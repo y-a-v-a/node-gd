@@ -108,12 +108,26 @@ using namespace node;
 	delete[] data;                                                      \
 	return scope.Close(result);
 
+#define COLOR_ANTIALIASED    gdAntiAliased 
+#define COLOR_BRUSHED        gdBrushed 
+#define COLOR_STYLED         gdStyled 
+#define COLOR_STYLEDBRUSHED  gdStyledBrushed 
+#define COLOR_TITLED         gdTiled 
+#define COLOR_TRANSPARENT    gdTransparent 
+
 class Gd
 {
 public:
 	static void Init(Handle<Object> target) 
 	{
 		HandleScope scope;
+
+		NODE_DEFINE_CONSTANT(target, COLOR_ANTIALIASED);
+		NODE_DEFINE_CONSTANT(target, COLOR_BRUSHED);
+		NODE_DEFINE_CONSTANT(target, COLOR_STYLED);
+		NODE_DEFINE_CONSTANT(target, COLOR_STYLEDBRUSHED);
+		NODE_DEFINE_CONSTANT(target, COLOR_TITLED);
+		NODE_DEFINE_CONSTANT(target, COLOR_TRANSPARENT);
 
 		NODE_SET_METHOD(target, "create", ImageCreate);
 		NODE_SET_METHOD(target, "createTrueColor", ImageCreateTrueColor);
@@ -132,15 +146,11 @@ public:
 		NODE_SET_METHOD(target, "trueColor", TrueColor);
 		NODE_SET_METHOD(target, "trueColorAlpha", TrueColorAlpha);
 
+
 		Image::Init(target);
 	}
 
 protected:
-	static Handle<Value> GetImageInfo (const Arguments& args)
-	{
-		return Undefined();
-	}
-
 	static Handle<Value> ImageCreate (const Arguments& args)
 	{
 		REQ_INT_ARG(0, width);
@@ -567,8 +577,8 @@ protected:
 							String::New("Arguments 0 must be an array")));
 			}
 
-			Local<String> x = String::New("x");
-			Local<String> y = String::New("y");
+			Local<String> x = String::NewSymbol("x");
+			Local<String> y = String::NewSymbol("y");
 
 			Local<Array> array = Local<Array>::Cast(args[0]);
 			int len = array->Length(), _len = 0;
@@ -603,8 +613,8 @@ protected:
 							String::New("Arguments 0 must be an array")));
 			}
 
-			Local<String> x = String::New("x");
-			Local<String> y = String::New("y");
+			Local<String> x = String::NewSymbol("x");
+			Local<String> y = String::NewSymbol("y");
 
 			Local<Array> array = Local<Array>::Cast(args[0]);
 			int len = array->Length(), _len = 0;
@@ -639,8 +649,8 @@ protected:
 							String::New("Arguments 0 must be an array")));
 			}
 
-			Local<String> x = String::New("x");
-			Local<String> y = String::New("y");
+			Local<String> x = String::NewSymbol("x");
+			Local<String> y = String::NewSymbol("y");
 
 			Local<Array> array = Local<Array>::Cast(args[0]);
 			int len = array->Length(), _len = 0;
