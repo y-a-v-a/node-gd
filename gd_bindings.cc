@@ -598,6 +598,8 @@ protected:
 
 			gdImagePolygon(*im, points, _len, color);
 
+			delete[] points;
+
 			return args.This();
 		}
 
@@ -634,6 +636,8 @@ protected:
 
 			gdImageOpenPolygon(*im, points, _len, color);
 
+			delete[] points;
+
 			return args.This();
 		}
 
@@ -669,6 +673,8 @@ protected:
 			}
 
 			gdImageFilledPolygon(*im, points, _len, color);
+
+			delete[] points;
 
 			return args.This();
 		}
