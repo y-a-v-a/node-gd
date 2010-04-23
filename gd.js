@@ -14,13 +14,13 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-// TODO: async
-
 var sys  = require('sys');
 var fs   = require("fs");
 var bind = require("./gd_bindings");
 
-process.mixin(exports, bind);
+for(var p in bind) {
+	if (bind[p] !== undefined) exports[p] = bind[p];
+}
 
 var formats = {
 	jpeg    : [1,2],  // format : arguments' length [open, save]
