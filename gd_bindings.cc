@@ -287,6 +287,7 @@ protected:
 			NODE_SET_PROTOTYPE_METHOD(t, "setStyle", SetStyle);
 			NODE_SET_PROTOTYPE_METHOD(t, "setThickness", SetThickness);
 			NODE_SET_PROTOTYPE_METHOD(t, "alphaBlending", AlphaBlending);
+			NODE_SET_PROTOTYPE_METHOD(t, "saveAlpha", SaveAlpha);
 			NODE_SET_PROTOTYPE_METHOD(t, "setClip", SetClip);
 			NODE_SET_PROTOTYPE_METHOD(t, "getClip", GetClip);
 
@@ -865,6 +866,16 @@ protected:
 			
 			REQ_INT_ARG(0, blending)
 			gdImageAlphaBlending(*im, blending);
+
+			return args.This();
+		}
+
+		static Handle<Value> SaveAlpha (const Arguments &args)
+		{
+			Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+			REQ_INT_ARG(0, saveFlag)
+			gdImageSaveAlpha(*im, saveFlag);
 
 			return args.This();
 		}
