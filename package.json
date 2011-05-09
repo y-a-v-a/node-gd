@@ -1,10 +1,14 @@
-{ "name" : "node-gd"
-, "version" : "0.1.5"
-, "description" : "GD bindings"
-, "author": "taggon"
-, "main": "."
-, "scripts": { "install": "node-waf configure build" }
-, "repository" : { "type" : "git"
-                 , "url" : "http://github.com/andris9/node-gd.git"
-                 }
+{
+    "name" : "node-gd", 
+    "version" : "0.1.6",
+    "description" : "GD bindings",
+    "author": "taggon",
+    "main": "./node-gd",
+    "scripts": {
+        "install": "node-waf configure build"
+    },
+    "repository" : {
+        "type" : "git",
+        "url" : "http://github.com/andris9/node-gd.git"
+    }
 }
