@@ -14,12 +14,12 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-var util  = require('util');
-var fs   = require("fs");
-var bind = require("./build/default/node-gd");
+var util  = require('util'),
+    fs   = require("fs"),
+    gd_bindings = require("./build/default/node-gd");
 
-for(var p in bind) {
-	if (bind[p] !== undefined) exports[p] = bind[p];
+for(var p in gd_bindings) {
+	if (gd_bindings[p] !== undefined) exports[p] = gd_bindings[p];
 }
 
 var formats = {
@@ -32,29 +32,21 @@ var formats = {
 	WBMP    : [1,1]
 };
 
-function arg2arr(args) {
-	var arr = [];
-	for(var i=0,l=args.length; i<l; i++) {
-		arr[i] = args[i];
-	}
-	return arr;
-}
-
 function open_func(format, len) {
-	return function() {
-		var args     = arg2arr(arguments);
-		var filename = args.shift();
-		var callback = args[len-1];
+    return function() {
+        var args     = Array.prototype.slice.call(arguments),
+            filename = args.shift(),
+            callback = args[len-1];
 
-		if (typeof callback != 'function') {
-			return bind['createFrom'+format].apply(arguments);
-		}
+        if (typeof callback != 'function') {
+            return gd_bindings['createFrom'+format].apply(arguments);
+        }
 
 		args.pop();
 
 		fs.readFile(filename, "binary", function(err, data) {
 			if(err) throw err;
-			callback(bind['createFrom'+format+'Ptr'](data));
+			callback(gd_bindings['createFrom'+format+'Ptr'](data));
 		});
 	}
 }
@@ -63,21 +55,21 @@ function save_func(format, len) {
 	format = format.toLowerCase();
 
 	return function() {
-		var args     = arg2arr(arguments);
-		var filename = args.shift();
-		var callback = args[len-1];
+        var args     = Array.prototype.slice.call(arguments),
+            filename = args.shift(),
+            callback = args[len-1];
 
-		if (typeof callback != 'function') {
-			return this[format].apply(this, arguments);
-		}
+        if (typeof callback != 'function') {
+            return this[format].apply(this, arguments);
+        }
 
-		var data = this[format+'Ptr'].apply(this, args);
-		util.debug(filename);
-		fs.writeFile(filename, data, "binary", function(err) {
-			if (err) throw err;
-			callback();
-		});
-	}
+        var data = this[format+'Ptr'].apply(this, args);
+
+        fs.writeFile(filename, data, "binary", function(err) {
+            if (err) throw err;
+            callback();
+        });
+    }
 }
 
 // create wrapper functions
@@ -91,7 +83,7 @@ for(var format in formats) {
 	}
 
 	if (v[1] >= 0) {
-		bind.Image.prototype['save'+format] = save_func(format, v[1]);
+		gd_bindings.Image.prototype['save'+format] = save_func(format, v[1]);
 	}
 }
 
