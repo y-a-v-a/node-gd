@@ -3,3 +3,7 @@ GD bindings for Node.js
 GD graphic library bindings for Node.js supporting asynchronous I/O.
 
 Tested with Node v0.1.91
+
+Dependencies
+
+apt-get install libgd2-xpm-dev

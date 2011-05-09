@@ -1,0 +1,13 @@
+{
+    "name": "nodegd",
+    "description":  "GD bindings",
+    "version":  "0.1.0",
+    "author": "taggon",
+    "keywords": ["gd", "graphic", "graphics"],
+    "repository": "https://github.com/andris9/node-gd.git",
+    "scripts": {
+        "preinstall": "node-waf configure build"
+    },
+    "engines": { "node": "0.4.x" },
+    "main": "./gd.js"
+}

@@ -14,7 +14,7 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-var sys  = require('sys');
+var util  = require('util');
 var fs   = require("fs");
 var bind = require("./gd_bindings");
 
@@ -72,7 +72,7 @@ function save_func(format, len) {
 		}
 
 		var data = this[format+'Ptr'].apply(this, args);
-		sys.debug(filename);
+		util.debug(filename);
 		fs.writeFile(filename, data, "binary", function(err) {
 			if (err) throw err;
 			callback();
