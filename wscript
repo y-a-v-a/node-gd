@@ -15,13 +15,13 @@ def configure(conf):
 
 def build(bld):
   obj = bld.new_task_gen("cxx", "shlib", "node_addon")
-  obj.target = "gd_bindings"
-  obj.source = "gd_bindings.cc"
+  obj.target = "node-gd"
+  obj.source = "node-gd.cc"
   obj.lib    = "gd"
  
 def shutdown():
   if Options.commands['clean']:
-    if exists('gd_binding.node'): unlink('gd_binding.node')
+    if exists('node-gd.node'): unlink('node-gd.node')
   else:
-    if exists('build/default/gd_binding.node') and not exists('gd_binding.node'):
-      symlink('build/default/gd_binding.node', 'gd_binding.node')
+    if exists('build/default/node-gd.node') and not exists('node-gd.node'):
+      symlink('build/default/node-gd.node', 'node-gd.node')

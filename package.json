@@ -1,5 +1,5 @@
 {
-    "name": "nodegd",
+    "name": "node-gd",
     "description":  "GD bindings",
     "version":  "0.1.0",
     "author": "taggon",
@@ -9,5 +9,5 @@
         "preinstall": "node-waf configure build"
     },
     "engines": { "node": "0.4.x" },
-    "main": "./gd.js"
+    "main": "."
 }
