@@ -9,7 +9,7 @@ Tested with Node v0.4
 
 ## Install
 
-    npm install node.gd
+    npm install node-gd
 
 ## Dependencies
 
