@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009, Taegon Kim <gonom9@gmail.com>
+Copyright (c) 2009-2011, Taegon Kim <gonom9@gmail.com>
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
@@ -270,6 +270,7 @@ protected:
 			/**
 			 * Drawing Functions
 			 */
+			NODE_SET_PROTOTYPE_METHOD(t, "setPixcel", SetPixel);
 			NODE_SET_PROTOTYPE_METHOD(t, "line", Line);
 			NODE_SET_PROTOTYPE_METHOD(t, "dashedLine", DashedLine);
 			NODE_SET_PROTOTYPE_METHOD(t, "polygon", Polygon);
@@ -401,7 +402,6 @@ protected:
 			char *data = (char*)gdImageJpegPtr(*im, &size, quality);
 
 			RETURN_DATA()
-
 		}
 
 		static Handle<Value> Gif (const Arguments &args)
@@ -536,6 +536,21 @@ protected:
 		/**
 		 * Drawing Functions
 		 */
+		static Handle<Value> SetPixel (const Arguments &args)
+		{
+			HandleScope scope;
+			Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+			REQ_ARGS(3);
+			REQ_INT_ARG(0, x);
+			REQ_INT_ARG(1, y);
+			REQ_INT_ARG(2, color);
+
+			gdImageSetPixel(*im, x, y, color);
+
+			return args.This();
+		}
+
 		static Handle<Value> Line (const Arguments &args)
 		{
 			Image *im = ObjectWrap::Unwrap<Image>(args.This());

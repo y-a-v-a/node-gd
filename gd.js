@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009, Taegon Kim <gonom9@gmail.com>
+Copyright (c) 2009-2011, Taegon Kim <gonom9@gmail.com>
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
@@ -15,8 +15,8 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 var sys  = require('sys');
-var fs   = require("fs");
-var bind = require("./gd_bindings");
+var fs   = require('fs');
+var bind = require('./gd_bindings');
 
 for(var p in bind) {
 	if (bind[p] !== undefined) exports[p] = bind[p];
@@ -52,7 +52,7 @@ function open_func(format, len) {
 
 		args.pop();
 
-		fs.readFile(filename, "binary", function(err, data) {
+		fs.readFile(filename, 'binary', function(err, data) {
 			if(err) throw err;
 			callback(bind['createFrom'+format+'Ptr'](data));
 		});
@@ -72,7 +72,7 @@ function save_func(format, len) {
 		}
 
 		var data = this[format+'Ptr'].apply(this, args);
-		sys.debug(filename);
+
 		fs.writeFile(filename, data, "binary", function(err) {
 			if (err) throw err;
 			callback();
