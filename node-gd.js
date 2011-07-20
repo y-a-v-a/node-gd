@@ -45,8 +45,11 @@ function open_func(format, len) {
 		args.pop();
 
 		fs.readFile(filename, "binary", function(err, data) {
-			if(err) throw err;
-			callback(gd_bindings['createFrom'+format+'Ptr'](data));
+            if(err){
+                callback(err);
+            }else{
+                callback(null, gd_bindings['createFrom'+format+'Ptr'](data));
+            }
 		});
 	}
 }
@@ -65,10 +68,7 @@ function save_func(format, len) {
 
         var data = this[format+'Ptr'].apply(this, args);
 
-        fs.writeFile(filename, data, "binary", function(err) {
-            if (err) throw err;
-            callback();
-        });
+        fs.writeFile(filename, data, "binary", callback);
     }
 }
 

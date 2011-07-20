@@ -421,7 +421,7 @@ protected:
 		{
 			Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
-			REQ_STR_ARG(0, path);
+			//REQ_STR_ARG(0, path);
 
 			int size;
 			char *data = (char*)gdImageGifPtr(*im, &size);
