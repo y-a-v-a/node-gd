@@ -995,8 +995,8 @@ protected:
 
 			/* return rectangle? */
 			bool return_rectangle = false;
-			if (args.Length() > 8 && args[8]->IsBoolean()) {
-				return_rectangle = args[8]->BooleanValue();
+			if (args.Length() > 7 && args[7]->IsBoolean()) {
+				return_rectangle = args[7]->BooleanValue();
 			}
 
 			int brect[8];
@@ -1007,7 +1007,7 @@ protected:
 				err = gdImageStringFT(NULL, &brect[0], 0, *font, size, angle, x, y, *str);
 				if (err) return ThrowException(Exception::Error(String::New(err)));
 
-				Local<Array> result;
+				Local<Array> result = Array::New();
 				for(int i=0; i < 8; i++) {
 					result->Set( Integer::New(i), Number::New(brect[i]) );
 				}
