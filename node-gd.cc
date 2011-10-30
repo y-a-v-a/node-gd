@@ -16,7 +16,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <gd.h>
 #include <v8.h>
 #include <node.h>
-#include <node_events.h>
 #include <string.h>
 #include <assert.h>
 
@@ -241,7 +240,7 @@ protected:
 		return scope.Close(result);
 	}
 
-	class Image : public EventEmitter
+	class Image : public node::ObjectWrap
 	{
 	public:
 		static Persistent<FunctionTemplate> constructor_template;
@@ -252,7 +251,6 @@ protected:
 			Local<FunctionTemplate> t = FunctionTemplate::New(New);
 			constructor_template = Persistent<FunctionTemplate>::New(t);
 
-			t->Inherit(EventEmitter::constructor_template);
 			t->InstanceTemplate()->SetInternalFieldCount(1);
 
 			NODE_SET_PROTOTYPE_METHOD(t, "jpeg", Jpeg);
