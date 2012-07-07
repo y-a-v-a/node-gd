@@ -8,7 +8,7 @@ var gd   = require('./node-gd');
 var source = './circle.png';
 var target = './circle.thumb.png';
 
-if (path.existsSync(target)) fs.unlinkSync(target);
+if (fs.existsSync(target)) fs.unlinkSync(target);
 
 gd.openPng(
 	source,
