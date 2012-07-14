@@ -5,7 +5,7 @@
     "author": "taggon",
     "main": "./node-gd",
     "scripts": {
-        "install": "node-waf configure build"
+        "install": "node-gyp configure build"
     },
     "repository" : {
         "type" : "git",
