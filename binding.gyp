@@ -2,7 +2,7 @@
   "targets": [
     {
       "target_name": "node-gd",
-      "sources": ["node-gd.cc"],
+      "sources": ["cpp/node-gd.cpp"],
       "libraries": ["-lgd"]
     }
   ]

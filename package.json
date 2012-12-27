@@ -1,14 +1,50 @@
 {
-    "name" : "node-gd", 
-    "version" : "0.1.8",
-    "description" : "GD bindings",
-    "author": "taggon",
-    "main": "./node-gd",
-    "scripts": {
-        "install": "node-gyp configure build"
+  "name": "node-gd",
+  "version": "0.2.0",
+  "description": "libgd C++ bindings for Node.js",
+  "main": "js/node-gd.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "pretest": "coffee --bare -o js coffee/node-gd.coffee && node-gyp rebuild",
+    "test": "mocha --reporter spec --bail --ui bdd --colors --compilers coffee:coffee-script --require coffee-script test/test.coffee",
+    "install": "node-gyp rebuild"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mikesmullin/node-gd.git"
+  },
+  "keywords": [
+    "libgd",
+    "gd",
+    "image",
+    "png",
+    "jpg",
+    "gif",
+    "graphics",
+    "library"
+  ],
+  "author": "Taegon Kim <gonom9@gmail.com>",
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Dudochkin Victor",
+      "email": "blacksmith@gogoo.ru"
     },
-    "repository" : {
-        "type" : "git",
-        "url" : "http://github.com/andris9/node-gd.git"
+    {
+      "name": "Andris Reinman",
+      "email": "andris@node.ee"
+    },
+    {
+      "name": "Mike Smullin",
+      "email": "mike@smullindesign.com"
     }
+  ],
+  "gypfile": true,
+  "readmeFilename": "README.md",
+  "devDependencies": {
+    "mocha": "~1.7.4",
+    "chai": "~1.4.2"
+  }
 }

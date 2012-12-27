@@ -1,1 +1,3 @@
-circle.thumb.png
+node_modules/
+build/
+test/fixtures/output.png

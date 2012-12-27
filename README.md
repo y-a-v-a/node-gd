@@ -1,54 +1,43 @@
-GD bindings for Node.js
-==================================
+# node-gd
 
-GD graphic library bindings for Node.js supporting asynchronous I/O.
+GD graphic library (libgd) C++ bindings for Node.js.
 
-Original source https://github.com/taggon/node-gd
+This version is the community-maintained [official NodeJS.org node-gd repo](https://npmjs.org/package/node-gd).
 
-Tested with Node v0.4
+## Installation on Debian/Ubuntu
 
-WARNING
--------
-This library is ABANDONWARE; its original author, [Taegon Kim](https://github.com/taggon/node-gd) of South Korea,
-stopped loving it over 2 years ago at v0.0.2. This is the community-maintained version currently at v0.1.8, which
-you will also find linked as the the [official NodeJS.org node-gd repo](https://npmjs.org/package/node-gd). However,
-a word of caution: it's [unusually painful to install](https://github.com/taggon/node-gd/issues/13), and there are better alternatives by now--including:
-[node-canvas](https://github.com/LearnBoost/node-canvas), [node-o3-canvas](https://github.com/ajaxorg/node-o3-canvas), 
-and [node-image](https://github.com/pkrumins/node-image).
-
-## Install
-
-    npm install node-gd
-
-## Dependencies
-
-  * **libgd** - in debian install with
-  
-        apt-get install libgd2-xpm-dev
+```bash
+sudo apt-get install libgd2-xpm-dev # libgd
+npm install node-gd
+```
 
 ## Usage
 
-### Require library
+```coffeescript
+# Require library
+gd = require 'node-gd'
 
-    var gd = require("node-gd");
+# Create blank new image in memory
+output_img = gd.create width, height
 
-### Open file
+# Load existing image file on disk into memory
+gd.openPng "test.png", (input_img, path) ->
+  console.log "width: ", input_img.width
+  console.log "height: ", input_img.width
 
-    gd.openPng("test.png", function(png, path){
-        console.log("Width: ", png.width);
-        console.log("Height: ", png.width);
-    });
-    
-### Save file
+# Render input over the top of output
+input_img.copyResampled output_img, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH
 
-    png.savePng("out.png", 0, function(){
-        console.log("image saved!");
-    });
-    
-### Create empty file
+# Write image buffer to disk
+output_img.savePng "out.png", 0, ->
+  console.log "image saved!"
+```
 
-    var img = gd.create(width, height);
-    
-### Copy image
+As usual, for the latest examples, review the easy-to-follow [./test/test.coffee](https://github.com/mikesmullin/node-gd/blob/master/test/test.coffee).
 
-    source.copyResampled(dest,dstX,dstY,srcX,srcY,dstW,dstH,srcW,srcH);
+## Related
+
+* [Original author's repo](https://github.com/taggon/node-gd)
+* [node-canvas](https://github.com/LearnBoost/node-canvas) uses libcairo to emulate browser HTML5 Canvas' image manipulation abilities within Node.js
+* [node-o3-canvas](https://github.com/ajaxorg/node-o3-canvas) uses libcairo to emulate browser HTML5 Canvas' image manipulation abilities within Node.js
+* [node-image](https://github.com/pkrumins/node-image)
