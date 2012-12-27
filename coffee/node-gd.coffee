@@ -41,7 +41,12 @@ save_func = (format, len) ->
 util = require 'util'
 fs = require 'fs'
 
-gd_bindings = require __dirname+'/../build/Release/node-gd'
+try
+  # node 0.6+
+  gd_bindings = require __dirname+'/../build/Release/node-gd'
+catch e
+  # node 0.4.x
+  gd_bindings = require __dirname+'/../build/default/node-gd'
 
 for p of gd_bindings
   if gd_bindings[p] isnt `undefined`

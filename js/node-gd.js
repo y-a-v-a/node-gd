@@ -40,7 +40,11 @@ util = require('util');
 
 fs = require('fs');
 
-gd_bindings = require(__dirname + '/../build/Release/node-gd');
+try {
+  gd_bindings = require(__dirname + '/../build/Release/node-gd');
+} catch (e) {
+  gd_bindings = require(__dirname + '/../build/default/node-gd');
+}
 
 for (p in gd_bindings) {
   if (gd_bindings[p] !== undefined) {
