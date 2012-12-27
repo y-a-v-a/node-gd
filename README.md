@@ -11,6 +11,14 @@ sudo apt-get install libgd2-xpm-dev # libgd
 npm install node-gd
 ```
 
+## Installation on Mac OS/X
+
+    to be determined
+
+## Installation on Windows 7
+
+    to be determined
+
 ## Usage
 
 ```coffeescript
