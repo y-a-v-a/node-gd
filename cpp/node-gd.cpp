@@ -308,6 +308,7 @@ protected:
       /**
        * Font and Text Handling Functions
        */
+      NODE_SET_PROTOTYPE_METHOD(t, "stringFTBBox", StringFTBBox);
       NODE_SET_PROTOTYPE_METHOD(t, "stringFT", StringFT);
 
       /**
@@ -1030,6 +1031,33 @@ protected:
     /**
      * Font and Text Handling Funcitons
      */
+    static Handle<Value> StringFTBBox (const Arguments &args)
+    {
+      REQ_ARGS(7);
+      REQ_INT_ARG(0, color);
+      REQ_STR_ARG(1, font);
+      REQ_DOUBLE_ARG(2, size);
+      REQ_DOUBLE_ARG(3, angle);
+      REQ_INT_ARG(4, x);
+      REQ_INT_ARG(5, y);
+      REQ_STR_ARG(6, str);
+
+      int brect[8];
+      char *err;
+      HandleScope scope;
+
+      err = gdImageStringFT(NULL, &brect[0], 0, *font, size, angle, x, y, *str);
+      if (err) return ThrowException(Exception::Error(String::New(err)));
+
+      Local<Array> result = Array::New();
+
+      for (int i = 0; i < 8; i++) {
+        result->Set(Integer::New(i), Number::New(brect[i]));
+      }
+
+      return scope.Close(result);
+    }
+
     static Handle<Value> StringFT (const Arguments &args)
     {
       REQ_ARGS(7);
