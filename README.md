@@ -7,6 +7,15 @@ Original source https://github.com/taggon/node-gd
 
 Tested with Node v0.4
 
+WARNING
+-------
+This library is ABANDONWARE; its original author, [Taegon Kim](https://github.com/taggon/node-gd) of North Korea,
+stopped loving it over 2 years ago at v0.0.2. This is the community-maintained version currently at v0.1.8, which
+you will also find linked as the the [official NodeJS.org node-gd repo](https://npmjs.org/package/node-gd). However,
+a word of caution: it's [unusually painful to install](https://github.com/taggon/node-gd/issues/13), and there are better alternatives by now--including:
+[node-canvas](https://github.com/LearnBoost/node-canvas), [node-o3-canvas](https://github.com/ajaxorg/node-o3-canvas), 
+and [node-image](https://github.com/pkrumins/node-image).
+
 ## Install
 
     npm install node-gd
