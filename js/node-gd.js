@@ -47,7 +47,7 @@ try {
 }
 
 for (p in gd_bindings) {
-  if (gd_bindings[p] !== undefined) {
+  if (typeof gd_bindings[p] !== 'undefined') {
     exports[p] = gd_bindings[p];
   }
 }

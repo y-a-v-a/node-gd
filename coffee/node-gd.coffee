@@ -49,7 +49,7 @@ catch e
   gd_bindings = require __dirname+'/../build/default/node-gd'
 
 for p of gd_bindings
-  if gd_bindings[p] isnt `undefined`
+  if typeof gd_bindings[p] isnt 'undefined'
     exports[p] = gd_bindings[p]
 
 formats =
