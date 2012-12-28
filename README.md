@@ -31,7 +31,7 @@ gd = require 'node-gd'
 output_img = gd.create width, height
 
 # Load existing image file on disk into memory
-gd.openPng "test.png", (input_img, path) ->
+gd.openPng "test.png", (err, input_img) ->
   console.log "width: ", input_img.width
   console.log "height: ", input_img.width
 
@@ -39,7 +39,7 @@ gd.openPng "test.png", (input_img, path) ->
 input_img.copyResampled output_img, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH
 
 # Write image buffer to disk
-output_img.savePng "out.png", 0, ->
+output_img.savePng "out.png", 0, (err) ->
   console.log "image saved!"
 ```
 
