@@ -269,7 +269,7 @@ protected:
       /**
        * Drawing Functions
        */
-      NODE_SET_PROTOTYPE_METHOD(t, "setPixcel", SetPixel);
+      NODE_SET_PROTOTYPE_METHOD(t, "setPixel", SetPixel);
       NODE_SET_PROTOTYPE_METHOD(t, "line", Line);
       NODE_SET_PROTOTYPE_METHOD(t, "dashedLine", DashedLine);
       NODE_SET_PROTOTYPE_METHOD(t, "polygon", Polygon);
