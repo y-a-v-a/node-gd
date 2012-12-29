@@ -41,12 +41,14 @@ save_func = (format, len) ->
 util = require 'util'
 fs = require 'fs'
 
-try
-  # node 0.6+
-  gd_bindings = require __dirname+'/../build/Release/node-gd'
-catch e
-  # node 0.4.x
-  gd_bindings = require __dirname+'/../build/default/node-gd'
+# not sure what dif. is between Release and default
+# but its not consistent across node installations
+if fs.existsSync(lib = __dirname+'/../build/Release/node-gd.node')
+  gd_bindings = require lib
+else if fs.existsSync(lib = __dirname+'/../build/default/node-gd.node')
+  gd_bindings = require lib
+else
+  throw 'unable to locate node-gd.node within build directory'
 
 for p of gd_bindings
   if typeof gd_bindings[p] isnt 'undefined'
