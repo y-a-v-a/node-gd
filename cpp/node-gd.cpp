@@ -275,11 +275,9 @@ protected:
       NODE_SET_PROTOTYPE_METHOD(t, "polygon", Polygon);
       NODE_SET_PROTOTYPE_METHOD(t, "openPolygon", OpenPolygon);
       NODE_SET_PROTOTYPE_METHOD(t, "filledPolygon", FilledPolygon);
-      NODE_SET_PROTOTYPE_METHOD(t, "rectangle", Rectangle);
       NODE_SET_PROTOTYPE_METHOD(t, "filledRectangle", FilledRectangle);
       NODE_SET_PROTOTYPE_METHOD(t, "arc", Arc);
       NODE_SET_PROTOTYPE_METHOD(t, "filledArc", FilledArc);
-      NODE_SET_PROTOTYPE_METHOD(t, "ellipse", Ellipse);
       NODE_SET_PROTOTYPE_METHOD(t, "filledEllipse", FilledEllipse);
       NODE_SET_PROTOTYPE_METHOD(t, "fill", Fill);
       NODE_SET_PROTOTYPE_METHOD(t, "setAntiAliased", SetAntiAliased);
@@ -697,22 +695,6 @@ protected:
       return args.This();
     }
 
-    static Handle<Value> Rectangle (const Arguments &args)
-    {
-      Image *im = ObjectWrap::Unwrap<Image>(args.This());
-
-      REQ_ARGS(5);
-      REQ_INT_ARG(0, x1);
-      REQ_INT_ARG(1, y1);
-      REQ_INT_ARG(2, x2);
-      REQ_INT_ARG(3, y2);
-      REQ_INT_ARG(4, color);
-
-      gdImageRectangle(*im, x1, y1, x2, y2, color);
-
-      return args.This();
-    }
-
     static Handle<Value> FilledRectangle (const Arguments &args)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
@@ -762,22 +744,6 @@ protected:
       REQ_INT_ARG(7, style);
 
       gdImageFilledArc(*im, cx, cy, width, height, begin, end, color, style);
-
-      return args.This();
-    }
-
-    static Handle<Value> Ellipse (const Arguments &args)
-    {
-      Image *im = ObjectWrap::Unwrap<Image>(args.This());
-
-      REQ_ARGS(5);
-      REQ_INT_ARG(0, cx);
-      REQ_INT_ARG(1, cy);
-      REQ_INT_ARG(2, width);
-      REQ_INT_ARG(3, height);
-      REQ_INT_ARG(4, color);
-
-      gdImageEllipse(*im, cx, cy, width, height, color);
 
       return args.This();
     }
