@@ -13,9 +13,10 @@ npm install node-gd
 
 ## Installation on Mac OS/X
 
-    please open an issue if you have the answer. i'm sure it works, i just don't have ready the exact commands.
-
-see also: https://github.com/taggon/node-gd/issues/6
+```bash
+brew install gd
+npm install node-gd
+```
 
 ## Installation on Windows 7
 
