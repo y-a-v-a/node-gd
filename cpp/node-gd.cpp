@@ -296,6 +296,8 @@ protected:
        */
       NODE_SET_PROTOTYPE_METHOD(t, "Alpha", Alpha);
       NODE_SET_PROTOTYPE_METHOD(t, "getPixel", GetPixel);
+      NODE_SET_PROTOTYPE_METHOD(t, "getTrueColorPixel", GetTrueColorPixel);
+      NODE_SET_PROTOTYPE_METHOD(t, "imageColorAt", ImageColorAt);
       NODE_SET_PROTOTYPE_METHOD(t, "getBoundsSafe", GetBoundsSafe);
       // trueColor
       t->PrototypeTemplate()->SetAccessor(String::NewSymbol("trueColor"), TrueColorGetter, NULL, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
@@ -353,7 +355,6 @@ protected:
 
     static Handle<Value> New(const Arguments& args) {
       HandleScope scope;
-      int I = 0;
       REQ_EXT_ARG(0, image);
       (new Image((gdImagePtr)image->Value()))->Wrap(args.This());
       return args.This();
@@ -951,6 +952,47 @@ protected:
       REQ_INT_ARG(1, y);
 
       Local<Number> result = Integer::New(gdImageGetPixel(*im, x, y));
+      return scope.Close(result);
+    }
+
+    static Handle<Value> GetTrueColorPixel (const Arguments &args)
+    {
+      HandleScope scope;
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      REQ_ARGS(2);
+      REQ_INT_ARG(0, x);
+      REQ_INT_ARG(1, y);
+
+      Local<Number> result = Integer::New(gdImageGetTrueColorPixel(*im, x, y));
+      return scope.Close(result);
+    }
+
+    // This is implementation of the PHP-GD specific method imagecolorat
+    static Handle<Value> ImageColorAt (const Arguments &args)
+    {
+      HandleScope scope;
+      Image *img = ObjectWrap::Unwrap<Image>(args.This());
+
+      REQ_ARGS(2);
+      REQ_INT_ARG(0, x);
+      REQ_INT_ARG(1, y);
+			
+			Local<Number> result;
+			gdImagePtr im = *img;
+      if (gdImageTrueColor(im)) {
+				if(im->tpixels && gdImageBoundsSafe(im, x, y)){
+					result = Integer::New(gdImageTrueColorPixel(im, x, y));
+				} else {
+					return ThrowException(Exception::Error(String::New("[imageColorAt]Invalid pixel")));
+				}
+			} else {
+				if (im->pixels && gdImageBoundsSafe(im, x, y)) {
+					result = Integer::New(im->pixels[y][x]);
+				} else {
+					return ThrowException(Exception::Error(String::New("[imageColorAt]Invalid pixel")));
+				}
+			}
       return scope.Close(result);
     }
 
