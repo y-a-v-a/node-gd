@@ -1486,8 +1486,12 @@ protected:
 Persistent<FunctionTemplate> Gd::Image::constructor_template;
 
 extern "C"
-void init (Handle<Object> target)
 {
-  HandleScope scope;
-  Gd::Init(target);
+  void init (Handle<Object> target)
+  {
+    HandleScope scope;
+    Gd::Init(target);
+  }
+
+  NODE_MODULE(node_gd, init);
 }
