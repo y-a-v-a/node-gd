@@ -43,12 +43,12 @@ fs = require 'fs'
 
 # not sure what dif. is between Release and default
 # but its not consistent across node installations
-if fs.existsSync(lib = __dirname+'/../build/Release/node-gd.node')
+if fs.existsSync(lib = __dirname+'/../build/Release/node_gd.node')
   gd_bindings = require lib
-else if fs.existsSync(lib = __dirname+'/../build/default/node-gd.node')
+else if fs.existsSync(lib = __dirname+'/../build/default/node_gd.node')
   gd_bindings = require lib
 else
-  throw 'unable to locate node-gd.node within build directory'
+  throw 'unable to locate node_gd.node within build directory'
 
 for p of gd_bindings
   if typeof gd_bindings[p] isnt 'undefined'
