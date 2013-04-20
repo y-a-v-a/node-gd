@@ -1456,7 +1456,7 @@ protected:
 
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
-      gdImageSquareToCircle(*im, pct);
+      gdImageSharpen(*im, pct);
 
       return args.This();
     }
