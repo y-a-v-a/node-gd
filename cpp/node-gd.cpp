@@ -373,8 +373,10 @@ protected:
     static Handle<Value> Destroy (const Arguments &args)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
-
-      gdImageDestroy(*im);
+      if(im->_image){
+        gdImageDestroy(*im);
+        im->_image = NULL;
+      }
 
       return Undefined();
     }
@@ -977,22 +979,22 @@ protected:
       REQ_ARGS(2);
       REQ_INT_ARG(0, x);
       REQ_INT_ARG(1, y);
-			
-			Local<Number> result;
-			gdImagePtr im = *img;
+      
+      Local<Number> result;
+      gdImagePtr im = *img;
       if (gdImageTrueColor(im)) {
-				if(im->tpixels && gdImageBoundsSafe(im, x, y)){
-					result = Integer::New(gdImageTrueColorPixel(im, x, y));
-				} else {
-					return ThrowException(Exception::Error(String::New("[imageColorAt]Invalid pixel")));
-				}
-			} else {
-				if (im->pixels && gdImageBoundsSafe(im, x, y)) {
-					result = Integer::New(im->pixels[y][x]);
-				} else {
-					return ThrowException(Exception::Error(String::New("[imageColorAt]Invalid pixel")));
-				}
-			}
+        if(im->tpixels && gdImageBoundsSafe(im, x, y)){
+          result = Integer::New(gdImageTrueColorPixel(im, x, y));
+        } else {
+          return ThrowException(Exception::Error(String::New("[imageColorAt]Invalid pixel")));
+        }
+      } else {
+        if (im->pixels && gdImageBoundsSafe(im, x, y)) {
+          result = Integer::New(im->pixels[y][x]);
+        } else {
+          return ThrowException(Exception::Error(String::New("[imageColorAt]Invalid pixel")));
+        }
+      }
       return scope.Close(result);
     }
 
