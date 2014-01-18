@@ -11,6 +11,13 @@ sudo apt-get install libgd2-xpm-dev # libgd
 npm install node-gd
 ```
 
+## Installation on RHEL/CentOS
+
+```bash
+sudo yum install gd-devel
+npm install node-gd
+```
+
 ## Installation on Mac OS/X
 
 ```bash
