@@ -328,9 +328,13 @@ protected:
       NODE_SET_PROTOTYPE_METHOD(t, "getTransparent", GetTransparent);
       NODE_SET_PROTOTYPE_METHOD(t, "colorDeallocate", ColorDeallocate);
       NODE_SET_PROTOTYPE_METHOD(t, "colorTransparent", ColorTransparent);
+      NODE_SET_PROTOTYPE_METHOD(t, "toGrayscale",GrayScale);
+
       // interlace
       t->PrototypeTemplate()->SetAccessor(String::NewSymbol("interlace"), InterlaceGetter, InterlaceSetter, Handle<Value>(), PROHIBITS_OVERWRITING);
       t->PrototypeTemplate()->SetAccessor(String::NewSymbol("colorsTotal"), ColorsTotalGetter, NULL, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
+
+
 
       /**
        * Copying and Resizing Functions
@@ -1308,6 +1312,14 @@ protected:
 
       REQ_INT_ARG(0, color);
       gdImageColorTransparent(*im, color);
+
+      return args.This();
+    }
+
+    static Handle<Value> GrayScale(const Arguments &args)
+    {
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+      gdImageGrayScale(*im);
 
       return args.This();
     }
