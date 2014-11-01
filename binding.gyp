@@ -10,8 +10,8 @@
           "include_dirs": ["/usr/local/include"]
         }],
         [ "OS=='mac'", {
-          "libraries": ["-L/usr/local/lib"],
-          "include_dirs": ["/usr/local/include"]
+          "libraries": ["-L/usr/local/lib", "-L/opt/local/lib"],
+          "include_dirs": ["/usr/local/include", "/opt/local/include"]
         }]
       ]
     }
