@@ -5,16 +5,23 @@ path = require 'path'
 util = require 'util'
 
 describe 'Node.js GD Graphics Library', ->
-  source = __dirname+'/fixtures/input.png'
-  target = __dirname+'/fixtures/output.png'
+  s = [
+    __dirname+'/fixtures/input.png',
+    __dirname + '/fixtures/input-rotate.png'
+  ]
+  t = [
+    __dirname+'/fixtures/output.png',
+    __dirname + '/fixtures/output-rotate.png'
+  ]
 
-  beforeEach ->
+  before ->
     # delete previous output image from disk
-    if fs.existsSync target
-      fs.unlinkSync target
+    t.forEach (img, idx) ->
+      if fs.existsSync img
+        fs.unlinkSync img
 
   it 'can scale-down (resize) an image', (done) ->
-    gd.openPng source, (err, img) ->
+    gd.openPng s[0], (err, img) ->
       throw err if err
       scale = 2 # factor
       w = Math.floor(img.width / scale)
@@ -27,7 +34,21 @@ describe 'Node.js GD Graphics Library', ->
       img.copyResampled canvas, 0, 0, 0, 0, w, h, img.width, img.height
 
       # save canvas to disk
-      canvas.savePng target, 1, (err) ->
+      canvas.savePng t[0], 1, (err) ->
         throw err if err
-        assert.ok fs.existsSync target
+        assert.ok fs.existsSync t[0]
+        done()
+
+  it 'can rotate an image', (done) ->
+    gd.openPng s[1], (err, img) ->
+      throw err if err
+      w = 100
+      h = 100
+      canvas = gd.createTrueColor w, h
+
+      img.copyRotated canvas, 50, 50, 0, 0, img.width, img.height, 45
+
+      canvas.savePng t[1], 1, (err) ->
+        throw err if err
+        assert.ok fs.existsSync t[1]
         done()

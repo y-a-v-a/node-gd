@@ -17,50 +17,46 @@
 #include <gd.h>
 #include <v8.h>
 #include <node.h>
+#include <node_object_wrap.h>
 #include <string.h>
 #include <assert.h>
+#include <nan.h>
 
 using namespace v8;
 using namespace node;
 
 #define THROW_ERROR(TYPE, STR)                                          \
-  return ThrowException(Exception::TYPE(String::New(STR)));
+  return NanThrowError(STR);
 
 #define REQ_ARGS(N)                                                     \
   if (args.Length() < (N))                                              \
-    return ThrowException(Exception::TypeError(                         \
-                             String::New("Expected " #N "arguments")));
+    return NanThrowError("Expected " #N "arguments");
 
 #define REQ_STR_ARG(I, VAR)                                             \
   if (args.Length() <= (I) || !args[I]->IsString())                     \
-    return ThrowException(Exception::TypeError(                         \
-                  String::New("Argument " #I " must be a string")));    \
+    return NanThrowError("Argument " #I " must be a string");    \
   String::Utf8Value VAR(args[I]->ToString());
 
 #define REQ_INT_ARG(I, VAR)                                             \
   int VAR;                                                              \
   if (args.Length() <= (I) || !args[I]->IsInt32())                      \
-    return ThrowException(Exception::TypeError(                         \
-                  String::New("Argument " #I " must be an integer")));  \
+    return NanThrowError("Argument " #I " must be an integer");  \
   VAR = args[I]->Int32Value();
 
 #define REQ_DOUBLE_ARG(I, VAR)                                          \
   double VAR;                                                           \
   if (args.Length() <= (I) || !args[I]->IsNumber())                     \
-    return ThrowException(Exception::TypeError(                         \
-                  String::New("Argument " #I " must be a number")));    \
+    return NanThrowError("Argument " #I " must be a number");    \
   VAR = args[I]->NumberValue();
 
 #define REQ_EXT_ARG(I, VAR)                                             \
   if (args.Length() <= (I) || !args[I]->IsExternal())                   \
-    return ThrowException(Exception::TypeError(                         \
-                  String::New("Argument " #I " invalid")));             \
+    return NanThrowError("Argument " #I " invalid");             \
   Local<External> VAR = Local<External>::Cast(args[I]);
 
 #define REQ_IMG_ARG(I, VAR)                                             \
   if (args.Length() <= (I) || !args[I]->IsObject())                     \
-    return ThrowException(Exception::TypeError(                         \
-                  String::New("Argument " #I " must be an object")));   \
+    return NanThrowError("Argument " #I " must be an object");   \
   Local<Object> _obj_ = Local<Object>::Cast(args[I]);                   \
   Image *VAR = ObjectWrap::Unwrap<Image>(_obj_);
 
@@ -72,26 +68,25 @@ using namespace node;
   } else if (args[I]->IsInt32()) {                                      \
     VAR = args[I]->Int32Value();                                        \
   } else {                                                              \
-    return ThrowException(Exception::TypeError(                         \
-              String::New("Argument " #I " must be an integer")));      \
+    return NanThrowError("Argument " #I " must be an integer");      \
   }
 
 #define RETURN_IMAGE(IMG)                                               \
-  if (!IMG) return Null();                                              \
-  HandleScope scope;                                                    \
-  Local<Value> _arg_ = External::New(IMG);                              \
-  Persistent<Object> _image_(Image::constructor_template->GetFunction()->NewInstance(1, &_arg_)); \
-  return scope.Close(_image_);
+  if (!IMG) NanReturnNull();                                              \
+  NanScope();                                                    \
+  Handle<Value> _arg_ = NanNew<External>(IMG); \
+  Handle<Object> _image_ = NanNew(Image::constructor)->GetFunction()->NewInstance(1, &_arg_); \
+  NanReturnValue(_image_);
 
 #define DECLARE_CREATE_FROM(TYPE)                                       \
-  static Handle<Value> CreateFrom##TYPE (const Arguments &args) {       \
+  static NAN_METHOD(CreateFrom##TYPE) {       \
     REQ_STR_ARG(0, path);                                               \
     FILE *in; in = fopen(*path, "rb");                                  \
     gdImagePtr im = gdImageCreateFrom##TYPE(in);                        \
     fclose(in);                                                         \
     RETURN_IMAGE(im)                                                    \
   }                                                                     \
-  static Handle<Value> CreateFrom##TYPE##Ptr (const Arguments &args){   \
+  static NAN_METHOD(CreateFrom##TYPE##Ptr) {   \
     REQ_ARGS(1);                                                        \
     ssize_t len = DecodeBytes(args[0]);                                 \
     char *buf   = new char[len];                                        \
@@ -103,10 +98,10 @@ using namespace node;
   }
 
 #define RETURN_DATA()                                                   \
-  HandleScope scope;                                                    \
+  NanScope();                                                    \
   Local<Value> result = Encode(data, size);                             \
   delete[] data;                                                        \
-  return scope.Close(result);
+  NanReturnValue(result);
 
 #define COLOR_ANTIALIASED    gdAntiAliased
 #define COLOR_BRUSHED        gdBrushed
@@ -115,43 +110,42 @@ using namespace node;
 #define COLOR_TITLED         gdTiled
 #define COLOR_TRANSPARENT    gdTransparent
 
-class Gd
-{
+class Gd : public node::ObjectWrap {
 public:
-  static void Init(Handle<Object> target)
+  static void Init(Handle<Object> exports)
   {
-    HandleScope scope;
+    Isolate* isolate = Isolate::GetCurrent();
+    HandleScope scope(isolate);
 
-    NODE_DEFINE_CONSTANT(target, COLOR_ANTIALIASED);
-    NODE_DEFINE_CONSTANT(target, COLOR_BRUSHED);
-    NODE_DEFINE_CONSTANT(target, COLOR_STYLED);
-    NODE_DEFINE_CONSTANT(target, COLOR_STYLEDBRUSHED);
-    NODE_DEFINE_CONSTANT(target, COLOR_TITLED);
-    NODE_DEFINE_CONSTANT(target, COLOR_TRANSPARENT);
+    NODE_DEFINE_CONSTANT(exports, COLOR_ANTIALIASED);
+    NODE_DEFINE_CONSTANT(exports, COLOR_BRUSHED);
+    NODE_DEFINE_CONSTANT(exports, COLOR_STYLED);
+    NODE_DEFINE_CONSTANT(exports, COLOR_STYLEDBRUSHED);
+    NODE_DEFINE_CONSTANT(exports, COLOR_TITLED);
+    NODE_DEFINE_CONSTANT(exports, COLOR_TRANSPARENT);
 
-    NODE_SET_METHOD(target, "create", ImageCreate);
-    NODE_SET_METHOD(target, "createTrueColor", ImageCreateTrueColor);
-    NODE_SET_METHOD(target, "createFromJpeg", CreateFromJpeg);
-    NODE_SET_METHOD(target, "createFromJpegPtr", CreateFromJpegPtr);
-    NODE_SET_METHOD(target, "createFromPng", CreateFromPng);
-    NODE_SET_METHOD(target, "createFromPngPtr", CreateFromPngPtr);
-    NODE_SET_METHOD(target, "createFromGif", CreateFromGif);
-    NODE_SET_METHOD(target, "createFromGifPtr", CreateFromGifPtr);
-    NODE_SET_METHOD(target, "createFromGd2", CreateFromGd2);
-    NODE_SET_METHOD(target, "createFromGd2Ptr", CreateFromGd2Ptr);
-    NODE_SET_METHOD(target, "createFromGd2Part", CreateFromGd2Part);
-    NODE_SET_METHOD(target, "createFromGd2PartPtr", CreateFromGd2PartPtr);
-    NODE_SET_METHOD(target, "createFromWBMP", CreateFromWBMP);
-    NODE_SET_METHOD(target, "createFromWBMPPtr", CreateFromWBMPPtr);
-    NODE_SET_METHOD(target, "trueColor", TrueColor);
-    NODE_SET_METHOD(target, "trueColorAlpha", TrueColorAlpha);
+    NODE_SET_METHOD(exports, "create", ImageCreate);
+    NODE_SET_METHOD(exports, "createTrueColor", ImageCreateTrueColor);
+    NODE_SET_METHOD(exports, "createFromJpeg", CreateFromJpeg);
+    NODE_SET_METHOD(exports, "createFromJpegPtr", CreateFromJpegPtr);
+    NODE_SET_METHOD(exports, "createFromPng", CreateFromPng);
+    NODE_SET_METHOD(exports, "createFromPngPtr", CreateFromPngPtr);
+    NODE_SET_METHOD(exports, "createFromGif", CreateFromGif);
+    NODE_SET_METHOD(exports, "createFromGifPtr", CreateFromGifPtr);
+    NODE_SET_METHOD(exports, "createFromGd2", CreateFromGd2);
+    NODE_SET_METHOD(exports, "createFromGd2Ptr", CreateFromGd2Ptr);
+    NODE_SET_METHOD(exports, "createFromGd2Part", CreateFromGd2Part);
+    NODE_SET_METHOD(exports, "createFromGd2PartPtr", CreateFromGd2PartPtr);
+    NODE_SET_METHOD(exports, "createFromWBMP", CreateFromWBMP);
+    NODE_SET_METHOD(exports, "createFromWBMPPtr", CreateFromWBMPPtr);
+    NODE_SET_METHOD(exports, "trueColor", TrueColor);
+    NODE_SET_METHOD(exports, "trueColorAlpha", TrueColorAlpha);
 
-
-    Image::Init(target);
+    Image::Init(exports);
   }
 
-protected:
-  static Handle<Value> ImageCreate (const Arguments& args)
+private:
+  static NAN_METHOD(ImageCreate)
   {
     REQ_INT_ARG(0, width);
     REQ_INT_ARG(1, height);
@@ -161,7 +155,7 @@ protected:
     RETURN_IMAGE(im)
   }
 
-  static Handle<Value> ImageCreateTrueColor (const Arguments &args)
+  static NAN_METHOD(ImageCreateTrueColor)
   {
     REQ_INT_ARG(0, width);
     REQ_INT_ARG(1, height);
@@ -177,7 +171,7 @@ protected:
   DECLARE_CREATE_FROM(Gif)
   DECLARE_CREATE_FROM(Gd2)
 
-  static Handle<Value> CreateFromGd2Part (const Arguments &args)
+  static NAN_METHOD(CreateFromGd2Part)
   {
     REQ_STR_ARG(0, path);
     REQ_INT_ARG(1, srcX);
@@ -193,7 +187,7 @@ protected:
     RETURN_IMAGE(im)
   }
 
-  static Handle<Value> CreateFromGd2PartPtr (const Arguments &args)
+  static NAN_METHOD(CreateFromGd2PartPtr)
   {
     REQ_ARGS(5);
     REQ_INT_ARG(1, srcX);
@@ -212,23 +206,23 @@ protected:
     RETURN_IMAGE(im)
   }
 
-  static Handle<Value> TrueColor (const Arguments &args)
+  static NAN_METHOD(TrueColor)
   {
-    HandleScope scope;
+    NanScope();
 
     REQ_ARGS(3);
     REQ_INT_ARG(0, r);
     REQ_INT_ARG(1, g);
     REQ_INT_ARG(2, b);
 
-    Local<Number> result = Integer::New(gdTrueColor(r, g, b));
+    uint32_t result = NanNew<Uint32>(gdTrueColor(r, g, b))->Uint32Value();
 
-    return scope.Close(result);
+    NanReturnValue(result);
   }
 
-  static Handle<Value> TrueColorAlpha (const Arguments &args)
+  static NAN_METHOD(TrueColorAlpha)
   {
-    HandleScope scope;
+    NanScope();
 
     REQ_ARGS(4);
     REQ_INT_ARG(0, r);
@@ -236,21 +230,19 @@ protected:
     REQ_INT_ARG(2, b);
     REQ_INT_ARG(3, a);
 
-    Local<Number> result = Integer::New(gdTrueColorAlpha(r, g, b, a));
+    uint32_t result = NanNew<Uint32>(gdTrueColorAlpha(r, g, b, a))->Uint32Value();
 
-    return scope.Close(result);
+    NanReturnValue(result);
   }
 
-  class Image : public node::ObjectWrap
-  {
+  class Image : public node::ObjectWrap {
   public:
-    static Persistent<FunctionTemplate> constructor_template;
+    static Persistent<FunctionTemplate> constructor;
 
-    static void Init(v8::Handle<Object> target) {
-      HandleScope scope;
+    static void Init(v8::Handle<Object> exports) {
+      NanScope();
 
-      Local<FunctionTemplate> t = FunctionTemplate::New(New);
-      constructor_template = Persistent<FunctionTemplate>::New(t);
+      Local<FunctionTemplate> t = NanNew<FunctionTemplate>(New);
 
       t->InstanceTemplate()->SetInternalFieldCount(1);
 
@@ -300,10 +292,10 @@ protected:
       NODE_SET_PROTOTYPE_METHOD(t, "imageColorAt", ImageColorAt);
       NODE_SET_PROTOTYPE_METHOD(t, "getBoundsSafe", GetBoundsSafe);
       // trueColor
-      t->PrototypeTemplate()->SetAccessor(String::NewSymbol("trueColor"), TrueColorGetter, NULL, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
+      t->PrototypeTemplate()->SetAccessor(NanNew("trueColor"), TrueColorGetter, NULL, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
       // width, height
-      t->PrototypeTemplate()->SetAccessor(String::NewSymbol("width"), WidthGetter, NULL, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
-      t->PrototypeTemplate()->SetAccessor(String::NewSymbol("height"), HeightGetter, NULL, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
+      t->PrototypeTemplate()->SetAccessor(NanNew("width"), WidthGetter, NULL, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
+      t->PrototypeTemplate()->SetAccessor(NanNew("height"), HeightGetter, NULL, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
 
       /**
        * Font and Text Handling Functions
@@ -331,8 +323,8 @@ protected:
       NODE_SET_PROTOTYPE_METHOD(t, "toGrayscale",GrayScale);
 
       // interlace
-      t->PrototypeTemplate()->SetAccessor(String::NewSymbol("interlace"), InterlaceGetter, InterlaceSetter, Handle<Value>(), PROHIBITS_OVERWRITING);
-      t->PrototypeTemplate()->SetAccessor(String::NewSymbol("colorsTotal"), ColorsTotalGetter, NULL, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
+      t->PrototypeTemplate()->SetAccessor(NanNew("interlace"), InterlaceGetter, InterlaceSetter, Handle<Value>(), PROHIBITS_OVERWRITING);
+      t->PrototypeTemplate()->SetAccessor(NanNew("colorsTotal"), ColorsTotalGetter, NULL, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
 
 
 
@@ -354,14 +346,15 @@ protected:
        */
       NODE_SET_PROTOTYPE_METHOD(t, "compare", Compare);
 
-      target->Set(String::NewSymbol("Image"), t->GetFunction());
+      NanAssignPersistent(constructor, t);
+      exports->Set(NanNew<String>("Image"), t->GetFunction());
     }
 
-    static Handle<Value> New(const Arguments& args) {
-      HandleScope scope;
+    static NAN_METHOD(New) {
+      NanScope();
       REQ_EXT_ARG(0, image);
       (new Image((gdImagePtr)image->Value()))->Wrap(args.This());
-      return args.This();
+      NanReturnThis();
     }
   protected:
     Image(gdImagePtr image) : _image(image) {}
@@ -374,7 +367,7 @@ protected:
     /**
      * Destruction, Loading and Saving Functions
      */
-    static Handle<Value> Destroy (const Arguments &args)
+    static NAN_METHOD(Destroy)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
       if(im->_image){
@@ -382,10 +375,10 @@ protected:
         im->_image = NULL;
       }
 
-      return Undefined();
+      NanReturnUndefined();
     }
 
-    static Handle<Value> Jpeg (const Arguments &args)
+    static NAN_METHOD(Jpeg)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -396,10 +389,10 @@ protected:
       gdImageJpeg(*im, out, quality);
       fclose(out);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> JpegPtr (const Arguments &args)
+    static NAN_METHOD(JpegPtr)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -411,7 +404,7 @@ protected:
       RETURN_DATA()
     }
 
-    static Handle<Value> Gif (const Arguments &args)
+    static NAN_METHOD(Gif)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -421,10 +414,10 @@ protected:
       gdImageGif(*im, out);
       fclose(out);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> GifPtr (const Arguments &args)
+    static NAN_METHOD(GifPtr)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -436,7 +429,7 @@ protected:
       RETURN_DATA()
     }
 
-    static Handle<Value> Png (const Arguments &args)
+    static NAN_METHOD(Png)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -447,10 +440,10 @@ protected:
       gdImagePngEx(*im, out, level);
       fclose(out);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> PngPtr (const Arguments &args)
+    static NAN_METHOD(PngPtr)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -462,7 +455,7 @@ protected:
       RETURN_DATA()
     }
 
-    static Handle<Value> WBMP (const Arguments &args)
+    static NAN_METHOD(WBMP)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -473,10 +466,10 @@ protected:
       gdImageWBMP(*im, foreground, out);
       fclose(out);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> WBMPPtr (const Arguments &args)
+    static NAN_METHOD(WBMPPtr)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -489,7 +482,7 @@ protected:
       RETURN_DATA()
     }
 
-    static Handle<Value> Gd (const Arguments &args)
+    static NAN_METHOD(Gd)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -499,10 +492,10 @@ protected:
       gdImageGd(*im, out);
       fclose(out);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> GdPtr (const Arguments &args)
+    static NAN_METHOD(GdPtr)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -512,7 +505,7 @@ protected:
       RETURN_DATA()
     }
 
-    static Handle<Value> Gd2 (const Arguments &args)
+    static NAN_METHOD(Gd2)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -524,10 +517,10 @@ protected:
       gdImageGd2(*im, out, chunkSize, format);
       fclose(out);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> Gd2Ptr (const Arguments &args)
+    static NAN_METHOD(Gd2Ptr)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -543,9 +536,9 @@ protected:
     /**
      * Drawing Functions
      */
-    static Handle<Value> SetPixel (const Arguments &args)
+    static NAN_METHOD(SetPixel)
     {
-      HandleScope scope;
+      NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       REQ_ARGS(3);
@@ -555,10 +548,10 @@ protected:
 
       gdImageSetPixel(*im, x, y, color);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> Line (const Arguments &args)
+    static NAN_METHOD(Line)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -570,10 +563,10 @@ protected:
 
       gdImageLine(*im, x1, y1, x2, y2, color);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> DashedLine (const Arguments &args)
+    static NAN_METHOD(DashedLine)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -585,10 +578,10 @@ protected:
 
       gdImageDashedLine(*im, x1, y1, x2, y2, color);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> Polygon (const Arguments &args)
+    static NAN_METHOD(Polygon)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -596,19 +589,18 @@ protected:
       REQ_INT_ARG(1, color);
 
       if (!args[0]->IsArray()) {
-        return ThrowException(Exception::TypeError(
-              String::New("Arguments 0 must be an array")));
+        return NanThrowError("Arguments 0 must be an array");
       }
 
-      Local<String> x = String::NewSymbol("x");
-      Local<String> y = String::NewSymbol("y");
+      Local<String> x = NanNew("x");
+      Local<String> y = NanNew("y");
 
       Local<Array> array = Local<Array>::Cast(args[0]);
       int len = array->Length(), _len = 0;
       gdPoint *points =  new gdPoint[len];
 
       for(int i=0; i < len; i++) {
-        Local<Value> v = array->Get(Integer::New(i));
+        Local<Value> v = array->Get(NanNew<Integer>(i));
         if (!v->IsObject()) continue;
 
         Local<Object> o = v->ToObject();
@@ -623,10 +615,10 @@ protected:
 
       delete[] points;
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> OpenPolygon (const Arguments &args)
+    static NAN_METHOD(OpenPolygon)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -634,19 +626,18 @@ protected:
       REQ_INT_ARG(1, color);
 
       if (!args[0]->IsArray()) {
-        return ThrowException(Exception::TypeError(
-              String::New("Arguments 0 must be an array")));
+        return NanThrowError("Arguments 0 must be an array");
       }
 
-      Local<String> x = String::NewSymbol("x");
-      Local<String> y = String::NewSymbol("y");
+      Local<String> x = NanNew("x");
+      Local<String> y = NanNew("y");
 
       Local<Array> array = Local<Array>::Cast(args[0]);
       int len = array->Length(), _len = 0;
       gdPoint *points =  new gdPoint[len];
 
       for(int i=0; i < len; i++) {
-        Local<Value> v = array->Get(Integer::New(i));
+        Local<Value> v = array->Get(NanNew<Integer>(i));
         if (!v->IsObject()) continue;
 
         Local<Object> o = v->ToObject();
@@ -661,10 +652,10 @@ protected:
 
       delete[] points;
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> FilledPolygon (const Arguments &args)
+    static NAN_METHOD(FilledPolygon)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -672,19 +663,18 @@ protected:
       REQ_INT_ARG(1, color);
 
       if (!args[0]->IsArray()) {
-        return ThrowException(Exception::TypeError(
-              String::New("Arguments 0 must be an array")));
+        return NanThrowError("Arguments 0 must be an array");
       }
 
-      Local<String> x = String::NewSymbol("x");
-      Local<String> y = String::NewSymbol("y");
+      Local<String> x = NanNew("x");
+      Local<String> y = NanNew("y");
 
       Local<Array> array = Local<Array>::Cast(args[0]);
       int len = array->Length(), _len = 0;
       gdPoint *points =  new gdPoint[len];
 
       for(int i=0; i < len; i++) {
-        Local<Value> v = array->Get(Integer::New(i));
+        Local<Value> v = array->Get(NanNew<Integer>(i));
         if (!v->IsObject()) continue;
 
         Local<Object> o = v->ToObject();
@@ -699,10 +689,10 @@ protected:
 
       delete[] points;
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> FilledRectangle (const Arguments &args)
+    static NAN_METHOD(FilledRectangle)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -715,10 +705,10 @@ protected:
 
       gdImageFilledRectangle(*im, x1, y1, x2, y2, color);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> Arc (const Arguments &args)
+    static NAN_METHOD(Arc)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -733,10 +723,10 @@ protected:
 
       gdImageArc(*im, cx, cy, width, height, begin, end, color);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> FilledArc (const Arguments &args)
+    static NAN_METHOD(FilledArc)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -752,10 +742,10 @@ protected:
 
       gdImageFilledArc(*im, cx, cy, width, height, begin, end, color, style);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> FilledEllipse (const Arguments &args)
+    static NAN_METHOD(FilledEllipse)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -768,10 +758,10 @@ protected:
 
       gdImageFilledEllipse(*im, cx, cy, width, height, color);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> FillToBorder (const Arguments &args)
+    static NAN_METHOD(FillToBorder)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -783,10 +773,10 @@ protected:
 
       gdImageFillToBorder(*im, x, y, border, color);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> Fill (const Arguments &args)
+    static NAN_METHOD(Fill)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -797,10 +787,10 @@ protected:
 
       gdImageFill(*im, x, y, color);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> SetAntiAliased (const Arguments &args)
+    static NAN_METHOD(SetAntiAliased)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -808,10 +798,10 @@ protected:
 
       gdImageSetAntiAliased(*im, color);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> SetAntiAliasedDontBlend (const Arguments &args)
+    static NAN_METHOD(SetAntiAliasedDontBlend)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -820,43 +810,42 @@ protected:
 
       gdImageSetAntiAliasedDontBlend(*im, color, dont_blend);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> SetBrush (const Arguments &args)
+    static NAN_METHOD(SetBrush)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       REQ_IMG_ARG(0, brush)
       gdImageSetBrush(*im, *brush);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> SetTile (const Arguments &args)
+    static NAN_METHOD(SetTile)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       REQ_IMG_ARG(0, tile)
       gdImageSetTile(*im, *tile);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> SetStyle (const Arguments &args)
+    static NAN_METHOD(SetStyle)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       if (args.Length() < 1 || !args[0]->IsArray())
-        return ThrowException(Exception::TypeError(
-              String::New("Arguments 0 must be an array")));
+        return NanThrowError("Arguments 0 must be an array");
 
       Local<Array> array = Local<Array>::Cast(args[0]);
       int len  = array->Length(), _len = 0;
       int *sty =  new int[len];
 
       for(int i=0; i < len; i++) {
-        Local<Value> v = array->Get(Integer::New(i));
+        Local<Value> v = array->Get(NanNew<Integer>(i));
         if (!v->IsNumber()) continue;
 
         sty[i] = v->Int32Value();
@@ -868,10 +857,10 @@ protected:
       delete[] sty;
 
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> SetThickness (const Arguments &args)
+    static NAN_METHOD(SetThickness)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -879,30 +868,30 @@ protected:
 
       gdImageSetThickness(*im, thickness);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> AlphaBlending (const Arguments &args)
+    static NAN_METHOD(AlphaBlending)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       REQ_INT_ARG(0, blending)
       gdImageAlphaBlending(*im, blending);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> SaveAlpha (const Arguments &args)
+    static NAN_METHOD(SaveAlpha)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       REQ_INT_ARG(0, saveFlag)
       gdImageSaveAlpha(*im, saveFlag);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> SetClip (const Arguments &args)
+    static NAN_METHOD(SetClip)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -914,138 +903,138 @@ protected:
 
       gdImageSetClip(*im, x1, y1, x2, y2);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> GetClip (const Arguments &args)
+    static NAN_METHOD(GetClip)
     {
-      HandleScope scope;
+      NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       int x1, y1, x2, y2;
       gdImageGetClip(*im, &x1, &y1, &x2, &y2);
 
-      Local<Object> result = Object::New();
-      result->Set(String::New("x1"), Integer::New(x1));
-      result->Set(String::New("y1"), Integer::New(y1));
-      result->Set(String::New("x2"), Integer::New(x2));
-      result->Set(String::New("y2"), Integer::New(y2));
+      Local<Object> result = NanNew<Object>();
+      result->Set(NanNew<String>("x1"), NanNew<Integer>(x1));
+      result->Set(NanNew<String>("y1"), NanNew<Integer>(y1));
+      result->Set(NanNew<String>("x2"), NanNew<Integer>(x2));
+      result->Set(NanNew<String>("y2"), NanNew<Integer>(y2));
 
-      return scope.Close(result);
+      NanReturnValue(result);
     }
 
     /**
      * Query Functions
      */
-    static Handle<Value> Alpha (const Arguments &args)
+    static NAN_METHOD(Alpha)
     {
-      HandleScope scope;
+      NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       REQ_INT_ARG(0, color);
 
-      Local<Number> result = Integer::New(gdImageAlpha(im->operator gdImagePtr(), color));
-      return scope.Close(result);
+      Local<Number> result = NanNew<Integer>(gdImageAlpha(im->operator gdImagePtr(), color));
+      NanReturnValue(result);
     }
 
-    static Handle<Value> GetPixel (const Arguments &args)
+    static NAN_METHOD(GetPixel)
     {
-      HandleScope scope;
+      NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       REQ_ARGS(2);
       REQ_INT_ARG(0, x);
       REQ_INT_ARG(1, y);
 
-      Local<Number> result = Integer::New(gdImageGetPixel(*im, x, y));
-      return scope.Close(result);
+      Local<Number> result = NanNew<Integer>(gdImageGetPixel(*im, x, y));
+      NanReturnValue(result);
     }
 
-    static Handle<Value> GetTrueColorPixel (const Arguments &args)
+    static NAN_METHOD(GetTrueColorPixel)
     {
-      HandleScope scope;
+      NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       REQ_ARGS(2);
       REQ_INT_ARG(0, x);
       REQ_INT_ARG(1, y);
 
-      Local<Number> result = Integer::New(gdImageGetTrueColorPixel(*im, x, y));
-      return scope.Close(result);
+      Local<Number> result = NanNew<Integer>(gdImageGetTrueColorPixel(*im, x, y));
+      NanReturnValue(result);
     }
 
     // This is implementation of the PHP-GD specific method imagecolorat
-    static Handle<Value> ImageColorAt (const Arguments &args)
+    static NAN_METHOD(ImageColorAt)
     {
-      HandleScope scope;
+      NanScope();
       Image *img = ObjectWrap::Unwrap<Image>(args.This());
 
       REQ_ARGS(2);
       REQ_INT_ARG(0, x);
       REQ_INT_ARG(1, y);
-      
+
       Local<Number> result;
       gdImagePtr im = *img;
       if (gdImageTrueColor(im)) {
         if(im->tpixels && gdImageBoundsSafe(im, x, y)){
-          result = Integer::New(gdImageTrueColorPixel(im, x, y));
+          result = NanNew<Integer>(gdImageTrueColorPixel(im, x, y));
         } else {
-          return ThrowException(Exception::Error(String::New("[imageColorAt]Invalid pixel")));
+          return NanThrowError("[imageColorAt]Invalid pixel");
         }
       } else {
         if (im->pixels && gdImageBoundsSafe(im, x, y)) {
-          result = Integer::New(im->pixels[y][x]);
+          result = NanNew<Integer>(im->pixels[y][x]);
         } else {
-          return ThrowException(Exception::Error(String::New("[imageColorAt]Invalid pixel")));
+          return NanThrowError("[imageColorAt]Invalid pixel");
         }
       }
-      return scope.Close(result);
+      NanReturnValue(result);
     }
 
-    static Handle<Value> GetBoundsSafe (const Arguments &args)
+    static NAN_METHOD(GetBoundsSafe)
     {
-      HandleScope scope;
+      NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       REQ_ARGS(2);
       REQ_INT_ARG(0, x);
       REQ_INT_ARG(1, y);
 
-      Local<Number> result = Integer::New(gdImageBoundsSafe(*im, x, y));
-      return scope.Close(result);
+      Local<Number> result = NanNew<Integer>(gdImageBoundsSafe(*im, x, y));
+      NanReturnValue(result);
     }
 
-    static Handle<Value> WidthGetter (Local<String> property, const AccessorInfo& info)
+    static NAN_GETTER(WidthGetter)
     {
-      HandleScope scope;
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
-      Local<Number> result = Integer::New(gdImageSX(im->operator gdImagePtr()));
-      return scope.Close(result);
+      Local<Number> result = NanNew<Integer>(gdImageSX(im->operator gdImagePtr()));
+      NanReturnValue(result);
     }
 
-    static Handle<Value> HeightGetter (Local<String> property, const AccessorInfo& info)
+    static NAN_GETTER(HeightGetter)
     {
-      HandleScope scope;
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
-      Local<Number> result = Integer::New(gdImageSY(im->operator gdImagePtr()));
-      return scope.Close(result);
+      Local<Number> result = NanNew<Integer>(gdImageSY(im->operator gdImagePtr()));
+      NanReturnValue(result);
     }
 
-    static Handle<Value> TrueColorGetter (Local<String> property, const AccessorInfo& info)
+    static NAN_GETTER(TrueColorGetter)
     {
-      HandleScope scope;
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
-      Local<Number> result = Integer::New(gdImageTrueColor(im->operator gdImagePtr()));
-      return scope.Close(result);
+      Local<Number> result = NanNew<Integer>(gdImageTrueColor(im->operator gdImagePtr()));
+      NanReturnValue(result);
     }
 
     /**
      * Font and Text Handling Funcitons
      */
-    static Handle<Value> StringFTBBox (const Arguments &args)
+    static NAN_METHOD(StringFTBBox)
     {
       REQ_ARGS(7);
       REQ_INT_ARG(0, color);
@@ -1058,21 +1047,21 @@ protected:
 
       int brect[8];
       char *err;
-      HandleScope scope;
+      NanScope();
 
       err = gdImageStringFT(NULL, &brect[0], 0, *font, size, angle, x, y, *str);
-      if (err) return ThrowException(Exception::Error(String::New(err)));
+      if (err) return NanThrowError(err);
 
-      Local<Array> result = Array::New();
+      Local<Array> result = NanNew<Array>();
 
       for (int i = 0; i < 8; i++) {
-        result->Set(Integer::New(i), Number::New(brect[i]));
+        result->Set(NanNew<Integer>(i), NanNew<Number>(brect[i]));
       }
 
-      return scope.Close(result);
+      NanReturnValue(result);
     }
 
-    static Handle<Value> StringFT (const Arguments &args)
+    static NAN_METHOD(StringFT)
     {
       REQ_ARGS(7);
       REQ_INT_ARG(0, color);
@@ -1091,34 +1080,34 @@ protected:
 
       int brect[8];
       char *err;
-      HandleScope scope;
+      NanScope();
 
       if (return_rectangle) {
         err = gdImageStringFT(NULL, &brect[0], 0, *font, size, angle, x, y, *str);
-        if (err) return ThrowException(Exception::Error(String::New(err)));
+        if (err) return NanThrowError(err);
 
-        Local<Array> result = Array::New();
+        Local<Array> result = NanNew<Array>();
         for(int i=0; i < 8; i++) {
-          result->Set( Integer::New(i), Number::New(brect[i]) );
+          result->Set( NanNew<Integer>(i), NanNew<Number>(brect[i]) );
         }
 
-        return scope.Close(result);
+        NanReturnValue(result);
       }
 
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       err = gdImageStringFT(*im, &brect[0], color, *font, size, angle, x, y, *str);
-      if (err) return ThrowException(Exception::Error(String::New(err)));
+      if (err) return NanThrowError(err);
 
-      return args.This();
+      NanReturnThis();
     }
 
     /**
      * Color Handling Functions
      */
-    static Handle<Value> ColorAllocate (const Arguments &args)
+    static NAN_METHOD(ColorAllocate)
     {
-      HandleScope scope;
+      NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       REQ_ARGS(3);
@@ -1126,13 +1115,13 @@ protected:
       OPT_INT_ARG(1, g, 0);
       OPT_INT_ARG(2, b, 0);
 
-      Local<Number> result = Integer::New(gdImageColorAllocate(*im, r, g, b));
-      return scope.Close(result);
+      Local<Number> result = NanNew<Integer>(gdImageColorAllocate(*im, r, g, b));
+      NanReturnValue(result);
     }
 
-    static Handle<Value> ColorAllocateAlpha (const Arguments &args)
+    static NAN_METHOD(ColorAllocateAlpha)
     {
-      HandleScope scope;
+      NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       OPT_INT_ARG(0, r, 0);
@@ -1140,79 +1129,26 @@ protected:
       OPT_INT_ARG(2, b, 0);
       OPT_INT_ARG(3, a, 100);
 
-      Local<Number> result = Integer::New(gdImageColorAllocateAlpha(*im, r, g, b, a));
-      return scope.Close(result);
+      Local<Number> result = NanNew<Integer>(gdImageColorAllocateAlpha(*im, r, g, b, a));
+      NanReturnValue(result);
     }
 
-    static Handle<Value> ColorClosest (const Arguments &args)
+    static NAN_METHOD(ColorClosest)
     {
-      HandleScope scope;
+      NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       OPT_INT_ARG(0, r, 0);
       OPT_INT_ARG(1, g, 0);
       OPT_INT_ARG(2, b, 0);
 
-      Local<Number> result = Integer::New(gdImageColorClosest(*im, r, g, b));
-      return scope.Close(result);
+      Local<Number> result = NanNew<Integer>(gdImageColorClosest(*im, r, g, b));
+      NanReturnValue(result);
     }
 
-    static Handle<Value> ColorClosestAlpha (const Arguments &args)
+    static NAN_METHOD(ColorClosestAlpha)
     {
-      HandleScope scope;
-      Image *im = ObjectWrap::Unwrap<Image>(args.This());
-
-      OPT_INT_ARG(0, r, 0);
-      OPT_INT_ARG(1, g, 0);
-      OPT_INT_ARG(2, b, 0);
-      OPT_INT_ARG(3, a, 100);
-
-      Local<Number> result = Integer::New(gdImageColorClosestAlpha(*im, r, g, b, a));
-      return scope.Close(result);
-    }
-
-    static Handle<Value> ColorClosestHWB (const Arguments &args)
-    {
-      HandleScope scope;
-      Image *im = ObjectWrap::Unwrap<Image>(args.This());
-
-      OPT_INT_ARG(0, r, 0);
-      OPT_INT_ARG(1, g, 0);
-      OPT_INT_ARG(2, b, 0);
-
-      Local<Number> result = Integer::New(gdImageColorClosestHWB(*im, r, g, b));
-      return scope.Close(result);
-    }
-
-    static Handle<Value> ColorExact (const Arguments &args)
-    {
-      HandleScope scope;
-      Image *im = ObjectWrap::Unwrap<Image>(args.This());
-
-      OPT_INT_ARG(0, r, 0);
-      OPT_INT_ARG(1, g, 0);
-      OPT_INT_ARG(2, b, 0);
-
-      Local<Number> result = Integer::New(gdImageColorExact(*im, r, g, b));
-      return scope.Close(result);
-    }
-
-    static Handle<Value> ColorResolve (const Arguments &args)
-    {
-      HandleScope scope;
-      Image *im = ObjectWrap::Unwrap<Image>(args.This());
-
-      OPT_INT_ARG(0, r, 0);
-      OPT_INT_ARG(1, g, 0);
-      OPT_INT_ARG(2, b, 0);
-
-      Local<Number> result = Integer::New(gdImageColorResolve(*im, r, g, b));
-      return scope.Close(result);
-    }
-
-    static Handle<Value> ColorResolveAlpha (const Arguments &args)
-    {
-      HandleScope scope;
+      NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       OPT_INT_ARG(0, r, 0);
@@ -1220,65 +1156,124 @@ protected:
       OPT_INT_ARG(2, b, 0);
       OPT_INT_ARG(3, a, 100);
 
-      Local<Number> result = Integer::New(gdImageColorResolveAlpha(*im, r, g, b, a));
-      return scope.Close(result);
+      Local<Number> result = NanNew<Integer>(gdImageColorClosestAlpha(*im, r, g, b, a));
+      NanReturnValue(result);
     }
 
-    static Handle<Value> ColorsTotalGetter (Local<String> property, const AccessorInfo& info)
+    static NAN_METHOD(ColorClosestHWB)
     {
-      HandleScope scope;
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
-      Local<Number> result = Integer::New(gdImageColorsTotal(im->operator gdImagePtr()));
-      return scope.Close(result);
+      OPT_INT_ARG(0, r, 0);
+      OPT_INT_ARG(1, g, 0);
+      OPT_INT_ARG(2, b, 0);
+
+      Local<Number> result = NanNew<Integer>(gdImageColorClosestHWB(*im, r, g, b));
+      NanReturnValue(result);
     }
 
-    static Handle<Value> Red (const Arguments &args)
+    static NAN_METHOD(ColorExact)
     {
-      HandleScope scope;
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      OPT_INT_ARG(0, r, 0);
+      OPT_INT_ARG(1, g, 0);
+      OPT_INT_ARG(2, b, 0);
+
+      Local<Number> result = NanNew<Integer>(gdImageColorExact(*im, r, g, b));
+      NanReturnValue(result);
+    }
+
+    static NAN_METHOD(ColorResolve)
+    {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      OPT_INT_ARG(0, r, 0);
+      OPT_INT_ARG(1, g, 0);
+      OPT_INT_ARG(2, b, 0);
+
+      Local<Number> result = NanNew<Integer>(gdImageColorResolve(*im, r, g, b));
+      NanReturnValue(result);
+    }
+
+    static NAN_METHOD(ColorResolveAlpha)
+    {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      OPT_INT_ARG(0, r, 0);
+      OPT_INT_ARG(1, g, 0);
+      OPT_INT_ARG(2, b, 0);
+      OPT_INT_ARG(3, a, 100);
+
+      Local<Number> result = NanNew<Integer>(gdImageColorResolveAlpha(*im, r, g, b, a));
+      NanReturnValue(result);
+    }
+
+    static NAN_GETTER(ColorsTotalGetter)
+    {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      Local<Number> result = NanNew<Integer>(gdImageColorsTotal(im->operator gdImagePtr()));
+      NanReturnValue(result);
+    }
+
+    static NAN_METHOD(Red)
+    {
+      NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       REQ_INT_ARG(0, color);
 
-      Local<Number> result = Integer::New(gdImageRed(im->operator gdImagePtr(), color));
-      return scope.Close(result);
+      Local<Number> result = NanNew<Integer>(gdImageRed(im->operator gdImagePtr(), color));
+      NanReturnValue(result);
     }
 
-    static Handle<Value> Blue (const Arguments &args)
+    static NAN_METHOD(Blue)
     {
-      HandleScope scope;
+      NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       REQ_INT_ARG(0, color);
 
-      Local<Number> result = Integer::New(gdImageBlue(im->operator gdImagePtr(), color));
-      return scope.Close(result);
+      Local<Number> result = NanNew<Integer>(gdImageBlue(im->operator gdImagePtr(), color));
+      NanReturnValue(result);
     }
 
-    static Handle<Value> Green (const Arguments &args)
+    static NAN_METHOD(Green)
     {
-      HandleScope scope;
+      NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       REQ_INT_ARG(0, color);
 
-      Local<Number> result = Integer::New(gdImageGreen(im->operator gdImagePtr(), color));
-      return scope.Close(result);
+      Local<Number> result = NanNew<Integer>(gdImageGreen(im->operator gdImagePtr(), color));
+      NanReturnValue(result);
     }
 
-    static Handle<Value> InterlaceGetter (Local<String> property, const AccessorInfo& info)
+    static NAN_GETTER(InterlaceGetter)
     {
-      HandleScope scope;
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       bool interlaced = (gdImageGetInterlaced(im->operator gdImagePtr()) != 0);
+      Local<Boolean> result;
+      if (interlaced) {
+        result = NanTrue();
+      } else {
+        result = NanFalse();
+      }
 
-      return interlaced?True():False();
+      NanReturnValue(result);
     }
 
-    static void InterlaceSetter (Local<String> property, Local<Value> value, const AccessorInfo& info)
+    static NAN_SETTER(InterlaceSetter)
     {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       if (value->IsBoolean()) {
         bool interlace = value->BooleanValue();
@@ -1287,47 +1282,47 @@ protected:
       }
     }
 
-    static Handle<Value> GetTransparent (const Arguments &args)
+    static NAN_METHOD(GetTransparent)
     {
-      HandleScope scope;
+      NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
-      Local<Number> result = Integer::New(gdImageGetTransparent(im->operator gdImagePtr()));
-      return scope.Close(result);
+      Local<Number> result = NanNew<Integer>(gdImageGetTransparent(im->operator gdImagePtr()));
+      NanReturnValue(result);
     }
 
-    static Handle<Value> ColorDeallocate (const Arguments &args)
+    static NAN_METHOD(ColorDeallocate)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       REQ_INT_ARG(0, color);
       gdImageColorDeallocate(*im, color);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> ColorTransparent (const Arguments &args)
+    static NAN_METHOD(ColorTransparent)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       REQ_INT_ARG(0, color);
       gdImageColorTransparent(*im, color);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> GrayScale(const Arguments &args)
+    static NAN_METHOD(GrayScale)
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
       gdImageGrayScale(*im);
 
-      return args.This();
+      NanReturnThis();
     }
 
     /**
      * Copying and Resizing Functions
      */
-    static Handle<Value> Copy (const Arguments &args)
+    static NAN_METHOD(Copy)
     {
       REQ_ARGS(7);
       REQ_IMG_ARG(0, dest);
@@ -1342,10 +1337,10 @@ protected:
 
       gdImageCopy(*dest, *im, dstX, dstY, srcX, srcY, width, height);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> CopyResized (const Arguments &args)
+    static NAN_METHOD(CopyResized)
     {
       REQ_ARGS(9);
       REQ_IMG_ARG(0, dest);
@@ -1362,10 +1357,10 @@ protected:
 
       gdImageCopyResized(*dest, *im, dstX, dstY, srcX, srcY, destW, destH, srcW, srcH);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> CopyResampled (const Arguments &args)
+    static NAN_METHOD(CopyResampled)
     {
       REQ_ARGS(9);
       REQ_IMG_ARG(0, dest);
@@ -1382,10 +1377,10 @@ protected:
 
       gdImageCopyResampled(*dest, *im, dstX, dstY, srcX, srcY, destW, destH, srcW, srcH);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> CopyRotated (const Arguments &args)
+    static NAN_METHOD(CopyRotated)
     {
       REQ_ARGS(8);
       REQ_IMG_ARG(0, dest);
@@ -1401,10 +1396,10 @@ protected:
 
       gdImageCopyRotated(*dest, *im, dstX, dstY, srcX, srcY, srcW, srcH, angle);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> CopyMerge (const Arguments &args)
+    static NAN_METHOD(CopyMerge)
     {
       REQ_ARGS(8);
       REQ_IMG_ARG(0, dest);
@@ -1420,10 +1415,10 @@ protected:
 
       gdImageCopyMerge(*dest, *im, dstX, dstY, srcX, srcY, width, height, pct);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> CopyMergeGray (const Arguments &args)
+    static NAN_METHOD(CopyMergeGray)
     {
       REQ_ARGS(8);
       REQ_IMG_ARG(0, dest);
@@ -1439,10 +1434,10 @@ protected:
 
       gdImageCopyMergeGray(*dest, *im, dstX, dstY, srcX, srcY, width, height, pct);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> PaletteCopy (const Arguments &args)
+    static NAN_METHOD(PaletteCopy)
     {
       REQ_IMG_ARG(0, dest);
 
@@ -1450,10 +1445,10 @@ protected:
 
       gdImagePaletteCopy(*dest, *im);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> SquareToCircle (const Arguments &args)
+    static NAN_METHOD(SquareToCircle)
     {
       REQ_INT_ARG(0, radius);
 
@@ -1461,10 +1456,10 @@ protected:
 
       gdImageSquareToCircle(*im, radius);
 
-      return args.This();
+      NanReturnThis();
     }
 
-    static Handle<Value> Sharpen (const Arguments &args)
+    static NAN_METHOD(Sharpen)
     {
       REQ_INT_ARG(0, pct);
 
@@ -1472,39 +1467,41 @@ protected:
 
       gdImageSharpen(*im, pct);
 
-      return args.This();
+      NanReturnThis();
     }
 
     /**
      * Miscellaneous Functions
      */
-    static Handle<Value> Compare (const Arguments &args)
+    static NAN_METHOD(Compare)
     {
-      HandleScope scope;
+      NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       REQ_ARGS(1);
       if (!args[0]->IsObject())
-        return ThrowException(Exception::TypeError(String::New("Argument 0  must be an image")));
+        return NanThrowError("Argument 0  must be an image");
 
       Local<Object> obj = Local<Object>::Cast(args[0]);
       Image *im2 = ObjectWrap::Unwrap<Image>(obj);
 
-      Local<Number> result = Integer::New(gdImageCompare(*im, *im2));
+      Local<Number> result = NanNew<Integer>(gdImageCompare(*im, *im2));
 
-      return scope.Close(result);
+      NanReturnValue(result);
     }
   };
 };
 
-Persistent<FunctionTemplate> Gd::Image::constructor_template;
+Persistent<FunctionTemplate> Gd::Image::constructor;
 
 extern "C"
 {
-  void init (Handle<Object> target)
+  void init (Handle<Object> exports)
   {
-    HandleScope scope;
-    Gd::Init(target);
+    Isolate* isolate = Isolate::GetCurrent();
+    HandleScope scope(isolate);
+
+    Gd::Init(exports);
   }
 
   NODE_MODULE(node_gd, init);
