@@ -34,29 +34,29 @@ using namespace node;
 
 #define REQ_STR_ARG(I, VAR)                                             \
   if (args.Length() <= (I) || !args[I]->IsString())                     \
-    return NanThrowError("Argument " #I " must be a string");    \
+    return NanThrowError("Argument " #I " must be a string");           \
   String::Utf8Value VAR(args[I]->ToString());
 
 #define REQ_INT_ARG(I, VAR)                                             \
   int VAR;                                                              \
   if (args.Length() <= (I) || !args[I]->IsInt32())                      \
-    return NanThrowError("Argument " #I " must be an integer");  \
+    return NanThrowError("Argument " #I " must be an integer");         \
   VAR = args[I]->Int32Value();
 
 #define REQ_DOUBLE_ARG(I, VAR)                                          \
   double VAR;                                                           \
   if (args.Length() <= (I) || !args[I]->IsNumber())                     \
-    return NanThrowError("Argument " #I " must be a number");    \
+    return NanThrowError("Argument " #I " must be a number");           \
   VAR = args[I]->NumberValue();
 
 #define REQ_EXT_ARG(I, VAR)                                             \
   if (args.Length() <= (I) || !args[I]->IsExternal())                   \
-    return NanThrowError("Argument " #I " invalid");             \
+    return NanThrowError("Argument " #I " invalid");                    \
   Local<External> VAR = Local<External>::Cast(args[I]);
 
 #define REQ_IMG_ARG(I, VAR)                                             \
   if (args.Length() <= (I) || !args[I]->IsObject())                     \
-    return NanThrowError("Argument " #I " must be an object");   \
+    return NanThrowError("Argument " #I " must be an object");          \
   Local<Object> _obj_ = Local<Object>::Cast(args[I]);                   \
   Image *VAR = ObjectWrap::Unwrap<Image>(_obj_);
 
@@ -68,25 +68,25 @@ using namespace node;
   } else if (args[I]->IsInt32()) {                                      \
     VAR = args[I]->Int32Value();                                        \
   } else {                                                              \
-    return NanThrowError("Argument " #I " must be an integer");      \
+    return NanThrowError("Argument " #I " must be an integer");         \
   }
 
 #define RETURN_IMAGE(IMG)                                               \
-  if (!IMG) NanReturnNull();                                              \
-  NanScope();                                                    \
-  Handle<Value> _arg_ = NanNew<External>(IMG); \
+  if (!IMG) NanReturnNull();                                            \
+  NanScope();                                                           \
+  Handle<Value> _arg_ = NanNew<External>(IMG);                          \
   Handle<Object> _image_ = NanNew(Image::constructor)->GetFunction()->NewInstance(1, &_arg_); \
   NanReturnValue(_image_);
 
 #define DECLARE_CREATE_FROM(TYPE)                                       \
-  static NAN_METHOD(CreateFrom##TYPE) {       \
+  static NAN_METHOD(CreateFrom##TYPE) {                                 \
     REQ_STR_ARG(0, path);                                               \
     FILE *in; in = fopen(*path, "rb");                                  \
     gdImagePtr im = gdImageCreateFrom##TYPE(in);                        \
     fclose(in);                                                         \
     RETURN_IMAGE(im)                                                    \
   }                                                                     \
-  static NAN_METHOD(CreateFrom##TYPE##Ptr) {   \
+  static NAN_METHOD(CreateFrom##TYPE##Ptr) {                            \
     REQ_ARGS(1);                                                        \
     ssize_t len = DecodeBytes(args[0]);                                 \
     char *buf   = new char[len];                                        \
@@ -98,7 +98,7 @@ using namespace node;
   }
 
 #define RETURN_DATA()                                                   \
-  NanScope();                                                    \
+  NanScope();                                                           \
   Local<Value> result = Encode(data, size);                             \
   delete[] data;                                                        \
   NanReturnValue(result);
