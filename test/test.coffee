@@ -11,7 +11,8 @@ describe 'Node.js GD Graphics Library', ->
   ]
   t = [
     __dirname+'/fixtures/output.png',
-    __dirname + '/fixtures/output-rotate.png'
+    __dirname + '/fixtures/output-rotate.png',
+    __dirname + '/fixtures/output-jpg.jpg'
   ]
 
   before ->
@@ -51,4 +52,16 @@ describe 'Node.js GD Graphics Library', ->
       canvas.savePng t[1], 1, (err) ->
         throw err if err
         assert.ok fs.existsSync t[1]
+        done()
+  it 'can save a png to jpg', (done) ->
+    gd.openPng s[1], (err, img) ->
+      throw err if err
+
+      canvas = gd.createTrueColor 100, 100
+
+      img.copyMerge canvas, 0, 0, 0, 0, 100, 100, 100
+
+      canvas.saveJpeg t[2], 100, (err) ->
+        throw err if err
+        assert.ok fs.existsSync t[2]
         done()
