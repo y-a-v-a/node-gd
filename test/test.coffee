@@ -6,13 +6,14 @@ util = require 'util'
 
 describe 'Node.js GD Graphics Library', ->
   s = [
-    __dirname+'/fixtures/input.png',
+    __dirname + '/fixtures/input.png',
     __dirname + '/fixtures/input-rotate.png'
   ]
   t = [
-    __dirname+'/fixtures/output.png',
+    __dirname + '/fixtures/output.png',
     __dirname + '/fixtures/output-rotate.png',
     __dirname + '/fixtures/output-jpg.jpg'
+    __dirname + '/fixtures/output-gif.gif'
   ]
 
   before ->
@@ -64,4 +65,20 @@ describe 'Node.js GD Graphics Library', ->
       canvas.saveJpeg t[2], 100, (err) ->
         throw err if err
         assert.ok fs.existsSync t[2]
+        done()
+  # it 'can open jpeg', (done) ->
+  #   gd.openJpeg t[2], (err, img) ->
+  #     throw err if err
+  #     done()
+  it 'can save a png to gif', (done) ->
+    gd.openPng s[0], (err, img) ->
+      throw err if err
+
+      canvas = gd.createTrueColor 100, 100
+
+      img.copyMerge canvas, 0, 0, 0, 0, 100, 100, 100
+
+      canvas.saveGif t[3], (err) ->
+        throw err if err
+        assert.ok fs.existsSync t[3]
         done()
