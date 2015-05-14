@@ -1052,7 +1052,7 @@ private:
       char *err;
       NanScope();
 
-      err = gdImageStringFT(NULL, &brect[0], 0, *font, size, angle, x, y, *str);
+      err = gdImageStringFT(NULL, &brect[0], color, *font, size, angle, x, y, *str);
       if (err) return NanThrowError(err);
 
       Local<Array> result = NanNew<Array>();
@@ -1086,7 +1086,7 @@ private:
       NanScope();
 
       if (return_rectangle) {
-        err = gdImageStringFT(NULL, &brect[0], 0, *font, size, angle, x, y, *str);
+        err = gdImageStringFT(NULL, &brect[0], color, *font, size, angle, x, y, *str);
         if (err) return NanThrowError(err);
 
         Local<Array> result = NanNew<Array>();
