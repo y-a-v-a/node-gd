@@ -5,4 +5,5 @@ node_js:
   - "0.10"
   - "0.8"
 before_install:
-  - "brew install gd"
+  - "brew update"
+  - "brew outdated gd || brew upgrade gd"
