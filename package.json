@@ -1,6 +1,6 @@
 {
   "name": "node-gd",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "libgd C++ bindings for Node.js",
   "main": "js/node-gd.js",
   "directories": {
@@ -8,7 +8,7 @@
   },
   "scripts": {
     "pretest": "coffee --bare -o js coffee/node-gd.coffee && node-gyp rebuild",
-    "test": "mocha --reporter spec --bail --ui bdd --colors --compilers coffee:coffee-script --require coffee-script test/test.coffee",
+    "test": "mocha --reporter spec --bail --ui bdd --colors --compilers coffee:coffee-script/register --require coffee-script test/test.coffee",
     "install": "node-gyp rebuild"
   },
   "repository": {
@@ -36,22 +36,35 @@
       "name": "Andris Reinman",
       "email": "andris@node.ee"
     },
-    { "name": "Peter Magnusson" },
+    {
+      "name": "Peter Magnusson"
+    },
     {
       "name": "Damian Senn",
       "email": "damian.senn@adfinis-sygroup.ch"
     },
-    { "name": "Farrin Reid" },
-    { "name": "Josh (zer0x304)" },
+    {
+      "name": "Farrin Reid"
+    },
+    {
+      "name": "Josh (zer0x304)"
+    },
     {
       "name": "Mike Smullin",
       "email": "mike@smullindesign.com"
+    },
+    {
+      "name": "Vincent Bruijn (y_a_v_a)",
+      "email": "vebruijn@gmail.com"
     }
   ],
   "gypfile": true,
   "readmeFilename": "README.md",
   "devDependencies": {
-    "mocha": "*",
-    "chai": "*"
+    "chai": "~2.3.0",
+    "coffee-script": "^1.9.2",
+    "mocha": "~2.2.4",
+    "nan": "~1.8.4",
+    "node-gyp": "~1.0.3"
   }
 }
