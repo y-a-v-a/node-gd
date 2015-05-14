@@ -5,26 +5,23 @@ path = require 'path'
 util = require 'util'
 
 describe 'Node.js GD Graphics Library', ->
-  s = [
-    __dirname + '/fixtures/input.png',
-    __dirname + '/fixtures/input-rotate.png'
-  ]
-  t = [
-    __dirname + '/fixtures/output.png',
-    __dirname + '/fixtures/output-rotate.png',
-    __dirname + '/fixtures/output-jpg.jpg'
-    __dirname + '/fixtures/output-gif.gif'
-  ]
+  source = __dirname + '/fixtures/'
+  target = __dirname + '/output/'
 
   before ->
     # delete previous output image from disk
-    t.forEach (img, idx) ->
-      if fs.existsSync img
-        fs.unlinkSync img
+    fs.readdir target, (err, files) ->
+      files.forEach (file, idx) ->
+        if file.substr(0, 6) == 'output'
+          fs.unlink target + file, (err) ->
+            throw err if err
 
   it 'can scale-down (resize) an image', (done) ->
-    gd.openPng s[0], (err, img) ->
+    s = source + 'input.png'
+    t = target + 'output-scale.png'
+    gd.openPng s, (err, img) ->
       throw err if err
+
       scale = 2 # factor
       w = Math.floor(img.width / scale)
       h = Math.floor(img.height / scale)
@@ -36,13 +33,15 @@ describe 'Node.js GD Graphics Library', ->
       img.copyResampled canvas, 0, 0, 0, 0, w, h, img.width, img.height
 
       # save canvas to disk
-      canvas.savePng t[0], 1, (err) ->
+      canvas.savePng t, 1, (err) ->
         throw err if err
-        assert.ok fs.existsSync t[0]
+        assert.ok fs.existsSync t
         done()
 
   it 'can rotate an image', (done) ->
-    gd.openPng s[1], (err, img) ->
+    s = source + 'input.png'
+    t = target + 'output-rotate.png'
+    gd.openPng s, (err, img) ->
       throw err if err
       w = 100
       h = 100
@@ -50,35 +49,97 @@ describe 'Node.js GD Graphics Library', ->
 
       img.copyRotated canvas, 50, 50, 0, 0, img.width, img.height, 45
 
-      canvas.savePng t[1], 1, (err) ->
+      canvas.savePng t, 1, (err) ->
         throw err if err
-        assert.ok fs.existsSync t[1]
+        assert.ok fs.existsSync t
         done()
-  it 'can save a png to jpg', (done) ->
-    gd.openPng s[1], (err, img) ->
+  it 'can save a png to jpeg', (done) ->
+    s = source + 'input.png'
+    t = target + 'output.jpg'
+    gd.openPng s, (err, img) ->
       throw err if err
 
       canvas = gd.createTrueColor 100, 100
 
-      img.copyMerge canvas, 0, 0, 0, 0, 100, 100, 100
+      img.copyResampled canvas, 0, 0, 0, 0, 100, 100, img.width, img.height
 
-      canvas.saveJpeg t[2], 100, (err) ->
+      canvas.saveJpeg t, 10, (err) ->
         throw err if err
-        assert.ok fs.existsSync t[2]
+        assert.ok fs.existsSync t
         done()
   # it 'can open jpeg', (done) ->
   #   gd.openJpeg t[2], (err, img) ->
   #     throw err if err
   #     done()
   it 'can save a png to gif', (done) ->
-    gd.openPng s[0], (err, img) ->
+    s = source + 'input.png'
+    t = target + 'output.gif'
+    gd.openPng s, (err, img) ->
       throw err if err
 
-      canvas = gd.createTrueColor 100, 100
+      canvas = gd.createTrueColor img.width, img.height
 
-      img.copyMerge canvas, 0, 0, 0, 0, 100, 100, 100
+      img.copyResampled canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height
 
-      canvas.saveGif t[3], (err) ->
+      canvas.saveGif t, (err) ->
         throw err if err
-        assert.ok fs.existsSync t[3]
+        assert.ok fs.existsSync t
+        done()
+  it 'can save a png to gd', (done) ->
+    s = source + 'input.png'
+    t = target + 'output.gd'
+    gd.openPng s, (err, img) ->
+      throw err if err
+
+      canvas = gd.createTrueColor img.width, img.height
+
+      img.copyResampled canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height
+
+      canvas.saveGd t, (err) ->
+        throw err if err
+        assert.ok fs.existsSync t
+        done()
+  it 'can save a png to gd2', (done) ->
+    s = source + 'input.png'
+    t = target + 'output.gd2'
+    gd.openPng s, (err, img) ->
+      throw err if err
+
+      canvas = gd.createTrueColor img.width, img.height
+
+      img.copyResampled canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height
+
+      canvas.saveGd2 t, (err) ->
+        throw err if err
+        assert.ok fs.existsSync t
+        done()
+    done()
+  it 'can save a png to WBMP', (done) ->
+    s = source + 'input.png'
+    t = target + 'output.wbmp'
+    gd.openPng s, (err, img) ->
+      throw err if err
+
+      canvas = gd.createTrueColor img.width, img.height
+
+      img.copyResampled canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height
+
+      fg = img.getPixel 5, 5
+
+      canvas.saveWBMP t, fg, (err) ->
+        throw err if err
+        assert.ok fs.existsSync t
+        done()
+    done()
+  it 'can convert to grayscale', (done) ->
+    s = source + 'input.png'
+    t = target + 'output-grayscale.png'
+    gd.openPng s, (err, img) ->
+      throw err if err
+
+      img.toGrayscale()
+
+      img.savePng t, 1, (err) ->
+        throw err if err
+        assert.ok fs.existsSync t
         done()

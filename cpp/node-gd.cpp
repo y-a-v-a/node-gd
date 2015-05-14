@@ -256,6 +256,9 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "gdPtr", GdPtr);
       NODE_SET_PROTOTYPE_METHOD(t, "gd2", Gd2);
       NODE_SET_PROTOTYPE_METHOD(t, "gd2Ptr", Gd2Ptr);
+      NODE_SET_PROTOTYPE_METHOD(t, "wbmp", WBMP);
+      NODE_SET_PROTOTYPE_METHOD(t, "wbmpPtr", WBMPPtr);
+
       NODE_SET_PROTOTYPE_METHOD(t, "destroy", Destroy);
 
       /**
