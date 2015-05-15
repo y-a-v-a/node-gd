@@ -143,3 +143,17 @@ describe 'Node.js GD Graphics Library', ->
         throw err if err
         assert.ok fs.existsSync t
         done()
+  it 'can create an image with text', (done) ->
+    f = source + 'FreeSans.ttf'
+    t = target + 'output-string.png'
+
+    img = gd.create 200, 80
+
+    img.colorAllocate 0, 255, 0
+    txtColor = img.colorAllocate 255, 0, 255
+
+    img.stringFT txtColor, f, 24, 0, 10, 60, "Hello world";
+
+    img.savePng t, 1, (err) ->
+      throw err if err
+      done()
