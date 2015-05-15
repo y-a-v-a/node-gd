@@ -5,7 +5,7 @@
       "sources": ["cpp/node-gd.cpp"],
       "libraries": ["-lgd"],
       "include_dirs": [
-        "<!(node -p -e \"require('path').relative('.', require('path').dirname(require.resolve('nan')))\")"
+        "<!(node -e \"require('nan')\")"
       ],
       "conditions": [
         [ "OS=='freebsd'", {
