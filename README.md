@@ -27,7 +27,7 @@ npm install node-gd
 
 ## Installation on Windows 7
 
-    please open an issue if you have the answer. i'm sure it works, i just don't have ready the exact commands.
+Please open an issue if you have the answer. i'm sure it works, i just don't have ready the exact commands.
 
 ## Usage
 
@@ -52,6 +52,10 @@ output_img.savePng "out.png", 0, (err) ->
 ```
 
 As usual, for the latest examples, review the easy-to-follow [./test/test.coffee](https://github.com/mikesmullin/node-gd/blob/master/test/test.coffee).
+
+# Travis CI
+
+I'm trying to get it built in Travis, but since we're dependent on libgd v2.1.x and Travis CI runs on Ubuntu 12, which has libgd2 v2.1.x, we'll have to wait until they've updated to Ubuntu 14.
 
 ## Related
 
