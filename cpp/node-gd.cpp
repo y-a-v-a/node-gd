@@ -1538,8 +1538,7 @@ extern "C"
 {
   void init (Handle<Object> exports)
   {
-    Isolate* isolate = Isolate::GetCurrent();
-    HandleScope scope(isolate);
+    NanScope();
 
     Gd::Init(exports);
   }
