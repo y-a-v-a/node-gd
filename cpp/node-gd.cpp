@@ -74,8 +74,10 @@ using namespace node;
 #define RETURN_IMAGE(IMG)                                               \
   if (!IMG) NanReturnNull();                                            \
   NanScope();                                                           \
-  Handle<Value> _arg_ = NanNew<External>(IMG);                          \
+  Local<Value> _arg_ = NanNew<External>(IMG);                           \
+  Persistent<Object> handle;                                            \
   Handle<Object> _image_ = NanNew(Image::constructor)->GetFunction()->NewInstance(1, &_arg_); \
+  NanAssignPersistent(handle, _image_);                                 \
   NanReturnValue(_image_);
 
 #define DECLARE_CREATE_FROM(TYPE)                                       \
