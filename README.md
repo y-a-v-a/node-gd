@@ -2,27 +2,27 @@
 
 GD graphic library (libgd) C++ bindings for Node.js.
 
-This version is the community-maintained [official NodeJS.org node-gd repo](https://npmjs.org/package/node-gd).
+This version is the community-maintained [official NodeJS.org node-gd repo](https://npmjs.org/package/node-gd). Be aware that since node-gd version 0.3.x only libgd2 version 2.1.x is supported. Run `gdlib-config --version` to check the version of libgd2 on your system.
 
 ## Installation on Debian/Ubuntu
 
 ```bash
-sudo apt-get install libgd2-xpm-dev # libgd
-npm install node-gd
+$ sudo apt-get install libgd2-xpm-dev # libgd
+$ npm install node-gd
 ```
 
 ## Installation on RHEL/CentOS
 
 ```bash
-sudo yum install gd-devel
-npm install node-gd
+$ sudo yum install gd-devel
+$ npm install node-gd
 ```
 
 ## Installation on Mac OS/X
 
 ```bash
-brew install gd
-npm install node-gd
+$ brew install gd
+$ npm install node-gd
 ```
 
 ## Installation on Windows 7
@@ -53,9 +53,15 @@ output_img.savePng "out.png", 0, (err) ->
 
 As usual, for the latest examples, review the easy-to-follow [./test/test.coffee](https://github.com/mikesmullin/node-gd/blob/master/test/test.coffee).
 
-# Travis CI
+## Test
+```bash
+$ npm test
+```
+The `test/output` directory contains the resulting images of the test script. The tests use, in some cases, a GNU Freefont font, which is licensed under the GNU General Public License v3.
 
-I'm trying to get it built in Travis, but since we're dependent on libgd v2.1.x and Travis CI runs on Ubuntu 12, which has libgd2 v2.1.x, we'll have to wait until they've updated to Ubuntu 14.
+## Travis CI
+
+I'm trying to get it built in Travis, but since we're dependent on libgd v2.1.x and Travis CI runs on Ubuntu 12, which has libgd2 v2.0.x, we'll have to wait until they've updated to Ubuntu 14.
 
 ## Related
 

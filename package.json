@@ -1,6 +1,6 @@
 {
   "name": "node-gd",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "libgd C++ bindings for Node.js",
   "main": "js/node-gd.js",
   "directories": {
