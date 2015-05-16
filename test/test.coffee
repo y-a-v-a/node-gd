@@ -152,7 +152,20 @@ describe 'Node.js GD Graphics Library', ->
     img.colorAllocate 0, 255, 0
     txtColor = img.colorAllocate 255, 0, 255
 
-    img.stringFT txtColor, f, 24, 0, 10, 60, "Hello world";
+    img.stringFT txtColor, f, 24, 0, 10, 60, "Hello world"
+
+    img.savePng t, 1, (err) ->
+      throw err if err
+      done()
+  it 'can create a truecolor iamge with text', (done) ->
+    f = source + 'FreeSans.ttf'
+    t = target + 'output-truecolor-string.png'
+
+    img = gd.createTrueColor 120, 20
+
+    txtColor = img.colorAllocate 255, 255, 0
+
+    img.stringFT txtColor, f, 16, 0, 8, 18, "Hello world!"
 
     img.savePng t, 1, (err) ->
       throw err if err
