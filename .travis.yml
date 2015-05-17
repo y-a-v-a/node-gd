@@ -9,6 +9,8 @@ node_js:
   - "0.10"
   - "0.8"
 
+sudo: required
+
 env:
  - TRAVIS_OS_UNAME=$(uname -s)
 
