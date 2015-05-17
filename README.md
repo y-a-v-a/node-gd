@@ -53,6 +53,37 @@ output_img.savePng "out.png", 0, (err) ->
   console.log "image saved!"
 ```
 
+
+```javascript
+# Require library
+var gd = require('node-gd');
+
+# Create blank new image in memory
+var img = gd.create(200, 80);
+
+# Set background color
+img.colorAllocate(0, 255, 0);
+
+# Set text color
+var txtColor = img.colorAllocate(255, 0, 255);
+# Set full path to font file
+var fontPath = '/full/path/to/font.ttf';
+
+# Render string in image
+img.stringFT(txtColor, fontPath, 24, 0, 10, 60, 'Hello world!');
+
+# Write image buffer to disk
+img.savePng('output.png', 1, function(err) {
+  if(err) {
+    throw err;
+  }
+});
+
+# Destroy buffer
+img.destroy();
+
+```
+
 As usual, for the latest examples, review the easy-to-follow [./test/test.coffee](https://github.com/mikesmullin/node-gd/blob/master/test/test.coffee).
 
 ## Test
