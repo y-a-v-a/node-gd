@@ -2,7 +2,7 @@
 
 GD graphic library (libgd) C++ bindings for Node.js.
 
-This version is the community-maintained [official NodeJS.org node-gd repo](https://npmjs.org/package/node-gd). Be aware that since node-gd version 0.3.x only libgd2 version 2.1.x is supported. Run `gdlib-config --version` to check the version of libgd2 on your system.
+This version is the community-maintained [official NodeJS.org node-gd repo](https://npmjs.org/package/node-gd). Be aware that since node-gd version 0.3.x only libgd2 version 2.1.x is fully supported. Run `gdlib-config --version` to check the version of libgd2 on your system.
 
 [![NPM](https://nodei.co/npm/node-gd.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/node-gd/) [![NPM](https://nodei.co/npm-dl/node-gd.png?months=6&height=3)](https://nodei.co/npm/node-gd/)
 
@@ -29,7 +29,7 @@ $ npm install node-gd
 
 ## Installation on Windows 7
 
-Please open an issue if you have the answer. i'm sure it works, i just don't have ready the exact commands.
+Please open an issue if you have the answer. I'm sure it works, I just don't have ready the exact commands.
 
 ## Usage
 
@@ -88,6 +88,26 @@ img.destroy();
 ```
 
 As usual, for the latest examples, review the easy-to-follow [./test/test.coffee](https://github.com/mikesmullin/node-gd/blob/master/test/test.coffee).
+
+## libgd2 version information
+The function `gdImageGrayScale` is not available in libgd2 version 2.0.x. Therefore, the following script althoug it works, will output a green image on systems with that version. This means: the function call to `img.toGrayscale` just doesn't do anything and returns only `this`.
+
+```javascript
+var gd = require('../js/node-gd.js');
+
+var img = gd.create(200, 80);
+
+img.colorAllocate(0, 255, 0);
+
+img.toGrayscale();
+
+img.savePng('output.png', 1, function(err) {
+  if(err) {
+    throw err;
+  }
+  img.destroy();
+});
+```
 
 ## Test
 ```bash
