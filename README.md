@@ -33,7 +33,7 @@ Please open an issue if you have the answer. i'm sure it works, i just don't hav
 
 ## Usage
 
-### Using coffescript
+### Using coffeescript
 
 ```coffeescript
 # Require library
