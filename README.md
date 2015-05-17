@@ -93,7 +93,7 @@ img.destroy();
 As usual, for the latest examples, review the easy-to-follow [./test/test.coffee](https://github.com/mikesmullin/node-gd/blob/master/test/test.coffee).
 
 ## libgd2 version information
-The function `gdImageGrayScale` is not available in libgd2 version 2.0.x. Therefore, the following script althoug it works, will output a green image on systems with that version. This means: the function call to `img.toGrayscale` just doesn't do anything and returns only `this`.
+The function `gdImageGrayScale` is not available in libgd2 version 2.0.x. Therefore, the following script although it works, will output a green image on systems with that version. This means: the function call to `img.toGrayscale` just doesn't do anything and returns only `this`.
 
 ```javascript
 var gd = require('../js/node-gd.js');
@@ -118,9 +118,6 @@ $ npm test
 ```
 The `test/output` directory contains the resulting images of the test script. The tests use, in some cases, a GNU Freefont font, which is licensed under the GNU General Public License v3.
 
-## Travis CI
-
-I'm trying to get it built in Travis, but since we're dependent on libgd v2.1.x and Travis CI runs on Ubuntu 12, which has libgd2 v2.0.x, we'll have to wait until they've updated to Ubuntu 14.
 
 ## Related
 
