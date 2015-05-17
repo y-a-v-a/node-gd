@@ -1,9 +1,17 @@
 language: node_js
-os: osx
+
+os:
+  - osx
+  - linux
+
 node_js:
   - "0.12"
   - "0.10"
   - "0.8"
-before_install:
-  - "brew update"
-  - "brew outdated gd || brew upgrade gd"
+
+env:
+ - TRAVIS_OS_UNAME=$(uname -s)
+
+install:
+ - if [[ $TRAVIS_OS_UNAME = 'Linux' ]]; then bash travis-linux-deps.sh; fi
+ - if [[ $TRAVIS_OS_UNAME = 'Darwin' ]]; then bash travis-osx-deps.sh; fi

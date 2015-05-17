@@ -33,6 +33,8 @@ Please open an issue if you have the answer. i'm sure it works, i just don't hav
 
 ## Usage
 
+### Using coffescript
+
 ```coffeescript
 # Require library
 gd = require 'node-gd'
@@ -53,6 +55,7 @@ output_img.savePng "out.png", 0, (err) ->
   console.log "image saved!"
 ```
 
+### Using javascript
 
 ```javascript
 // Require library
