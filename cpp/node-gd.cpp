@@ -1346,9 +1346,11 @@ private:
     static NAN_METHOD(GrayScale)
     {
       NanScope();
+      // Silently fail on missing gdImageGrayScale
+#if (defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && GD_MAJOR_VERSION >= 2 && GD_MINOR_VERSION >= 1)
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
       gdImageGrayScale(*im);
-
+#endif
       NanReturnThis();
     }
 
