@@ -4,6 +4,8 @@ GD graphic library (libgd) C++ bindings for Node.js.
 
 This version is the community-maintained [official NodeJS.org node-gd repo](https://npmjs.org/package/node-gd). Be aware that since node-gd version 0.3.x only libgd2 version 2.1.x is supported. Run `gdlib-config --version` to check the version of libgd2 on your system.
 
+[![NPM](https://nodei.co/npm/node-gd.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/node-gd/) [![NPM](https://nodei.co/npm-dl/node-gd.png?months=6&height=3)](https://nodei.co/npm/node-gd/)
+
 ## Installation on Debian/Ubuntu
 
 ```bash
