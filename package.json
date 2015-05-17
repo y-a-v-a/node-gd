@@ -62,9 +62,9 @@
   "readmeFilename": "README.md",
   "devDependencies": {
     "chai": "~2.3.0",
-    "coffee-script": "^1.9.2",
+    "coffee-script": "1.9.2",
     "mocha": "~2.2.4",
-    "nan": "~1.8.4",
+    "nan": "^1.8.4",
     "node-gyp": "~1.0.3"
   },
   "dependencies": {
