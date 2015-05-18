@@ -93,7 +93,7 @@ img.destroy();
 As usual, for the latest examples, review the easy-to-follow [./test/test.coffee](https://github.com/mikesmullin/node-gd/blob/master/test/test.coffee).
 
 ## libgd2 version information
-The function `gdImageGrayScale` is not available in libgd2 version 2.0.x. Therefore, the following script although it works, will output a green image on systems with that version. This means: the function call to `img.toGrayscale` just doesn't do anything and returns only `this`.
+The function `gdImageGrayScale`, `gdImageEmboss`, etc. are not available in libgd2 version 2.0.x. Therefore, the following script although it works, will output a green image on systems with that version. This means: the function call to `img.toGrayscale()` just doesn't do anything and returns only `this`.
 
 ```javascript
 var gd = require('../js/node-gd.js');
