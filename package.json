@@ -10,7 +10,7 @@
     "pretest": "coffee --bare -o js coffee/node-gd.coffee && node-gyp rebuild",
     "test": "mocha --reporter spec --bail --ui bdd --colors --compilers coffee:coffee-script/register --require coffee-script test/test.coffee",
     "prepublish": "coffee --bare -o js coffee/node-gd.coffee",
-    "preinstall": "node-gyp rebuild"
+    "install": "node-gyp rebuild"
   },
   "repository": {
     "type": "git",

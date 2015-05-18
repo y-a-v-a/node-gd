@@ -123,5 +123,4 @@ The `test/output` directory contains the resulting images of the test script. Th
 
 * [Original author's repo](https://github.com/taggon/node-gd)
 * [node-canvas](https://github.com/LearnBoost/node-canvas) uses libcairo to emulate browser HTML5 Canvas' image manipulation abilities within Node.js
-* [node-o3-canvas](https://github.com/ajaxorg/node-o3-canvas) uses libcairo to emulate browser HTML5 Canvas' image manipulation abilities within Node.js
-* [node-image](https://github.com/pkrumins/node-image)
+
