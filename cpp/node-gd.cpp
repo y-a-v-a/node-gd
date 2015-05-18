@@ -324,7 +324,15 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "getTransparent", GetTransparent);
       NODE_SET_PROTOTYPE_METHOD(t, "colorDeallocate", ColorDeallocate);
       NODE_SET_PROTOTYPE_METHOD(t, "colorTransparent", ColorTransparent);
+
+
+      /**
+       * Effects
+       */
       NODE_SET_PROTOTYPE_METHOD(t, "toGrayscale",GrayScale);
+      NODE_SET_PROTOTYPE_METHOD(t, "gaussianBlur", GaussianBlur);
+      NODE_SET_PROTOTYPE_METHOD(t, "negate", Negate);
+      NODE_SET_PROTOTYPE_METHOD(t, "brightness", Brightness);
 
       // interlace
       t->PrototypeTemplate()->SetAccessor(NanNew("interlace"), InterlaceGetter, InterlaceSetter, Handle<Value>(), PROHIBITS_OVERWRITING);
@@ -1351,6 +1359,34 @@ private:
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
       gdImageGrayScale(*im);
 #endif
+      NanReturnThis();
+    }
+
+    static NAN_METHOD(GaussianBlur) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      gdImageGaussianBlur(*im);
+
+      NanReturnThis();
+    }
+
+    static NAN_METHOD(Negate) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      gdImageNegate(*im);
+
+      NanReturnThis();
+    }
+
+    static NAN_METHOD(Brightness) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      REQ_INT_ARG(0, brightness);
+      gdImageBrightness(*im, brightness);
+
       NanReturnThis();
     }
 

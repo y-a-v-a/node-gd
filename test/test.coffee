@@ -156,6 +156,7 @@ describe 'Node.js GD Graphics Library', ->
 
     img.savePng t, 1, (err) ->
       throw err if err
+      assert.ok fs.existsSync t
       done()
   it 'can create a truecolor iamge with text', (done) ->
     f = source + 'FreeSans.ttf'
@@ -169,4 +170,51 @@ describe 'Node.js GD Graphics Library', ->
 
     img.savePng t, 1, (err) ->
       throw err if err
+      assert.ok fs.existsSync t
       done()
+  it 'can add gaussian blur to an image', (done) ->
+    s = source + 'input.png'
+    t = target + 'output-gaussianblur.png'
+
+    gd.openPng s, (err, img) ->
+      throw err if err
+
+      # call gaussianBlur 10 times on image
+      # creates a very blurry image
+      img.gaussianBlur() for i in [0...10]
+
+      img.savePng t, -1, (err) ->
+        throw err if err
+        assert.ok fs.existsSync t
+        img.destroy()
+        done()
+  it 'can negate an image', (done) ->
+    s = source + 'input.png'
+    t = target + 'output-negate.png'
+
+    gd.openPng s, (err, img) ->
+      throw err if err
+
+      img.negate()
+
+      img.savePng t, -1, (err) ->
+        throw err if err
+        assert.ok fs.existsSync t
+        img.destroy()
+        done()
+  it 'can change brightness of an image', (done) ->
+    s = source + 'input.png'
+    t = target + 'output-brightness.png'
+
+    gd.openPng s, (err, img) ->
+      throw err if err
+
+      brightness = Math.floor(Math.random() * 100)
+
+      img.brightness(brightness)
+
+      img.savePng t, -1, (err) ->
+        throw err if err
+        assert.ok fs.existsSync t
+        img.destroy()
+        done()
