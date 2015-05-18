@@ -333,6 +333,9 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "gaussianBlur", GaussianBlur);
       NODE_SET_PROTOTYPE_METHOD(t, "negate", Negate);
       NODE_SET_PROTOTYPE_METHOD(t, "brightness", Brightness);
+      NODE_SET_PROTOTYPE_METHOD(t, "contrast", Contrast);
+      NODE_SET_PROTOTYPE_METHOD(t, "selectiveBlur", SelectiveBlur);
+      NODE_SET_PROTOTYPE_METHOD(t, "emboss", Emboss);
 
       // interlace
       t->PrototypeTemplate()->SetAccessor(NanNew("interlace"), InterlaceGetter, InterlaceSetter, Handle<Value>(), PROHIBITS_OVERWRITING);
@@ -1386,6 +1389,34 @@ private:
 
       REQ_INT_ARG(0, brightness);
       gdImageBrightness(*im, brightness);
+
+      NanReturnThis();
+    }
+
+    static NAN_METHOD(Contrast) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      REQ_DOUBLE_ARG(0, contrast);
+      gdImageContrast(*im, contrast);
+
+      NanReturnThis();
+    }
+
+    static NAN_METHOD(SelectiveBlur) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      gdImageSelectiveBlur(*im);
+
+      NanReturnThis();
+    }
+
+    static NAN_METHOD(Emboss) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      gdImageEmboss(*im);
 
       NanReturnThis();
     }

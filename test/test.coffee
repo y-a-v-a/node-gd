@@ -139,7 +139,7 @@ describe 'Node.js GD Graphics Library', ->
 
       img.toGrayscale()
 
-      img.savePng t, 1, (err) ->
+      img.savePng t, -1, (err) ->
         throw err if err
         assert.ok fs.existsSync t
         done()
@@ -212,6 +212,53 @@ describe 'Node.js GD Graphics Library', ->
       brightness = Math.floor(Math.random() * 100)
 
       img.brightness(brightness)
+
+      img.savePng t, -1, (err) ->
+        throw err if err
+        assert.ok fs.existsSync t
+        img.destroy()
+        done()
+  it 'can change contrast of an image', (done) ->
+    s = source + 'input.png'
+    t = target + 'output-contrast.png'
+
+    gd.openPng s, (err, img) ->
+      throw err if err
+
+      # a value of 100 gives no contrast i.e. rgb 127, 127, 127 gray
+      # I found out a value somewhere between -900 and 1100
+      # fits best.
+      contrast = Math.floor(Math.random() * 2000) - 900
+
+      img.contrast(contrast)
+
+      img.savePng t, -1, (err) ->
+        throw err if err
+        assert.ok fs.existsSync t
+        img.destroy()
+        done()
+  it 'can emboss an image', (done) ->
+    s = source + 'input.png'
+    t = target + 'output-emboss.png'
+
+    gd.openPng s, (err, img) ->
+      throw err if err
+
+      img.emboss()
+
+      img.savePng t, -1, (err) ->
+        throw err if err
+        assert.ok fs.existsSync t
+        img.destroy()
+        done()
+  it 'can apply selective blur to an image', (done) ->
+    s = source + 'input.png'
+    t = target + 'output-selectiveBlur.png'
+
+    gd.openPng s, (err, img) ->
+      throw err if err
+
+      img.selectiveBlur()
 
       img.savePng t, -1, (err) ->
         throw err if err
