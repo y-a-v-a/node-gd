@@ -9,7 +9,7 @@
   "scripts": {
     "pretest": "coffee --bare -o js coffee/node-gd.coffee && node-gyp rebuild",
     "test": "mocha --reporter spec --bail --ui bdd --colors --compilers coffee:coffee-script/register --require coffee-script test/test.coffee",
-    "preinstall": "coffee --bare -o js coffee/node-gd.coffee",
+    "prepublish": "coffee --bare -o js coffee/node-gd.coffee",
     "install": "node-gyp rebuild"
   },
   "repository": {
@@ -63,11 +63,11 @@
   "gypfile": true,
   "readmeFilename": "README.md",
   "devDependencies": {
+    "coffee-script": "~1.9.2",
     "chai": "~2.3.0",
     "mocha": "~2.2.4"
   },
   "dependencies": {
-    "coffee-script": "~1.9.2",
     "node-gyp": "~1.0.3",
     "nan": "~1.8.4"
   }
