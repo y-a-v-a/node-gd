@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/mikesmullin/node-gd.git"
+    "url": "git://github.com/y-a-v-a/node-gd.git"
   },
   "keywords": [
     "libgd",
