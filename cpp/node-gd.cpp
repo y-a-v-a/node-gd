@@ -1367,57 +1367,64 @@ private:
 
     static NAN_METHOD(GaussianBlur) {
       NanScope();
+#if (defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && GD_MAJOR_VERSION >= 2 && GD_MINOR_VERSION >= 1)
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       gdImageGaussianBlur(*im);
-
+#endif
       NanReturnThis();
     }
 
     static NAN_METHOD(Negate) {
       NanScope();
+#if (defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && GD_MAJOR_VERSION >= 2 && GD_MINOR_VERSION >= 1)
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       gdImageNegate(*im);
-
+#endif
       NanReturnThis();
     }
 
     static NAN_METHOD(Brightness) {
       NanScope();
+      REQ_INT_ARG(0, brightness);
+
+#if (defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && GD_MAJOR_VERSION >= 2 && GD_MINOR_VERSION >= 1)
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
-      REQ_INT_ARG(0, brightness);
       gdImageBrightness(*im, brightness);
-
+#endif
       NanReturnThis();
     }
 
     static NAN_METHOD(Contrast) {
       NanScope();
+      REQ_DOUBLE_ARG(0, contrast);
+#if (defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && GD_MAJOR_VERSION >= 2 && GD_MINOR_VERSION >= 1)
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
-      REQ_DOUBLE_ARG(0, contrast);
       gdImageContrast(*im, contrast);
-
+#endif
       NanReturnThis();
     }
 
     static NAN_METHOD(SelectiveBlur) {
       NanScope();
+#if (defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && GD_MAJOR_VERSION >= 2 && GD_MINOR_VERSION >= 1)
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       gdImageSelectiveBlur(*im);
-
+#endif
       NanReturnThis();
     }
 
     static NAN_METHOD(Emboss) {
       NanScope();
+#if (defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && GD_MAJOR_VERSION >= 2 && GD_MINOR_VERSION >= 1)
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       gdImageEmboss(*im);
-
+#endif
       NanReturnThis();
     }
 
