@@ -69,6 +69,6 @@
   },
   "dependencies": {
     "node-gyp": "~1.0.3",
-    "nan": "file:../nan/"
+    "nan": "~1.8.4"
   }
 }

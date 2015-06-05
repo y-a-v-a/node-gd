@@ -667,8 +667,10 @@ private:
 
       bool result = gdImageFile(*im, *path);
       if (result == false) {
+        Local<Value> err = Exception::Error(NanNew<String>("Unable to write file."));
         Handle<Value> argv[] = {
-          NanError(NanNew<String>("fail!"))
+          // NanError(NanNew<String>("fail!"))
+          err
         };
         callback->Call(1, argv);
       } else {
