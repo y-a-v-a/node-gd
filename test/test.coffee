@@ -343,6 +343,9 @@ describe 'Node.js GD Graphics Library', ->
           img.destroy()
           done()
     it 'can open a bmp and save it as png', (done) ->
+      if gd.getGDVersion() < '2.1.1'
+        done()
+        return
       s = source + 'input.bmp'
       t = target + 'output-from-bmp.png'
 
