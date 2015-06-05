@@ -61,10 +61,13 @@ formats = {
   gd: [1, 1],
   gd2: [1, 1],
   gd2Part: [5, -1],
-  WBMP: [1, 1],
-  bmp: [1, 2],
-  tiff: [-1, 1]
+  WBMP: [1, 1]
 };
+
+if (gd_bindings.getGDVersion() >= '2.1.1') {
+  formats.bmp = [1, 2];
+  formats.tiff = [-1, 1];
+}
 
 for (format in formats) {
   v = formats[format];
@@ -79,22 +82,23 @@ for (format in formats) {
   }
 }
 
-gd_bindings.Image.prototype["saveFile"] = function() {
-  var args, callback;
-  args = Array.prototype.slice.call(arguments);
-  callback = args[args.length - 1];
-  if (typeof callback !== "function") {
-    return this["file"].apply(this, args);
-  }
-  return this["fileCallback"].apply(this, args);
-};
-
-exports["openFile"] = function() {
-  var args, callback;
-  args = Array.prototype.slice.call(arguments);
-  callback = args[args.length - 1];
-  if (typeof callback !== "function") {
-    return this["createFromFile"].apply(this, args);
-  }
-  return callback(null, this["createFromFile"].apply(this, args));
-};
+if (gd_bindings.getGDVersion() >= '2.1.1') {
+  gd_bindings.Image.prototype["saveFile"] = function() {
+    var args, callback;
+    args = Array.prototype.slice.call(arguments);
+    callback = args[args.length - 1];
+    if (typeof callback !== "function") {
+      return this["file"].apply(this, args);
+    }
+    return this["fileCallback"].apply(this, args);
+  };
+  exports["openFile"] = function() {
+    var args, callback;
+    args = Array.prototype.slice.call(arguments);
+    callback = args[args.length - 1];
+    if (typeof callback !== "function") {
+      return this["createFromFile"].apply(this, args);
+    }
+    return callback(null, this["createFromFile"].apply(this, args));
+  };
+}

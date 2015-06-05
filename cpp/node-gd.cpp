@@ -173,6 +173,7 @@ public:
 #endif
     NODE_SET_METHOD(exports, "trueColor", TrueColor);
     NODE_SET_METHOD(exports, "trueColorAlpha", TrueColorAlpha);
+    NODE_SET_METHOD(exports, "getGDVersion", GdVersionGetter);
 
     Image::Init(exports);
   }
@@ -286,6 +287,12 @@ private:
 
     NanReturnValue(result);
   }
+
+  static NAN_METHOD(GdVersionGetter) {
+    NanScope();
+    NanReturnValue(GD_VERSION_STRING);
+  }
+
 
   class Image : public node::ObjectWrap {
   public:
