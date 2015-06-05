@@ -43,6 +43,11 @@ using namespace node;
     return NanThrowError("Argument " #I " must be an integer");         \
   VAR = args[I]->Int32Value();
 
+#define REQ_FN_ARG(I, VAR) \
+  if (args.Length() <= (I) || !args[I]->IsFunction()) \
+    return NanThrowError("Argument " #I " must be a function"); \
+  Local<Function> VAR = args[I].As<Function>();
+
 #define REQ_DOUBLE_ARG(I, VAR)                                          \
   double VAR;                                                           \
   if (args.Length() <= (I) || !args[I]->IsNumber())                     \
@@ -73,7 +78,6 @@ using namespace node;
 
 #define RETURN_IMAGE(IMG)                                               \
   if (!IMG) NanReturnNull();                                            \
-  NanScope();                                                           \
   Local<Value> _arg_ = NanNew<External>(IMG);                           \
   Persistent<Object> handle;                                            \
   Handle<Object> _image_ = NanNew(Image::constructor)->GetFunction()->NewInstance(1, &_arg_); \
@@ -82,6 +86,7 @@ using namespace node;
 
 #define DECLARE_CREATE_FROM(TYPE)                                       \
   static NAN_METHOD(CreateFrom##TYPE) {                                 \
+    NanScope();                                                         \
     REQ_STR_ARG(0, path);                                               \
     FILE *in; in = fopen(*path, "rb");                                  \
     gdImagePtr im = gdImageCreateFrom##TYPE(in);                        \
@@ -89,19 +94,34 @@ using namespace node;
     RETURN_IMAGE(im)                                                    \
   }                                                                     \
   static NAN_METHOD(CreateFrom##TYPE##Ptr) {                            \
+    NanScope();                                                         \
     REQ_ARGS(1);                                                        \
-    ssize_t len = DecodeBytes(args[0]);                                 \
-    char *buf   = new char[len];                                        \
-    ssize_t written = DecodeWrite(buf, len, args[0]);                   \
-    assert(written == len);                                             \
-    gdImagePtr im = gdImageCreateFrom##TYPE##Ptr(len, buf);             \
-    delete[] buf;                                                       \
+    ASSERT_IS_STRING_OR_BUFFER(args[0]);                                \
+    gdImagePtr im;                                                      \
+    if(Buffer::HasInstance(args[0])) {                                  \
+      Local<Value> obj = args[0]->ToObject();                           \
+      char *buffer_data = Buffer::Data(obj);                            \
+      size_t buffer_length = Buffer::Length(obj);                       \
+      im = gdImageCreateFrom##TYPE##Ptr(buffer_length, buffer_data);    \
+    } else {                                                            \
+      ssize_t len = DecodeBytes(args[0], BINARY);                       \
+      char* buf = new char[len];                                        \
+      ssize_t written = DecodeWrite(buf, len, args[0]);                 \
+      assert(written == len);                                           \
+      im = gdImageCreateFrom##TYPE##Ptr(len, buf);                      \
+      delete[] buf;                                                     \
+    }                                                                   \
     RETURN_IMAGE(im)                                                    \
+  }
+
+#define ASSERT_IS_STRING_OR_BUFFER(val)                                 \
+  if (!val->IsString() && !Buffer::HasInstance(val)) {                  \
+    return NanThrowError("Not a string or buffer");                     \
   }
 
 #define RETURN_DATA()                                                   \
   NanScope();                                                           \
-  Local<Value> result = Encode(data, size);                             \
+  Local<Value> result = NanEncode(data, size, Nan::BINARY);             \
   delete[] data;                                                        \
   NanReturnValue(result);
 
@@ -139,6 +159,11 @@ public:
     NODE_SET_METHOD(exports, "createFromGd2PartPtr", CreateFromGd2PartPtr);
     NODE_SET_METHOD(exports, "createFromWBMP", CreateFromWBMP);
     NODE_SET_METHOD(exports, "createFromWBMPPtr", CreateFromWBMPPtr);
+    NODE_SET_METHOD(exports, "createFromBmp", CreateFromBmp);
+    NODE_SET_METHOD(exports, "createFromBmpPtr", CreateFromBmpPtr);
+    // NODE_SET_METHOD(exports, "createFromTiff", CreateFromTiff);
+    // NODE_SET_METHOD(exports, "createFromTiffPtr", CreateFromTiffPtr);
+    NODE_SET_METHOD(exports, "createFromFile", CreateFromFile);
     NODE_SET_METHOD(exports, "trueColor", TrueColor);
     NODE_SET_METHOD(exports, "trueColorAlpha", TrueColorAlpha);
 
@@ -148,6 +173,7 @@ public:
 private:
   static NAN_METHOD(ImageCreate)
   {
+    NanScope();
     REQ_INT_ARG(0, width);
     REQ_INT_ARG(1, height);
 
@@ -158,6 +184,7 @@ private:
 
   static NAN_METHOD(ImageCreateTrueColor)
   {
+    NanScope();
     REQ_INT_ARG(0, width);
     REQ_INT_ARG(1, height);
 
@@ -168,12 +195,25 @@ private:
 
   DECLARE_CREATE_FROM(Jpeg)
   DECLARE_CREATE_FROM(Png)
-  DECLARE_CREATE_FROM(WBMP)
   DECLARE_CREATE_FROM(Gif)
   DECLARE_CREATE_FROM(Gd2)
+  DECLARE_CREATE_FROM(WBMP)
+  DECLARE_CREATE_FROM(Bmp)
+  // libgd appears to open tiff's buggy...
+  // DECLARE_CREATE_FROM(Tiff)
+
+  static NAN_METHOD(CreateFromFile) {
+    NanScope();
+    REQ_STR_ARG(0, path);
+
+    gdImagePtr im = gdImageCreateFromFile(*path);
+
+    RETURN_IMAGE(im)
+  }
 
   static NAN_METHOD(CreateFromGd2Part)
   {
+    NanScope();
     REQ_STR_ARG(0, path);
     REQ_INT_ARG(1, srcX);
     REQ_INT_ARG(2, srcY);
@@ -190,6 +230,7 @@ private:
 
   static NAN_METHOD(CreateFromGd2PartPtr)
   {
+    NanScope();
     REQ_ARGS(5);
     REQ_INT_ARG(1, srcX);
     REQ_INT_ARG(2, srcY);
@@ -259,6 +300,12 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "gd2Ptr", Gd2Ptr);
       NODE_SET_PROTOTYPE_METHOD(t, "wbmp", WBMP);
       NODE_SET_PROTOTYPE_METHOD(t, "wbmpPtr", WBMPPtr);
+      NODE_SET_PROTOTYPE_METHOD(t, "bmp", Bmp);
+      NODE_SET_PROTOTYPE_METHOD(t, "bmpPtr", BmpPtr);
+      NODE_SET_PROTOTYPE_METHOD(t, "tiff", Tiff);
+      NODE_SET_PROTOTYPE_METHOD(t, "tiffPtr", TiffPtr);
+      NODE_SET_PROTOTYPE_METHOD(t, "file", File);
+      NODE_SET_PROTOTYPE_METHOD(t, "fileCallback", FileCallback);
 
       NODE_SET_PROTOTYPE_METHOD(t, "destroy", Destroy);
 
@@ -438,8 +485,6 @@ private:
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
-      //REQ_STR_ARG(0, path);
-
       int size;
       char *data = (char*)gdImageGifPtr(*im, &size);
 
@@ -492,8 +537,7 @@ private:
     {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
-      REQ_STR_ARG(0, path);
-      REQ_INT_ARG(1, foreground);
+      REQ_INT_ARG(0, foreground);
 
       int size;
       char *data = (char*)gdImageWBMPPtr(*im, &size, foreground);
@@ -552,6 +596,90 @@ private:
       char *data = (char*)gdImageGd2Ptr(*im, chunkSize, format, &size);
 
       RETURN_DATA()
+    }
+
+    static NAN_METHOD(Bmp) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      REQ_STR_ARG(0, path);
+      REQ_INT_ARG(1, compression);
+
+      FILE *out = fopen(*path, "wb");
+      gdImageBmp(*im, out, compression);
+      fclose(out);
+
+      NanReturnThis();
+    }
+
+    static NAN_METHOD(BmpPtr) {
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      OPT_INT_ARG(0, compression, 0);
+
+      int size;
+      char *data = (char*)gdImageBmpPtr(*im, &size, compression);
+
+      RETURN_DATA()
+    }
+
+    static NAN_METHOD(Tiff) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      REQ_STR_ARG(0, path);
+
+      FILE *out = fopen(*path, "wb");
+      gdImageTiff(*im, out);
+      fclose(out);
+
+      NanReturnThis();
+    }
+
+    static NAN_METHOD(TiffPtr) {
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      int size;
+      char *data = (char*)gdImageTiffPtr(*im, &size);
+
+      RETURN_DATA()
+    }
+
+    static NAN_METHOD(File) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      REQ_STR_ARG(0, path);
+
+      gdImageFile(*im, *path);
+
+      NanReturnThis();
+    }
+
+    static NAN_METHOD(FileCallback) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      REQ_STR_ARG(0, path);
+      REQ_FN_ARG(1, cb);
+
+      NanCallback *callback = new NanCallback(cb);
+
+      bool result = gdImageFile(*im, *path);
+      if (result == false) {
+        Handle<Value> argv[] = {
+          NanError(NanNew<String>("fail!"))
+        };
+        callback->Call(1, argv);
+      } else {
+        Handle<Value> argv[] = {
+          NanNull()
+        };
+        callback->Call(1, argv);
+      }
+
+      delete callback;
+      NanReturnThis();
     }
 
     /**

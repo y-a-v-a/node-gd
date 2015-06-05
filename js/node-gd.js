@@ -8,10 +8,10 @@ open_func = function(format, len) {
     filename = args.shift();
     callback = args[len - 1];
     if (typeof callback !== "function") {
-      return gd_bindings["createFrom" + format].apply(arguments);
+      return gd_bindings["createFrom" + format].apply(this, arguments);
     }
     args.pop();
-    return fs.readFile(filename, "binary", function(err, data) {
+    return fs.readFile(filename, function(err, data) {
       if (err) {
         return callback(err);
       } else {
@@ -61,7 +61,9 @@ formats = {
   gd: [1, 1],
   gd2: [1, 1],
   gd2Part: [5, -1],
-  WBMP: [1, 1]
+  WBMP: [1, 1],
+  bmp: [1, 2],
+  tiff: [-1, 1]
 };
 
 for (format in formats) {
@@ -76,3 +78,23 @@ for (format in formats) {
     gd_bindings.Image.prototype["save" + format] = save_func(format, v[1]);
   }
 }
+
+gd_bindings.Image.prototype["saveFile"] = function() {
+  var args, callback;
+  args = Array.prototype.slice.call(arguments);
+  callback = args[args.length - 1];
+  if (typeof callback !== "function") {
+    return this["file"].apply(this, args);
+  }
+  return this["fileCallback"].apply(this, args);
+};
+
+exports["openFile"] = function() {
+  var args, callback;
+  args = Array.prototype.slice.call(arguments);
+  callback = args[args.length - 1];
+  if (typeof callback !== "function") {
+    return this["createFromFile"].apply(this, args);
+  }
+  return callback(null, this["createFromFile"].apply(this, args));
+};

@@ -20,9 +20,9 @@ open_func = (format, len) ->
     args = Array::slice.call(arguments)
     filename = args.shift()
     callback = args[len - 1]
-    return gd_bindings["createFrom" + format].apply(arguments)  unless typeof callback is "function"
+    return gd_bindings["createFrom" + format].apply(this, arguments) unless typeof callback is "function"
     args.pop()
-    fs.readFile filename, "binary", (err, data) ->
+    fs.readFile filename, (err, data) ->
       if err
         callback err
       else
@@ -61,7 +61,9 @@ formats =
   gd: [1, 1]
   gd2: [1, 1]
   gd2Part: [5, -1]
-  WBMP: [1, 1]
+  WBMP: [1, 1],
+  bmp: [1, 2],
+  tiff: [-1, 1]
 
 # create wrapper functions
 for format of formats
@@ -70,3 +72,15 @@ for format of formats
     m0.toUpperCase()
   exports["open" + format] = open_func(format, v[0]) if v[0] >= 0
   gd_bindings.Image::["save" + format] = save_func(format, v[1]) if v[1] >= 0
+
+gd_bindings.Image::["saveFile"] = () ->
+  args = Array::slice.call(arguments)
+  callback = args[args.length - 1]
+  return this["file"].apply(this, args) unless typeof callback is "function"
+  this["fileCallback"].apply(this, args)
+
+exports["openFile"] = () ->
+  args = Array::slice.call(arguments)
+  callback = args[args.length - 1]
+  return this["createFromFile"].apply(this, args) unless typeof callback is "function"
+  callback null, this["createFromFile"].apply(this, args)

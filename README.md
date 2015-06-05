@@ -112,6 +112,8 @@ img.savePng('output.png', 1, function(err) {
 });
 ```
 
+There are different flavours of images, of which the main ones are palette-based (up to 256 colors) and true color images (millions of colors). GIFs are always palette-based, PNGs can be both palette-based or true color. JPEGs are always true color images. `gd.create()` will create a palette-based base image while `gd.createTrueColor()` will create a true color image.
+
 ## Test
 ```bash
 $ npm test

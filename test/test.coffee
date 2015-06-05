@@ -36,6 +36,8 @@ describe 'Node.js GD Graphics Library', ->
       canvas.savePng t, 1, (err) ->
         throw err if err
         assert.ok fs.existsSync t
+        img.destroy()
+        canvas.destroy()
         done()
 
   it 'can rotate an image', (done) ->
@@ -52,85 +54,10 @@ describe 'Node.js GD Graphics Library', ->
       canvas.savePng t, 1, (err) ->
         throw err if err
         assert.ok fs.existsSync t
+        img.destroy()
+        canvas.destroy()
         done()
-  it 'can save a png to jpeg', (done) ->
-    s = source + 'input.png'
-    t = target + 'output.jpg'
-    gd.openPng s, (err, img) ->
-      throw err if err
 
-      canvas = gd.createTrueColor 100, 100
-
-      img.copyResampled canvas, 0, 0, 0, 0, 100, 100, img.width, img.height
-
-      canvas.saveJpeg t, 10, (err) ->
-        throw err if err
-        assert.ok fs.existsSync t
-        done()
-  # it 'can open jpeg', (done) ->
-  #   gd.openJpeg t[2], (err, img) ->
-  #     throw err if err
-  #     done()
-  it 'can save a png to gif', (done) ->
-    s = source + 'input.png'
-    t = target + 'output.gif'
-    gd.openPng s, (err, img) ->
-      throw err if err
-
-      canvas = gd.createTrueColor img.width, img.height
-
-      img.copyResampled canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height
-
-      canvas.saveGif t, (err) ->
-        throw err if err
-        assert.ok fs.existsSync t
-        done()
-  it 'can save a png to gd', (done) ->
-    s = source + 'input.png'
-    t = target + 'output.gd'
-    gd.openPng s, (err, img) ->
-      throw err if err
-
-      canvas = gd.createTrueColor img.width, img.height
-
-      img.copyResampled canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height
-
-      canvas.saveGd t, (err) ->
-        throw err if err
-        assert.ok fs.existsSync t
-        done()
-  # it 'can save a png to gd2', (done) ->
-  #   s = source + 'input.png'
-  #   t = target + 'output.gd2'
-  #   gd.openPng s, (err, img) ->
-  #     throw err if err
-
-  #     canvas = gd.createTrueColor img.width, img.height
-
-  #     img.copyResampled canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height
-
-  #     canvas.saveGd2 t, 1, null, (err) ->
-  #       throw err if err
-  #       assert.ok fs.existsSync t
-  #       done()
-  #   done()
-  it 'can save a png to WBMP', (done) ->
-    s = source + 'input.png'
-    t = target + 'output.wbmp'
-    gd.openPng s, (err, img) ->
-      throw err if err
-
-      canvas = gd.createTrueColor img.width, img.height
-
-      img.copyResampled canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height
-
-      fg = img.getPixel 5, 5
-
-      canvas.saveWBMP t, fg, (err) ->
-        throw err if err
-        assert.ok fs.existsSync t
-        done()
-    done()
   it 'can convert to grayscale', (done) ->
     s = source + 'input.png'
     t = target + 'output-grayscale.png'
@@ -142,7 +69,9 @@ describe 'Node.js GD Graphics Library', ->
       img.savePng t, -1, (err) ->
         throw err if err
         assert.ok fs.existsSync t
+        img.destroy()
         done()
+
   it 'can create an image with text', (done) ->
     f = source + 'FreeSans.ttf'
     t = target + 'output-string.png'
@@ -157,8 +86,10 @@ describe 'Node.js GD Graphics Library', ->
     img.savePng t, 1, (err) ->
       throw err if err
       assert.ok fs.existsSync t
+      img.destroy()
       done()
-  it 'can create a truecolor iamge with text', (done) ->
+
+  it 'can create a truecolor image with text', (done) ->
     f = source + 'FreeSans.ttf'
     t = target + 'output-truecolor-string.png'
 
@@ -171,7 +102,9 @@ describe 'Node.js GD Graphics Library', ->
     img.savePng t, 1, (err) ->
       throw err if err
       assert.ok fs.existsSync t
+      img.destroy()
       done()
+
   it 'can add gaussian blur to an image', (done) ->
     s = source + 'input.png'
     t = target + 'output-gaussianblur.png'
@@ -188,6 +121,7 @@ describe 'Node.js GD Graphics Library', ->
         assert.ok fs.existsSync t
         img.destroy()
         done()
+
   it 'can negate an image', (done) ->
     s = source + 'input.png'
     t = target + 'output-negate.png'
@@ -202,6 +136,7 @@ describe 'Node.js GD Graphics Library', ->
         assert.ok fs.existsSync t
         img.destroy()
         done()
+
   it 'can change brightness of an image', (done) ->
     s = source + 'input.png'
     t = target + 'output-brightness.png'
@@ -218,6 +153,7 @@ describe 'Node.js GD Graphics Library', ->
         assert.ok fs.existsSync t
         img.destroy()
         done()
+
   it 'can change contrast of an image', (done) ->
     s = source + 'input.png'
     t = target + 'output-contrast.png'
@@ -237,6 +173,7 @@ describe 'Node.js GD Graphics Library', ->
         assert.ok fs.existsSync t
         img.destroy()
         done()
+
   it 'can emboss an image', (done) ->
     s = source + 'input.png'
     t = target + 'output-emboss.png'
@@ -251,6 +188,7 @@ describe 'Node.js GD Graphics Library', ->
         assert.ok fs.existsSync t
         img.destroy()
         done()
+
   it 'can apply selective blur to an image', (done) ->
     s = source + 'input.png'
     t = target + 'output-selectiveBlur.png'
@@ -265,3 +203,143 @@ describe 'Node.js GD Graphics Library', ->
         assert.ok fs.existsSync t
         img.destroy()
         done()
+
+  it 'can create a truecolor BMP image with text', (done) ->
+    f = source + 'FreeSans.ttf'
+    t = target + 'output-truecolor-string.bmp'
+
+    img = gd.createTrueColor 120, 20
+
+    txtColor = img.colorAllocate 255, 255, 0
+
+    img.stringFT txtColor, f, 16, 0, 8, 18, "Hello world!"
+
+    img.saveBmp t, 0, (err) ->
+      throw err if err
+      assert.ok fs.existsSync t
+      done()
+
+  it 'can create a truecolor Tiff image with text', (done) ->
+    f = source + 'FreeSans.ttf'
+    t = target + 'output-truecolor-string.tiff'
+
+    img = gd.createTrueColor 120, 20
+
+    txtColor = img.colorAllocate 255, 255, 0
+
+    img.stringFT txtColor, f, 16, 0, 8, 18, "Hello world!"
+
+    img.saveTiff t, (err) ->
+      throw err if err
+      assert.ok fs.existsSync t
+      done()
+
+  # from-to different file types
+  describe  'section Handling file types', ->
+    it 'can copy a png into a jpeg', (done) ->
+      s = source + 'input.png'
+      t = target + 'output.jpg'
+      gd.openPng s, (err, img) ->
+        throw err if err
+
+        canvas = gd.createTrueColor 100, 100
+
+        img.copyResampled canvas, 0, 0, 0, 0, 100, 100, img.width, img.height
+
+        canvas.saveJpeg t, 10, (err) ->
+          throw err if err
+          assert.ok fs.existsSync t
+          img.destroy()
+          canvas.destroy()
+          done()
+    it 'can copy a png into gif', (done) ->
+      s = source + 'input.png'
+      t = target + 'output.gif'
+      gd.openPng s, (err, img) ->
+        throw err if err
+
+        canvas = gd.createTrueColor img.width, img.height
+
+        img.copyResampled canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height
+
+        canvas.saveGif t, (err) ->
+          throw err if err
+          assert.ok fs.existsSync t
+          img.destroy()
+          canvas.destroy()
+          done()
+    it 'can copy a png into gd', (done) ->
+      s = source + 'input.png'
+      t = target + 'output.gd'
+      gd.openPng s, (err, img) ->
+        throw err if err
+
+        canvas = gd.createTrueColor img.width, img.height
+
+        img.copyResampled canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height
+
+        canvas.saveGd t, (err) ->
+          throw err if err
+          assert.ok fs.existsSync t
+          img.destroy()
+          canvas.destroy()
+          done()
+  # it 'can save a png to gd2', (done) ->
+  #   s = source + 'input.png'
+  #   t = target + 'output.gd2'
+  #   gd.openPng s, (err, img) ->
+  #     throw err if err
+
+  #     canvas = gd.createTrueColor img.width, img.height
+
+  #     img.copyResampled canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height
+
+  #     canvas.saveGd2 t, 1, null, (err) ->
+  #       throw err if err
+  #       assert.ok fs.existsSync t
+  #       done()
+  #   done()
+    it 'can copy a png into WBMP', (done) ->
+      s = source + 'input.png'
+      t = target + 'output.wbmp'
+      gd.openPng s, (err, img) ->
+        throw err if err
+
+        canvas = gd.createTrueColor img.width, img.height
+
+        img.copyResampled canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height
+
+        fg = img.getPixel 5, 5
+
+        canvas.saveWBMP t, fg, (err) ->
+          throw err if err
+          assert.ok fs.existsSync t
+          img.destroy()
+          canvas.destroy()
+          done()
+      done()
+    it 'can open a jpeg file and save it as png', (done) ->
+      s = source + 'input.jpg'
+      t = target + 'output-from-jpeg.png'
+
+      gd.openJpeg s, (err, img) ->
+        throw err if err
+
+        img.savePng t, -1, (err) ->
+          throw err if err
+          assert.ok fs.existsSync t
+          img.destroy()
+          done()
+    it 'can open a bmp and save it as png', (done) ->
+      s = source + 'input.bmp'
+      t = target + 'output-from-bmp.png'
+
+      gd.openBmp s, (err, img) ->
+        throw err if err
+
+        img.savePng t, -1, (err) ->
+          throw err if err
+          assert.ok fs.existsSync t
+          img.destroy()
+          done()
+
