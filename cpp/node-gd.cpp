@@ -25,6 +25,11 @@
 using namespace v8;
 using namespace node;
 
+#define LATEST_GD (defined(GD_MAJOR_VERSION)                            \
+                  && defined(GD_MINOR_VERSION)                          \
+                  && GD_MAJOR_VERSION >= 2                              \
+                  && GD_MINOR_VERSION >= 1)
+
 #define THROW_ERROR(TYPE, STR)                                          \
   return NanThrowError(STR);
 
@@ -159,11 +164,13 @@ public:
     NODE_SET_METHOD(exports, "createFromGd2PartPtr", CreateFromGd2PartPtr);
     NODE_SET_METHOD(exports, "createFromWBMP", CreateFromWBMP);
     NODE_SET_METHOD(exports, "createFromWBMPPtr", CreateFromWBMPPtr);
+#if (LATEST_GD)
     NODE_SET_METHOD(exports, "createFromBmp", CreateFromBmp);
     NODE_SET_METHOD(exports, "createFromBmpPtr", CreateFromBmpPtr);
     // NODE_SET_METHOD(exports, "createFromTiff", CreateFromTiff);
     // NODE_SET_METHOD(exports, "createFromTiffPtr", CreateFromTiffPtr);
     NODE_SET_METHOD(exports, "createFromFile", CreateFromFile);
+#endif
     NODE_SET_METHOD(exports, "trueColor", TrueColor);
     NODE_SET_METHOD(exports, "trueColorAlpha", TrueColorAlpha);
 
@@ -198,7 +205,9 @@ private:
   DECLARE_CREATE_FROM(Gif)
   DECLARE_CREATE_FROM(Gd2)
   DECLARE_CREATE_FROM(WBMP)
-  DECLARE_CREATE_FROM(Bmp)
+
+#if (LATEST_GD)
+  DECLARE_CREATE_FROM(Bmp);
   // libgd appears to open tiff's buggy...
   // DECLARE_CREATE_FROM(Tiff)
 
@@ -210,6 +219,7 @@ private:
 
     RETURN_IMAGE(im)
   }
+#endif
 
   static NAN_METHOD(CreateFromGd2Part)
   {
@@ -300,12 +310,14 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "gd2Ptr", Gd2Ptr);
       NODE_SET_PROTOTYPE_METHOD(t, "wbmp", WBMP);
       NODE_SET_PROTOTYPE_METHOD(t, "wbmpPtr", WBMPPtr);
+#if (LATEST_GD)
       NODE_SET_PROTOTYPE_METHOD(t, "bmp", Bmp);
       NODE_SET_PROTOTYPE_METHOD(t, "bmpPtr", BmpPtr);
       NODE_SET_PROTOTYPE_METHOD(t, "tiff", Tiff);
       NODE_SET_PROTOTYPE_METHOD(t, "tiffPtr", TiffPtr);
       NODE_SET_PROTOTYPE_METHOD(t, "file", File);
       NODE_SET_PROTOTYPE_METHOD(t, "fileCallback", FileCallback);
+#endif
 
       NODE_SET_PROTOTYPE_METHOD(t, "destroy", Destroy);
 
@@ -598,6 +610,7 @@ private:
       RETURN_DATA()
     }
 
+#if (LATEST_GD)
     static NAN_METHOD(Bmp) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
@@ -683,6 +696,7 @@ private:
       delete callback;
       NanReturnThis();
     }
+#endif
 
     /**
      * Drawing Functions
@@ -1488,7 +1502,7 @@ private:
     {
       NanScope();
       // Silently fail on missing gdImageGrayScale
-#if (defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && GD_MAJOR_VERSION >= 2 && GD_MINOR_VERSION >= 1)
+#if (LATEST_GD)
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
       gdImageGrayScale(*im);
 #endif
@@ -1497,7 +1511,7 @@ private:
 
     static NAN_METHOD(GaussianBlur) {
       NanScope();
-#if (defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && GD_MAJOR_VERSION >= 2 && GD_MINOR_VERSION >= 1)
+#if (LATEST_GD)
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       gdImageGaussianBlur(*im);
@@ -1507,7 +1521,7 @@ private:
 
     static NAN_METHOD(Negate) {
       NanScope();
-#if (defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && GD_MAJOR_VERSION >= 2 && GD_MINOR_VERSION >= 1)
+#if (LATEST_GD)
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       gdImageNegate(*im);
@@ -1519,7 +1533,7 @@ private:
       NanScope();
       REQ_INT_ARG(0, brightness);
 
-#if (defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && GD_MAJOR_VERSION >= 2 && GD_MINOR_VERSION >= 1)
+#if (LATEST_GD)
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       gdImageBrightness(*im, brightness);
@@ -1530,7 +1544,7 @@ private:
     static NAN_METHOD(Contrast) {
       NanScope();
       REQ_DOUBLE_ARG(0, contrast);
-#if (defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && GD_MAJOR_VERSION >= 2 && GD_MINOR_VERSION >= 1)
+#if (LATEST_GD)
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       gdImageContrast(*im, contrast);
@@ -1540,7 +1554,7 @@ private:
 
     static NAN_METHOD(SelectiveBlur) {
       NanScope();
-#if (defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && GD_MAJOR_VERSION >= 2 && GD_MINOR_VERSION >= 1)
+#if (LATEST_GD)
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       gdImageSelectiveBlur(*im);
@@ -1550,7 +1564,7 @@ private:
 
     static NAN_METHOD(Emboss) {
       NanScope();
-#if (defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && GD_MAJOR_VERSION >= 2 && GD_MINOR_VERSION >= 1)
+#if (LATEST_GD)
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       gdImageEmboss(*im);
