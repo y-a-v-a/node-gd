@@ -206,7 +206,7 @@ describe 'Node.js GD Graphics Library', ->
         done()
 
   it 'can create a truecolor BMP image with text', (done) ->
-    if gd.getGDVersion() >= '2.1.1'
+    if gd.getGDVersion() < '2.1.1'
       done()
       return
 
@@ -225,7 +225,7 @@ describe 'Node.js GD Graphics Library', ->
       done()
 
   it 'can create a truecolor Tiff image with text', (done) ->
-    if gd.getGDVersion() >= '2.1.1'
+    if gd.getGDVersion() < '2.1.1'
       done()
       return
     f = source + 'FreeSans.ttf'
@@ -308,7 +308,7 @@ describe 'Node.js GD Graphics Library', ->
   #       done()
   #   done()
     it 'can copy a png into WBMP', (done) ->
-      if gd.getGDVersion() >= '2.1.1'
+      if gd.getGDVersion() < '2.1.1'
         done()
         return
 
