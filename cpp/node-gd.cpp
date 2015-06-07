@@ -85,7 +85,8 @@ using namespace node;
   if (!IMG) NanReturnNull();                                            \
   Local<Value> _arg_ = NanNew<External>(IMG);                           \
   Persistent<Object> handle;                                            \
-  Handle<Object> _image_ = NanNew(Image::constructor)->GetFunction()->NewInstance(1, &_arg_); \
+  Handle<FunctionTemplate> func = NanNew(Image::constructor);           \
+  Handle<Object> _image_ = func->GetFunction()->NewInstance(1, &_arg_); \
   NanAssignPersistent(handle, _image_);                                 \
   NanReturnValue(_image_);
 
@@ -362,10 +363,10 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "imageColorAt", ImageColorAt);
       NODE_SET_PROTOTYPE_METHOD(t, "getBoundsSafe", GetBoundsSafe);
       // trueColor
-      t->PrototypeTemplate()->SetAccessor(NanNew("trueColor"), TrueColorGetter, NULL, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
+      t->InstanceTemplate()->SetAccessor(NanNew("trueColor"), TrueColorGetter, 0, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
       // width, height
-      t->PrototypeTemplate()->SetAccessor(NanNew("width"), WidthGetter, NULL, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
-      t->PrototypeTemplate()->SetAccessor(NanNew("height"), HeightGetter, NULL, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
+      t->InstanceTemplate()->SetAccessor(NanNew("width"), WidthGetter, 0, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
+      t->InstanceTemplate()->SetAccessor(NanNew("height"), HeightGetter, 0, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
 
       /**
        * Font and Text Handling Functions
@@ -404,8 +405,8 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "emboss", Emboss);
 
       // interlace
-      t->PrototypeTemplate()->SetAccessor(NanNew("interlace"), InterlaceGetter, InterlaceSetter, Handle<Value>(), PROHIBITS_OVERWRITING);
-      t->PrototypeTemplate()->SetAccessor(NanNew("colorsTotal"), ColorsTotalGetter, NULL, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
+      t->InstanceTemplate()->SetAccessor(NanNew("interlace"), InterlaceGetter, InterlaceSetter, Handle<Value>(), PROHIBITS_OVERWRITING);
+      t->InstanceTemplate()->SetAccessor(NanNew("colorsTotal"), ColorsTotalGetter, 0, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
 
 
 
@@ -450,6 +451,7 @@ private:
      */
     static NAN_METHOD(Destroy)
     {
+      NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
       if(im->_image){
         gdImageDestroy(*im);
