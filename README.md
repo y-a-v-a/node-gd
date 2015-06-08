@@ -246,7 +246,7 @@ Returns an object containing the coordinates of the clipping area.
 #### gd.Image#getTrueColorPixel(x, y)
 #### gd.Image#imageColorAt(x, y)
 #### gd.Image#getBoundsSafe(x, y)
-###Font and text
+### Font and text
 #### gd.Image#stringFTBBox(color, font, size, angle, x, y, string)
 The font color can be allocated with `img.colorAllocate(r, g, b)`. The `font` parameter should be an absolute path to a `ttf` font file.
 #### gd.Image#stringFT(color, font, size, angle, x, y, string)
@@ -265,7 +265,7 @@ The font color can be allocated with `img.colorAllocate(r, g, b)`. The `font` pa
 #### gd.Image#getTransparent()
 #### gd.Image#colorDeallocate(color)
 #### gd.Image#colorTransparent(color)
-###Effects
+### Effects
 #### gd.Image#toGrayscale()
 Remove all color from an image and create a grayscaled image.
 #### gd.Image#gaussianBlur()
