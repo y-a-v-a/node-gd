@@ -1,5 +1,6 @@
 /**
  * Copyright (c) 2009-2011, Taegon Kim <gonom9@gmail.com>
+ * Copyright (c) 2014-2015, Vincent Bruijn <vebruijn@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -48,9 +49,9 @@ using namespace node;
     return NanThrowError("Argument " #I " must be an integer");         \
   VAR = args[I]->Int32Value();
 
-#define REQ_FN_ARG(I, VAR) \
-  if (args.Length() <= (I) || !args[I]->IsFunction()) \
-    return NanThrowError("Argument " #I " must be a function"); \
+#define REQ_FN_ARG(I, VAR)                                              \
+  if (args.Length() <= (I) || !args[I]->IsFunction())                   \
+    return NanThrowError("Argument " #I " must be a function");         \
   Local<Function> VAR = args[I].As<Function>();
 
 #define REQ_DOUBLE_ARG(I, VAR)                                          \
@@ -326,7 +327,6 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "file", File);
       NODE_SET_PROTOTYPE_METHOD(t, "fileCallback", FileCallback);
 #endif
-
       NODE_SET_PROTOTYPE_METHOD(t, "destroy", Destroy);
 
       /**
