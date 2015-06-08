@@ -341,7 +341,9 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "filledRectangle", FilledRectangle);
       NODE_SET_PROTOTYPE_METHOD(t, "arc", Arc);
       NODE_SET_PROTOTYPE_METHOD(t, "filledArc", FilledArc);
+      NODE_SET_PROTOTYPE_METHOD(t, "ellipse", Ellipse);
       NODE_SET_PROTOTYPE_METHOD(t, "filledEllipse", FilledEllipse);
+      NODE_SET_PROTOTYPE_METHOD(t, "fillToBorder", FillToBorder);
       NODE_SET_PROTOTYPE_METHOD(t, "fill", Fill);
       NODE_SET_PROTOTYPE_METHOD(t, "setAntiAliased", SetAntiAliased);
       NODE_SET_PROTOTYPE_METHOD(t, "setAntiAliasedDontBlend", SetAntiAliasedDontBlend);
@@ -402,6 +404,7 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "contrast", Contrast);
       NODE_SET_PROTOTYPE_METHOD(t, "selectiveBlur", SelectiveBlur);
       NODE_SET_PROTOTYPE_METHOD(t, "emboss", Emboss);
+      NODE_SET_PROTOTYPE_METHOD(t, "sharpen", Sharpen);
 
       // interlace
       t->InstanceTemplate()->SetAccessor(NanNew("interlace"), InterlaceGetter, InterlaceSetter, Handle<Value>(), PROHIBITS_OVERWRITING);
@@ -418,7 +421,6 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "copyMergeGray", CopyMergeGray);
       NODE_SET_PROTOTYPE_METHOD(t, "paletteCopy", PaletteCopy);
       NODE_SET_PROTOTYPE_METHOD(t, "squareToCircle", SquareToCircle);
-      NODE_SET_PROTOTYPE_METHOD(t, "sharpen", Sharpen);
 
       /**
        * Miscellaneous Functions
@@ -924,8 +926,23 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(FilledEllipse)
-    {
+    static NAN_METHOD(Ellipse) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      REQ_ARGS(5);
+      REQ_INT_ARG(0, cx);
+      REQ_INT_ARG(1, cy);
+      REQ_INT_ARG(2, width);
+      REQ_INT_ARG(3, height);
+      REQ_INT_ARG(4, color);
+
+      gdImageEllipse(*im, cx, cy, width, height, color);
+
+      NanReturnThis();
+    }
+
+    static NAN_METHOD(FilledEllipse) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 

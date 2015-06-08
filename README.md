@@ -43,28 +43,6 @@ Please open an issue if you have the answer. I'm sure it works, I just don't hav
 
 ## Usage
 
-### Using coffeescript
-
-```coffeescript
-# Require library
-gd = require 'node-gd'
-
-# Create blank new image in memory
-output_img = gd.create width, height
-
-# Load existing image file on disk into memory
-gd.openPng "test.png", (err, input_img) ->
-  console.log "width: ", input_img.width
-  console.log "height: ", input_img.width
-
-# Render input over the top of output
-input_img.copyResampled output_img, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH
-
-# Write image buffer to disk
-output_img.savePng "out.png", 0, (err) ->
-  console.log "image saved!"
-```
-
 ### Using javascript
 
 ```javascript
@@ -110,6 +88,28 @@ gd.openFile('/path/to/file.jpg', function(err, img) {
     }
   });
 });
+```
+
+### Using coffeescript
+
+```coffeescript
+# Require library
+gd = require 'node-gd'
+
+# Create blank new image in memory
+output_img = gd.create width, height
+
+# Load existing image file on disk into memory
+gd.openPng "test.png", (err, input_img) ->
+  console.log "width: ", input_img.width
+  console.log "height: ", input_img.width
+
+# Render input over the top of output
+input_img.copyResampled output_img, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH
+
+# Write image buffer to disk
+output_img.savePng "out.png", 0, (err) ->
+  console.log "image saved!"
 ```
 
 As usual, for the latest examples, review the easy-to-follow [./test/test.coffee](https://github.com/mikesmullin/node-gd/blob/master/test/test.coffee).
@@ -188,9 +188,108 @@ var transparentRed = gd.trueColorAlpha(255,0,0,127); // 2147418112
 ####gd.getGDVersion()
 Will return a string representing the version of your currently installed GD version. Outputs something like `2.1.1`
 
-### Manipulating graphic images
+## Manipulating graphic images
 ####gd.Image#destroy()
 Free up allocated memory for image data.
+###Drawing
+####gd.Image#setPixel(x, y, color)
+Set the color of a certain pixel. Use for color either `0xff00ff` or `gd.trueColor()`.
+####gd.Image#line(x1, y1, x2, y2, color)
+Draw a line from a certain point to a next point.
+####gd.Image#dashedLine(x1, y1, x2, y2, color)
+Draw a dashed line.
+####gd.Image#polygon(array, color)
+Draw a closed polygon. The first parameter shoud be an `Array` of `Object`s containing an x and y property.
+```javascript
+// draw a red triangle on a black background
+var gd = require('node-gd');
+var img = gd.createTrueColor(100, 100);
+var points = [
+  { x: 10, y: 10 },
+  { x: 70, y: 50 },
+  { x: 30, y: 90 }
+];
+img.polygon(points, 0xff0000);
+img.bmp('test.bmp', 0);
+```
+####gd.Image#openPolygon(array, color)
+Same as the above but start and end point will not be connected with a line.
+####gd.Image#filledPolygon(array, color)
+Same as the above but color value will be used to fill the polygon.
+####gd.Image#filledRectangle(x1, y1, x2, y2, color)
+Create a filled rectangle.
+####gd.Image#arc(cx, cy, width, height, begin, end, color)
+Draw an arc. `cx` and `cy` denote the center of the arc. The `begin` and `end` parameters are in degrees, from 0 to 360.
+####gd.Image#filledArc(cx, cy, width, height, begin, end, color)
+Draw a filled arc.
+####gd.Image#ellipse(cx, cy, width, height, color)
+Draw an ellipse.
+####gd.Image#filledEllipse(cx, cy, width, height, color)
+Draw a filled ellipse.
+####gd.Image#fillToBorder(x, y, border, color)
+####gd.Image#fill(x, y, color)
+####gd.Image#setAntiAliased(color)
+####gd.Image#setAntiAliasedDontBlend(color, dontblend)
+####gd.Image#setBrush(image)
+####gd.Image#setTile(image)
+####gd.Image#setStyle(array)
+####gd.Image#setThickness(thickness)
+####gd.Image#alphaBlending(blending)
+####gd.Image#saveAlpha(saveFlag)
+####gd.Image#setClip(x1, y1, x2, y2)
+Set the clipping area.
+####gd.Image#getClip()
+Returns an object containing the coordinates of the clipping area.
+###Query image information
+####gd.Image#Alpha(color)
+####gd.Image#getPixel(x, y)
+####gd.Image#getTrueColorPixel(x, y)
+####gd.Image#imageColorAt(x, y)
+####gd.Image#getBoundsSafe(x, y)
+###Font and text
+####gd.Image#stringFTBBox(color, font, size, angle, x, y, string)
+The font color can be allocated with `img.colorAllocate(r, g, b)`. The `font` parameter should be an absolute path to a `ttf` font file.
+####gd.Image#stringFT(color, font, size, angle, x, y, string)
+###Color handling
+####gd.Image#colorAllocate(r, g, b)
+####gd.Image#colorAllocateAlpha(r, g, b, a)
+####gd.Image#colorClosest(r, g, b)
+####gd.Image#colorClosestAlpha(r, g, b, a)
+####gd.Image#colorClosestHWB(r, g, b)
+####gd.Image#colorExact(r, g, b)
+####gd.Image#colorResolve(r, g, b)
+####gd.Image#colorResolveAlpha(r, g, b, a)
+####gd.Image#red(r)
+####gd.Image#green(g)
+####gd.Image#blue(b)
+####gd.Image#getTransparent()
+####gd.Image#colorDeallocate(color)
+####gd.Image#colorTransparent(color)
+###Effects
+####gd.Image#toGrayscale()
+Remove all color from an image and create a grayscaled image.
+####gd.Image#gaussianBlur()
+Apply gaussian blur. Can by applied multiple times to an image to get more blur.
+####gd.Image#negate()
+Invert the colors of the image.
+####gd.Image#brightness(brightness)
+Supply an integer between `0` and `100`.
+####gd.Image#contrast(contrast)
+The value for contrast is a bit weird. A value of `100` wil return a complete grey image, with gray being exactly `rgb(127, 127, 127)`. For best results, the range applied should be between `-900` and `1100` (so actually `100 + 1000` and `100 - 1000`).
+####gd.Image#selectiveBlur()
+####gd.Image#emboss()
+####gd.Image#sharpen(pct)
+###Copying and resizing
+####gd.Image#copy(dest, dx, dy, sx, sy, width, height)
+####gd.Image#copyResized(dest, dx, dy, sx, sy, dw, dh, sw, sh)
+####gd.Image#copyResampled(dest, dx, dy, sx, sy, dw, dh, sw, sh)
+####gd.Image#copyRotated(dest, dx, dy, sx, sy, sw, sh, angle)
+####gd.Image#copyMerge(dest, dx, dy, sx, sy, width, height, pct)
+####gd.Image#copyMergeGray(dest, dx, dy, sx, sy, width, height pct)
+####gd.Image#paletteCopy(dest)
+####gd.Image#squareToCircle(radius)
+### Misc
+####gd.Image#compare(image)
 ### Saving graphic images
 The functions `gd.Image#savePng`, `gd.Image#saveJpeg`, `gd.Image#saveGif`, etc. are convenience functions which will be processed asynchronously when a callback is supplied. All of the following have a counterpart like `gd.Image#png` and `gd.Image#pngPtr` which write to disk synchronously or store the image data in a memory pointer respectively. `gd.Image#jpeg` will return the instance of `gd.Image`, `gd.Image#jpgPtr` will return the newly created image data.
 
@@ -241,7 +340,7 @@ Currently, opening TIFF files with GD has some errors, but saving image data as 
 Lets GD decide in which format the image should be stored to disk, based on the supplied file name extension. Only available from GD version 2.1.1.
 
 ### Image properties
-Any instance of `gd.Image()` has a basic set of instance properties accessible as readonly values.
+Any instance of `gd.Image()` has a basic set of instance properties accessible as read only values.
 ```javascript
 var gd = require('node-gd');
 var img = gd.creatTrueColor(100,100);
