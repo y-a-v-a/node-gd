@@ -392,7 +392,6 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "colorDeallocate", ColorDeallocate);
       NODE_SET_PROTOTYPE_METHOD(t, "colorTransparent", ColorTransparent);
 
-
       /**
        * Effects
        */
@@ -407,8 +406,6 @@ private:
       // interlace
       t->InstanceTemplate()->SetAccessor(NanNew("interlace"), InterlaceGetter, InterlaceSetter, Handle<Value>(), PROHIBITS_OVERWRITING);
       t->InstanceTemplate()->SetAccessor(NanNew("colorsTotal"), ColorsTotalGetter, 0, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
-
-
 
       /**
        * Copying and Resizing Functions
