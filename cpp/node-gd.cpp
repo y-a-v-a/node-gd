@@ -338,6 +338,7 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "polygon", Polygon);
       NODE_SET_PROTOTYPE_METHOD(t, "openPolygon", OpenPolygon);
       NODE_SET_PROTOTYPE_METHOD(t, "filledPolygon", FilledPolygon);
+      NODE_SET_PROTOTYPE_METHOD(t, "rectangle", Rectangle);
       NODE_SET_PROTOTYPE_METHOD(t, "filledRectangle", FilledRectangle);
       NODE_SET_PROTOTYPE_METHOD(t, "arc", Arc);
       NODE_SET_PROTOTYPE_METHOD(t, "filledArc", FilledArc);
@@ -870,8 +871,23 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(FilledRectangle)
-    {
+    static NAN_METHOD(Rectangle) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      REQ_ARGS(5);
+      REQ_INT_ARG(0, x1);
+      REQ_INT_ARG(1, y1);
+      REQ_INT_ARG(2, x2);
+      REQ_INT_ARG(3, y2);
+      REQ_INT_ARG(4, color);
+
+      gdImageRectangle(*im, x1, y1, x2, y2, color);
+
+      NanReturnThis();
+    }
+
+    static NAN_METHOD(FilledRectangle) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1187,13 +1203,13 @@ private:
         if(im->tpixels && gdImageBoundsSafe(im, x, y)){
           result = NanNew<Integer>(gdImageTrueColorPixel(im, x, y));
         } else {
-          return NanThrowError("[imageColorAt]Invalid pixel");
+          return NanThrowError("[imageColorAt] Invalid pixel");
         }
       } else {
         if (im->pixels && gdImageBoundsSafe(im, x, y)) {
           result = NanNew<Integer>(im->pixels[y][x]);
         } else {
-          return NanThrowError("[imageColorAt]Invalid pixel");
+          return NanThrowError("[imageColorAt] Invalid pixel");
         }
       }
       NanReturnValue(result);

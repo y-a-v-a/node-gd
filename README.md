@@ -3,9 +3,7 @@
 
 [![Build Status](https://api.travis-ci.org/y-a-v-a/node-gd.svg?branch=stable)](http://travis-ci.org/y-a-v-a/node-gd)
 
-GD graphic library ([libgd](http://www.libgd.org/)) C++ bindings for Node.js.
-
-This version is the community-maintained [official NodeJS node-gd repo](https://npmjs.org/package/node-gd). Be aware that since node-gd version 0.3.x libgd2 version 2.1.x is mostly supported. node-gd version 0.2.x is backed at best with libgd2 version 2.0.x. Run `gdlib-config --version` to check the version of libgd2 on your system.
+GD graphic library, [libgd](http://www.libgd.org/), C++ bindings for Node.js. This version is the community-maintained [official NodeJS node-gd repo](https://npmjs.org/package/node-gd). With `node-gd` you can easily create, manipulate, open and save paletted and true color images from and to a variaty of image formats including JPEG, PNG, GIF and BMP.
 
 [![NPM](https://nodei.co/npm/node-gd.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/node-gd/) [![NPM](https://nodei.co/npm-dl/node-gd.png?months=6&height=3)](https://nodei.co/npm/node-gd/)
 
@@ -31,7 +29,7 @@ $ brew install gd
 $ npm install node-gd
 ```
 
-or using MacPorts
+...or using MacPorts
 ```bash
 $ sudo port install gd2
 $ npm install node-gd
@@ -42,6 +40,8 @@ $ npm install node-gd
 Please open an issue if you have the answer. I'm sure it works, I just don't have ready the exact commands.
 
 ## Usage
+
+There are different flavours of images, of which the main ones are palette-based (up to 256 colors) and true color images (millions of colors). GIFs are always palette-based, PNGs can be both palette-based or true color. JPEGs are always true color images. `gd.create()` will create a palette-based base image while `gd.createTrueColor()` will create a true color image.
 
 ### Using javascript
 
@@ -69,10 +69,9 @@ img.savePng('output.png', 1, function(err) {
     throw err;
   }
 });
-
-// Destroy buffer
-img.destroy();
 ```
+
+Another example:
 
 ```javascript
 var gd = require('node-gd');
@@ -111,8 +110,6 @@ input_img.copyResampled output_img, dstX, dstY, srcX, srcY, dstW, dstH, srcW, sr
 output_img.savePng "out.png", 0, (err) ->
   console.log "image saved!"
 ```
-
-As usual, for the latest examples, review the easy-to-follow [./test/test.coffee](https://github.com/mikesmullin/node-gd/blob/master/test/test.coffee).
 
 ## API
 ### Opening and creating graphic images
@@ -169,6 +166,7 @@ Open a BMP bitmap image file.
 #### gd.openFile(path[, callback])
 GD will try to find out of what type the supplied image is, and will open it likewise. This is a quite new convenience method for if you don't exactly know what the type is that you will try to open.
 #### gd.createFromFile(path)
+A synchronous version of the above.
 #### gd.trueColor(red, green, blue)
 Returns an integer representation of the supplied color values.
 ```javascript
@@ -193,11 +191,11 @@ Will return a string representing the version of your currently installed GD ver
 Free up allocated memory for image data.
 ### Drawing
 #### gd.Image#setPixel(x, y, color)
-Set the color of a certain pixel. Use for color either `0xff00ff` or `gd.trueColor()`.
+Set the color of a certain pixel. Use for color either `0xff00ff` or `gd.trueColor(255, 0, 255)`.
 #### gd.Image#line(x1, y1, x2, y2, color)
 Draw a line from a certain point to a next point.
 #### gd.Image#dashedLine(x1, y1, x2, y2, color)
-Draw a dashed line.
+Draw a dashed line from a certain point to a next point.
 #### gd.Image#polygon(array, color)
 Draw a closed polygon. The first parameter shoud be an `Array` of `Object`s containing an x and y property.
 ```javascript
@@ -216,10 +214,40 @@ img.bmp('test.bmp', 0);
 Same as the above but start and end point will not be connected with a line.
 #### gd.Image#filledPolygon(array, color)
 Same as the above but color value will be used to fill the polygon.
+#### gd.Image#rectangle(x1, y1, x2, y2, color)
+Create a rectangle. The x and y values indicate upper left and lower right corner respectively.
+```javascript
+var gd = require('node-gd');
+var img = gd.create(300, 200);
+var color0 = img.colorAllocate(255,255,255);
+var color1 = img.colorAllocate(255,0,255);
+img.rectangle(20, 20, 280, 180, color1);
+img.saveFile('./test.png');
+```
 #### gd.Image#filledRectangle(x1, y1, x2, y2, color)
-Create a filled rectangle.
+Create a filled rectangle i.e. a solid bar.
+```javascript
+var gd = require('node-gd');
+var img = gd.create(300, 200);
+var color0 = img.colorAllocate(255,255,255);
+var color1 = img.colorAllocate(255,0,255);
+img.filledRectangle(20, 20, 280, 180, color1);
+img.saveFile('./test.png');
+```
 #### gd.Image#arc(cx, cy, width, height, begin, end, color)
 Draw an arc. `cx` and `cy` denote the center of the arc. The `begin` and `end` parameters are in degrees, from 0 to 360.
+```javascript
+var gd = require('node-gd');
+var img = gd.create(300, 200);
+var color0 = img.colorAllocate(255, 255, 255);
+var color1 = img.colorAllocate(255, 0, 255);
+var color2 = img.colorAllocate(0, 255, 255);
+
+img.arc(150, 100, 200, 160, 0, 270, color1);
+img.arc(150, 100, 120, 120, 90, 0, color2);
+
+img.saveFile('./test.png');
+```
 #### gd.Image#filledArc(cx, cy, width, height, begin, end, color)
 Draw a filled arc.
 #### gd.Image#ellipse(cx, cy, width, height, color)
@@ -227,6 +255,19 @@ Draw an ellipse.
 #### gd.Image#filledEllipse(cx, cy, width, height, color)
 Draw a filled ellipse.
 #### gd.Image#fillToBorder(x, y, border, color)
+Fill a drawn form up until its border.
+```javascript
+var gd = require('node-gd');
+var img = gd.create(300, 200);
+var color0 = img.colorAllocate(255, 255, 255);
+var color1 = img.colorAllocate(255, 0, 255);
+var color2 = img.colorAllocate(0, 255, 255);
+
+img.ellipse(150, 100, 160, 160, color2);
+img.fillToBorder(150,100, 2, color1);
+
+img.saveFile('./test.png');
+```
 #### gd.Image#fill(x, y, color)
 #### gd.Image#setAntiAliased(color)
 #### gd.Image#setAntiAliasedDontBlend(color, dontblend)
@@ -234,6 +275,19 @@ Draw a filled ellipse.
 #### gd.Image#setTile(image)
 #### gd.Image#setStyle(array)
 #### gd.Image#setThickness(thickness)
+Set the thickness for lines.
+```javascript
+var gd = require('node-gd');
+var img = gd.create(300, 200);
+var color0 = img.colorAllocate(255, 255, 255);
+var color1 = img.colorAllocate(255, 0, 255);
+
+img.setThickness(30);
+img.line(0, 0, 300, 200, color1);
+img.line(0, 200, 300, 0, color1);
+
+img.saveFile('./test.png');
+```
 #### gd.Image#alphaBlending(blending)
 #### gd.Image#saveAlpha(saveFlag)
 #### gd.Image#setClip(x1, y1, x2, y2)
@@ -243,16 +297,36 @@ Returns an object containing the coordinates of the clipping area.
 ### Query image information
 #### gd.Image#Alpha(color)
 #### gd.Image#getPixel(x, y)
+For paletted images, this will return the palette index of the color for that pixel.
 #### gd.Image#getTrueColorPixel(x, y)
+This will return the color integer representation.
+```javascript
+var gd = require('node-gd');
+var img = gd.createTrueColor(300, 200);
+var color = img.colorAllocate(255, 0, 255);
+
+img.setThickness(30);
+img.line(0, 0, 300, 200, color);
+img.line(0, 200, 300, 0, color);
+
+// will output ff00ff
+console.log(img.getTrueColorPixel(50, 50).toString(16));
+
+img.saveFile('./test.png');
+```
 #### gd.Image#imageColorAt(x, y)
+This is the implementation of the PHP-GD specific method imagecolorat.
 #### gd.Image#getBoundsSafe(x, y)
+Returns `0` if either x or y are out of the bounds of the image canvas, or `1` when within the bounds.
 ### Font and text
 #### gd.Image#stringFTBBox(color, font, size, angle, x, y, string)
 The font color can be allocated with `img.colorAllocate(r, g, b)`. The `font` parameter should be an absolute path to a `ttf` font file.
 #### gd.Image#stringFT(color, font, size, angle, x, y, string)
 ### Color handling
 #### gd.Image#colorAllocate(r, g, b)
+Allocate a color in the color table.
 #### gd.Image#colorAllocateAlpha(r, g, b, a)
+Allocate a color in the color table with transparency value.
 #### gd.Image#colorClosest(r, g, b)
 #### gd.Image#colorClosestAlpha(r, g, b, a)
 #### gd.Image#colorClosestHWB(r, g, b)
@@ -267,7 +341,7 @@ The font color can be allocated with `img.colorAllocate(r, g, b)`. The `font` pa
 #### gd.Image#colorTransparent(color)
 ### Effects
 #### gd.Image#toGrayscale()
-Remove all color from an image and create a grayscaled image.
+Remove all color from an image and create a grayscaled image. Only available from libgd2 version 2.1.x.
 #### gd.Image#gaussianBlur()
 Apply gaussian blur. Can by applied multiple times to an image to get more blur.
 #### gd.Image#negate()
@@ -375,25 +449,8 @@ Returns the width of the image as `Number`.
 Returns nonzero if the image is a truecolor image, zero for a palette image.
 
 ## libgd2 version information
-node-gd should build successfully for both libgd2 version 2.0.x as wel as for 2.1.x. The main difference is that some functions will not be available. These include:
+Be aware that since `node-gd` version 0.3.x libgd2 version 2.1.x is mostly supported. `node-gd` version 0.2.x is backed at best with libgd2 version 2.0.x. Run `gdlib-config --version` to check the version of libgd2 on your system. `node-gd` should build successfully for both libgd2 version 2.0.x as wel as for 2.1.x. The main difference is that some functions will not be available. These include:
 
-* `gdImageGrayScale`
-* `gdImageEmboss`
-* `gdImageGaussianBlur`
-* `gdImageNegate`
-* `gdImageBrightness`
-* `gdImageContrast`
-* `gdImageSelectiveBlur`
-* `gdImageCreateFromBmp`
-* `gdImageCreateFromBmpPtr`
-* `gdImageCreateFromFile`
-* `gdImageBmp`
-* `gdImageBmpPtr`
-* `gdImageTiff`
-* `gdImageTiffPtr`
-* `gdImageFile`
-
-In node-gd, these are their equivalents
 * `toGrayscale()`
 * `emboss()`
 * `gaussianBlur()`
@@ -410,6 +467,8 @@ In node-gd, these are their equivalents
 * `saveTiff()`
 * `saveImage()`
 
+Another way to check the installed GD version on your system:
+
 ```javascript
 var gd = require('../js/node-gd.js');
 
@@ -418,13 +477,12 @@ var version = gd.getGDVersion();
 console.log(version); // 2.0.1 or 2.1.1 or the like
 ```
 
-There are different flavours of images, of which the main ones are palette-based (up to 256 colors) and true color images (millions of colors). GIFs are always palette-based, PNGs can be both palette-based or true color. JPEGs are always true color images. `gd.create()` will create a palette-based base image while `gd.createTrueColor()` will create a true color image.
-
 ## Test
+
 ```bash
 $ npm test
 ```
-The `test/output` directory contains the resulting images of the test script. The tests use, in some cases, a GNU Freefont font, which is licensed under the GNU General Public License v3.
+The `test/output/` directory contains the resulting images of the test script. The tests use, in some cases, a GNU Freefont font, which is licensed under the GNU General Public License v3.
 
 
 ## Related
