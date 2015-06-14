@@ -60,6 +60,10 @@ describe 'Node.js GD Graphics Library', ->
         done()
 
   it 'can convert to grayscale', (done) ->
+    if gd.getGDVersion() < '2.1.1'
+      done()
+      return
+
     s = source + 'input.png'
     t = target + 'output-grayscale.png'
     gd.openPng s, (err, img) ->
@@ -107,6 +111,10 @@ describe 'Node.js GD Graphics Library', ->
       done()
 
   it 'can add gaussian blur to an image', (done) ->
+    if gd.getGDVersion() < '2.1.1'
+      done()
+      return
+
     s = source + 'input.png'
     t = target + 'output-gaussianblur.png'
 
@@ -124,6 +132,10 @@ describe 'Node.js GD Graphics Library', ->
         done()
 
   it 'can negate an image', (done) ->
+    if gd.getGDVersion() < '2.1.1'
+      done()
+      return
+
     s = source + 'input.png'
     t = target + 'output-negate.png'
 
@@ -139,6 +151,10 @@ describe 'Node.js GD Graphics Library', ->
         done()
 
   it 'can change brightness of an image', (done) ->
+    if gd.getGDVersion() < '2.1.1'
+      done()
+      return
+
     s = source + 'input.png'
     t = target + 'output-brightness.png'
 
@@ -156,6 +172,10 @@ describe 'Node.js GD Graphics Library', ->
         done()
 
   it 'can change contrast of an image', (done) ->
+    if gd.getGDVersion() < '2.1.1'
+      done()
+      return
+
     s = source + 'input.png'
     t = target + 'output-contrast.png'
 
@@ -176,6 +196,10 @@ describe 'Node.js GD Graphics Library', ->
         done()
 
   it 'can emboss an image', (done) ->
+    if gd.getGDVersion() < '2.1.1'
+      done()
+      return
+
     s = source + 'input.png'
     t = target + 'output-emboss.png'
 
@@ -191,6 +215,10 @@ describe 'Node.js GD Graphics Library', ->
         done()
 
   it 'can apply selective blur to an image', (done) ->
+    if gd.getGDVersion() < '2.1.1'
+      done()
+      return
+
     s = source + 'input.png'
     t = target + 'output-selectiveBlur.png'
 

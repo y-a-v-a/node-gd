@@ -400,6 +400,9 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "selectiveBlur", SelectiveBlur);
       NODE_SET_PROTOTYPE_METHOD(t, "emboss", Emboss);
 #endif
+      NODE_SET_PROTOTYPE_METHOD(t, "flipHorizontal", FlipHorizontal);
+      NODE_SET_PROTOTYPE_METHOD(t, "flipVertical", FlipVertical);
+      NODE_SET_PROTOTYPE_METHOD(t, "flipBoth", FlipBoth);
       NODE_SET_PROTOTYPE_METHOD(t, "sharpen", Sharpen);
 
       // interlace
@@ -1543,6 +1546,30 @@ private:
       NanReturnThis();
     }
 #endif
+
+    static NAN_METHOD(FlipHorizontal) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      gdImageFlipHorizontal(*im);
+      NanReturnThis();
+    }
+
+    static NAN_METHOD(FlipVertical) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      gdImageFlipVertical(*im);
+      NanReturnThis();
+    }
+
+    static NAN_METHOD(FlipBoth) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      gdImageFlipBoth(*im);
+      NanReturnThis();
+    }
 
     /**
      * Copying and Resizing Functions
