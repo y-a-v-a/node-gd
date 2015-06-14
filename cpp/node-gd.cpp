@@ -399,10 +399,10 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "contrast", Contrast);
       NODE_SET_PROTOTYPE_METHOD(t, "selectiveBlur", SelectiveBlur);
       NODE_SET_PROTOTYPE_METHOD(t, "emboss", Emboss);
-#endif
       NODE_SET_PROTOTYPE_METHOD(t, "flipHorizontal", FlipHorizontal);
       NODE_SET_PROTOTYPE_METHOD(t, "flipVertical", FlipVertical);
       NODE_SET_PROTOTYPE_METHOD(t, "flipBoth", FlipBoth);
+#endif
       NODE_SET_PROTOTYPE_METHOD(t, "sharpen", Sharpen);
 
       // interlace
@@ -1545,7 +1545,6 @@ private:
       gdImageEmboss(*im);
       NanReturnThis();
     }
-#endif
 
     static NAN_METHOD(FlipHorizontal) {
       NanScope();
@@ -1570,6 +1569,7 @@ private:
       gdImageFlipBoth(*im);
       NanReturnThis();
     }
+#endif
 
     /**
      * Copying and Resizing Functions
