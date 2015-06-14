@@ -352,6 +352,12 @@ Supply an integer between `0` and `100`.
 The value for contrast is a bit weird. A value of `100` wil return a complete grey image, with gray being exactly `rgb(127, 127, 127)`. For best results, the range applied should be between `-900` and `1100` (so actually `100 + 1000` and `100 - 1000`).
 #### gd.Image#selectiveBlur()
 #### gd.Image#emboss()
+#### gd.Image#flipHorizontal()
+Flip the image on the canvas over the vertical axis.
+#### gd.Image#flipVertical()
+Flip the image on the canvas over the horizontal axis.
+#### gd.Image#flipBoth()
+Flip the image on the canvas over both axes.
 #### gd.Image#sharpen(pct)
 ### Copying and resizing
 #### gd.Image#copy(dest, dx, dy, sx, sy, width, height)
