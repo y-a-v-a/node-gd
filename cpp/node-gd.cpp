@@ -402,10 +402,10 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "flipHorizontal", FlipHorizontal);
       NODE_SET_PROTOTYPE_METHOD(t, "flipVertical", FlipVertical);
       NODE_SET_PROTOTYPE_METHOD(t, "flipBoth", FlipBoth);
-#endif
       NODE_SET_PROTOTYPE_METHOD(t, "crop", Crop);
       NODE_SET_PROTOTYPE_METHOD(t, "cropAuto", CropAuto);
       NODE_SET_PROTOTYPE_METHOD(t, "cropThreshold", CropThreshold);
+#endif
       NODE_SET_PROTOTYPE_METHOD(t, "sharpen", Sharpen);
 
       // interlace
@@ -1572,7 +1572,6 @@ private:
       gdImageFlipBoth(*im);
       NanReturnThis();
     }
-#endif
 
     static NAN_METHOD(Crop) {
       NanScope();
@@ -1620,6 +1619,7 @@ private:
       gdImagePtr newImage = gdImageCropThreshold(*im, color, threshold);
       RETURN_IMAGE(newImage);
     }
+#endif
 
     /**
      * Copying and Resizing Functions
