@@ -36,7 +36,7 @@ using namespace node;
 
 #define REQ_ARGS(N)                                                     \
   if (args.Length() < (N))                                              \
-    return NanThrowError("Expected " #N "arguments");
+    return NanThrowError("Expected " #N " arguments");
 
 #define REQ_STR_ARG(I, VAR)                                             \
   if (args.Length() <= (I) || !args[I]->IsString())                     \
@@ -403,6 +403,9 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "flipVertical", FlipVertical);
       NODE_SET_PROTOTYPE_METHOD(t, "flipBoth", FlipBoth);
 #endif
+      NODE_SET_PROTOTYPE_METHOD(t, "crop", Crop);
+      NODE_SET_PROTOTYPE_METHOD(t, "cropAuto", CropAuto);
+      NODE_SET_PROTOTYPE_METHOD(t, "cropThreshold", CropThreshold);
       NODE_SET_PROTOTYPE_METHOD(t, "sharpen", Sharpen);
 
       // interlace
@@ -1570,6 +1573,53 @@ private:
       NanReturnThis();
     }
 #endif
+
+    static NAN_METHOD(Crop) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      REQ_INT_ARG(0, x);
+      REQ_INT_ARG(1, y);
+      REQ_INT_ARG(2, width);
+      REQ_INT_ARG(3, height);
+
+      gdRect *rect = new gdRect;
+
+      rect->x = x;
+      rect->y = y;
+      rect->width = (width == 0) ? 100 : width;
+      rect->height = (height == 0) ? 100 : height;
+
+      gdImagePtr newImage = gdImageCrop(*im, rect);
+
+      RETURN_IMAGE(newImage);
+    }
+
+    static NAN_METHOD(CropAuto) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      REQ_INT_ARG(0, mode);
+
+      if (mode > 4) {
+        return NanThrowError("Crop mode should be between 0 and 5");
+      }
+
+      gdImagePtr newImage = gdImageCropAuto(*im, mode);
+
+      RETURN_IMAGE(newImage);
+    }
+
+    static NAN_METHOD(CropThreshold) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      REQ_INT_ARG(0, color);
+      REQ_DOUBLE_ARG(1, threshold);
+
+      gdImagePtr newImage = gdImageCropThreshold(*im, color, threshold);
+      RETURN_IMAGE(newImage);
+    }
 
     /**
      * Copying and Resizing Functions

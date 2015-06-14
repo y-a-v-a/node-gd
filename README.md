@@ -360,6 +360,12 @@ Flip the image on the canvas over the horizontal axis, the oposite of the above.
 Flip the image on the canvas over both axes.
 #### gd.Image#sharpen(pct)
 Does not work on non-true color images. A value lower than 0 for `pct` is ignored.
+#### gd.Image#crop(x, y, width, height)
+Crop the supplied image from a certain point to a certain size. Will return a new instance of `gd.Image`. Negative numbers, i.e. when going out of the image bounds, can result in images with black parts.
+#### gd.Image#cropAuto(mode)
+The mode parameter is a value from 0 to 4, so there are 5 modes: `0`: default: 4 corners or background, `1`: crop using the transparent color, `2`: crop black borders, `3`: crop white borders, `4`: crop using colors of the 4 corners.
+#### gd.Image#cropThreshold(color, threshold)
+Crop by color, with a threshold. Use for color an integer and for threshold a number.
 ### Copying and resizing
 #### gd.Image#copy(dest, dx, dy, sx, sy, width, height)
 #### gd.Image#copyResized(dest, dx, dy, sx, sy, dw, dh, sw, sh)
