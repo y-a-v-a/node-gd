@@ -141,8 +141,7 @@ using namespace node;
 
 class Gd : public node::ObjectWrap {
 public:
-  static void Init(Handle<Object> exports)
-  {
+  static void Init(Handle<Object> exports) {
     NanScope();
 
     NODE_DEFINE_CONSTANT(exports, COLOR_ANTIALIASED);
@@ -181,8 +180,7 @@ public:
   }
 
 private:
-  static NAN_METHOD(ImageCreate)
-  {
+  static NAN_METHOD(ImageCreate) {
     NanScope();
     REQ_INT_ARG(0, width);
     REQ_INT_ARG(1, height);
@@ -192,8 +190,7 @@ private:
     RETURN_IMAGE(im)
   }
 
-  static NAN_METHOD(ImageCreateTrueColor)
-  {
+  static NAN_METHOD(ImageCreateTrueColor) {
     NanScope();
     REQ_INT_ARG(0, width);
     REQ_INT_ARG(1, height);
@@ -224,8 +221,7 @@ private:
   }
 #endif
 
-  static NAN_METHOD(CreateFromGd2Part)
-  {
+  static NAN_METHOD(CreateFromGd2Part) {
     NanScope();
     REQ_STR_ARG(0, path);
     REQ_INT_ARG(1, srcX);
@@ -241,8 +237,7 @@ private:
     RETURN_IMAGE(im)
   }
 
-  static NAN_METHOD(CreateFromGd2PartPtr)
-  {
+  static NAN_METHOD(CreateFromGd2PartPtr) {
     NanScope();
     REQ_ARGS(5);
     REQ_INT_ARG(1, srcX);
@@ -261,8 +256,7 @@ private:
     RETURN_IMAGE(im)
   }
 
-  static NAN_METHOD(TrueColor)
-  {
+  static NAN_METHOD(TrueColor) {
     NanScope();
 
     REQ_ARGS(3);
@@ -275,8 +269,7 @@ private:
     NanReturnValue(result);
   }
 
-  static NAN_METHOD(TrueColorAlpha)
-  {
+  static NAN_METHOD(TrueColorAlpha) {
     NanScope();
 
     REQ_ARGS(4);
@@ -398,6 +391,7 @@ private:
       /**
        * Effects
        */
+#if (LATEST_GD)
       NODE_SET_PROTOTYPE_METHOD(t, "toGrayscale",GrayScale);
       NODE_SET_PROTOTYPE_METHOD(t, "gaussianBlur", GaussianBlur);
       NODE_SET_PROTOTYPE_METHOD(t, "negate", Negate);
@@ -405,6 +399,7 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "contrast", Contrast);
       NODE_SET_PROTOTYPE_METHOD(t, "selectiveBlur", SelectiveBlur);
       NODE_SET_PROTOTYPE_METHOD(t, "emboss", Emboss);
+#endif
       NODE_SET_PROTOTYPE_METHOD(t, "sharpen", Sharpen);
 
       // interlace
@@ -435,7 +430,10 @@ private:
     static NAN_METHOD(New) {
       NanScope();
       REQ_EXT_ARG(0, image);
-      (new Image((gdImagePtr)image->Value()))->Wrap(args.This());
+
+      gdImagePtr imgPtr = (gdImagePtr)image->Value();
+      (new Image(imgPtr))->Wrap(args.This());
+
       NanReturnThis();
     }
   protected:
@@ -449,8 +447,7 @@ private:
     /**
      * Destruction, Loading and Saving Functions
      */
-    static NAN_METHOD(Destroy)
-    {
+    static NAN_METHOD(Destroy) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
       if(im->_image){
@@ -461,8 +458,7 @@ private:
       NanReturnUndefined();
     }
 
-    static NAN_METHOD(Jpeg)
-    {
+    static NAN_METHOD(Jpeg) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -476,8 +472,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(JpegPtr)
-    {
+    static NAN_METHOD(JpegPtr) {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       OPT_INT_ARG(0, quality, -1);
@@ -488,8 +483,7 @@ private:
       RETURN_DATA()
     }
 
-    static NAN_METHOD(Gif)
-    {
+    static NAN_METHOD(Gif) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -502,8 +496,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(GifPtr)
-    {
+    static NAN_METHOD(GifPtr) {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       int size;
@@ -512,8 +505,7 @@ private:
       RETURN_DATA()
     }
 
-    static NAN_METHOD(Png)
-    {
+    static NAN_METHOD(Png) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -527,8 +519,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(PngPtr)
-    {
+    static NAN_METHOD(PngPtr) {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       OPT_INT_ARG(0, level, -1);
@@ -539,8 +530,7 @@ private:
       RETURN_DATA()
     }
 
-    static NAN_METHOD(WBMP)
-    {
+    static NAN_METHOD(WBMP) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -554,8 +544,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(WBMPPtr)
-    {
+    static NAN_METHOD(WBMPPtr) {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       REQ_INT_ARG(0, foreground);
@@ -566,8 +555,7 @@ private:
       RETURN_DATA()
     }
 
-    static NAN_METHOD(Gd)
-    {
+    static NAN_METHOD(Gd) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -580,8 +568,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(GdPtr)
-    {
+    static NAN_METHOD(GdPtr) {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       int size;
@@ -590,8 +577,7 @@ private:
       RETURN_DATA()
     }
 
-    static NAN_METHOD(Gd2)
-    {
+    static NAN_METHOD(Gd2) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -606,8 +592,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(Gd2Ptr)
-    {
+    static NAN_METHOD(Gd2Ptr) {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       REQ_INT_ARG(0, chunkSize);
@@ -710,8 +695,7 @@ private:
     /**
      * Drawing Functions
      */
-    static NAN_METHOD(SetPixel)
-    {
+    static NAN_METHOD(SetPixel) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -725,8 +709,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(Line)
-    {
+    static NAN_METHOD(Line) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -741,8 +724,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(DashedLine)
-    {
+    static NAN_METHOD(DashedLine) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -757,8 +739,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(Polygon)
-    {
+    static NAN_METHOD(Polygon) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -795,8 +776,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(OpenPolygon)
-    {
+    static NAN_METHOD(OpenPolygon) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -833,8 +813,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(FilledPolygon)
-    {
+    static NAN_METHOD(FilledPolygon) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -903,8 +882,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(Arc)
-    {
+    static NAN_METHOD(Arc) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -922,8 +900,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(FilledArc)
-    {
+    static NAN_METHOD(FilledArc) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -974,8 +951,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(FillToBorder)
-    {
+    static NAN_METHOD(FillToBorder) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -990,8 +966,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(Fill)
-    {
+    static NAN_METHOD(Fill) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1005,8 +980,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(SetAntiAliased)
-    {
+    static NAN_METHOD(SetAntiAliased) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1017,8 +991,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(SetAntiAliasedDontBlend)
-    {
+    static NAN_METHOD(SetAntiAliasedDontBlend) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1030,8 +1003,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(SetBrush)
-    {
+    static NAN_METHOD(SetBrush) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1041,8 +1013,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(SetTile)
-    {
+    static NAN_METHOD(SetTile) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1052,8 +1023,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(SetStyle)
-    {
+    static NAN_METHOD(SetStyle) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1080,8 +1050,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(SetThickness)
-    {
+    static NAN_METHOD(SetThickness) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1092,8 +1061,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(AlphaBlending)
-    {
+    static NAN_METHOD(AlphaBlending) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1103,8 +1071,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(SaveAlpha)
-    {
+    static NAN_METHOD(SaveAlpha) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1114,8 +1081,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(SetClip)
-    {
+    static NAN_METHOD(SetClip) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1130,8 +1096,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(GetClip)
-    {
+    static NAN_METHOD(GetClip) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1150,8 +1115,7 @@ private:
     /**
      * Query Functions
      */
-    static NAN_METHOD(Alpha)
-    {
+    static NAN_METHOD(Alpha) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1161,8 +1125,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_METHOD(GetPixel)
-    {
+    static NAN_METHOD(GetPixel) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1174,8 +1137,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_METHOD(GetTrueColorPixel)
-    {
+    static NAN_METHOD(GetTrueColorPixel) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1188,8 +1150,7 @@ private:
     }
 
     // This is implementation of the PHP-GD specific method imagecolorat
-    static NAN_METHOD(ImageColorAt)
-    {
+    static NAN_METHOD(ImageColorAt) {
       NanScope();
       Image *img = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1215,8 +1176,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_METHOD(GetBoundsSafe)
-    {
+    static NAN_METHOD(GetBoundsSafe) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1228,8 +1188,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_GETTER(WidthGetter)
-    {
+    static NAN_GETTER(WidthGetter) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1237,8 +1196,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_GETTER(HeightGetter)
-    {
+    static NAN_GETTER(HeightGetter) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1246,8 +1204,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_GETTER(TrueColorGetter)
-    {
+    static NAN_GETTER(TrueColorGetter) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1258,8 +1215,7 @@ private:
     /**
      * Font and Text Handling Funcitons
      */
-    static NAN_METHOD(StringFTBBox)
-    {
+    static NAN_METHOD(StringFTBBox) {
       REQ_ARGS(7);
       REQ_INT_ARG(0, color);
       REQ_STR_ARG(1, font);
@@ -1285,8 +1241,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_METHOD(StringFT)
-    {
+    static NAN_METHOD(StringFT) {
       REQ_ARGS(7);
       REQ_INT_ARG(0, color);
       REQ_STR_ARG(1, font);
@@ -1329,8 +1284,7 @@ private:
     /**
      * Color Handling Functions
      */
-    static NAN_METHOD(ColorAllocate)
-    {
+    static NAN_METHOD(ColorAllocate) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1343,8 +1297,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_METHOD(ColorAllocateAlpha)
-    {
+    static NAN_METHOD(ColorAllocateAlpha) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1357,8 +1310,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_METHOD(ColorClosest)
-    {
+    static NAN_METHOD(ColorClosest) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1370,8 +1322,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_METHOD(ColorClosestAlpha)
-    {
+    static NAN_METHOD(ColorClosestAlpha) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1384,8 +1335,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_METHOD(ColorClosestHWB)
-    {
+    static NAN_METHOD(ColorClosestHWB) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1397,8 +1347,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_METHOD(ColorExact)
-    {
+    static NAN_METHOD(ColorExact) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1410,8 +1359,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_METHOD(ColorResolve)
-    {
+    static NAN_METHOD(ColorResolve) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1423,8 +1371,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_METHOD(ColorResolveAlpha)
-    {
+    static NAN_METHOD(ColorResolveAlpha) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1437,8 +1384,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_GETTER(ColorsTotalGetter)
-    {
+    static NAN_GETTER(ColorsTotalGetter) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1446,8 +1392,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_METHOD(Red)
-    {
+    static NAN_METHOD(Red) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1457,8 +1402,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_METHOD(Blue)
-    {
+    static NAN_METHOD(Blue) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1468,8 +1412,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_METHOD(Green)
-    {
+    static NAN_METHOD(Green) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1479,8 +1422,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_GETTER(InterlaceGetter)
-    {
+    static NAN_GETTER(InterlaceGetter) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1495,8 +1437,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_SETTER(InterlaceSetter)
-    {
+    static NAN_SETTER(InterlaceSetter) {
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       if (value->IsBoolean()) {
@@ -1506,8 +1447,7 @@ private:
       }
     }
 
-    static NAN_METHOD(GetTransparent)
-    {
+    static NAN_METHOD(GetTransparent) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1515,8 +1455,7 @@ private:
       NanReturnValue(result);
     }
 
-    static NAN_METHOD(ColorDeallocate)
-    {
+    static NAN_METHOD(ColorDeallocate) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1526,8 +1465,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(ColorTransparent)
-    {
+    static NAN_METHOD(ColorTransparent) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1537,34 +1475,33 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(GrayScale)
-    {
+#if (LATEST_GD)
+    static NAN_METHOD(GrayScale) {
       NanScope();
       // Silently fail on missing gdImageGrayScale
-#if (LATEST_GD)
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
       gdImageGrayScale(*im);
-#endif
+
       NanReturnThis();
     }
 
     static NAN_METHOD(GaussianBlur) {
       NanScope();
-#if (LATEST_GD)
+
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       gdImageGaussianBlur(*im);
-#endif
+
       NanReturnThis();
     }
 
     static NAN_METHOD(Negate) {
       NanScope();
-#if (LATEST_GD)
+
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       gdImageNegate(*im);
-#endif
+
       NanReturnThis();
     }
 
@@ -1572,50 +1509,45 @@ private:
       NanScope();
       REQ_INT_ARG(0, brightness);
 
-#if (LATEST_GD)
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       gdImageBrightness(*im, brightness);
-#endif
+
       NanReturnThis();
     }
 
     static NAN_METHOD(Contrast) {
       NanScope();
       REQ_DOUBLE_ARG(0, contrast);
-#if (LATEST_GD)
+
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       gdImageContrast(*im, contrast);
-#endif
+
       NanReturnThis();
     }
 
     static NAN_METHOD(SelectiveBlur) {
       NanScope();
-#if (LATEST_GD)
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       gdImageSelectiveBlur(*im);
-#endif
       NanReturnThis();
     }
 
     static NAN_METHOD(Emboss) {
       NanScope();
-#if (LATEST_GD)
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       gdImageEmboss(*im);
-#endif
       NanReturnThis();
     }
+#endif
 
     /**
      * Copying and Resizing Functions
      */
-    static NAN_METHOD(Copy)
-    {
+    static NAN_METHOD(Copy) {
       NanScope();
       REQ_ARGS(7);
       REQ_IMG_ARG(0, dest);
@@ -1633,8 +1565,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(CopyResized)
-    {
+    static NAN_METHOD(CopyResized) {
       NanScope();
       REQ_ARGS(9);
       REQ_IMG_ARG(0, dest);
@@ -1654,8 +1585,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(CopyResampled)
-    {
+    static NAN_METHOD(CopyResampled) {
       NanScope();
       REQ_ARGS(9);
       REQ_IMG_ARG(0, dest);
@@ -1675,8 +1605,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(CopyRotated)
-    {
+    static NAN_METHOD(CopyRotated) {
       NanScope();
       REQ_ARGS(8);
       REQ_IMG_ARG(0, dest);
@@ -1695,8 +1624,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(CopyMerge)
-    {
+    static NAN_METHOD(CopyMerge) {
       NanScope();
       REQ_ARGS(8);
       REQ_IMG_ARG(0, dest);
@@ -1715,8 +1643,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(CopyMergeGray)
-    {
+    static NAN_METHOD(CopyMergeGray) {
       NanScope();
       REQ_ARGS(8);
       REQ_IMG_ARG(0, dest);
@@ -1735,8 +1662,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(PaletteCopy)
-    {
+    static NAN_METHOD(PaletteCopy) {
       NanScope();
       REQ_IMG_ARG(0, dest);
 
@@ -1747,8 +1673,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(SquareToCircle)
-    {
+    static NAN_METHOD(SquareToCircle) {
       NanScope();
       REQ_INT_ARG(0, radius);
 
@@ -1759,8 +1684,7 @@ private:
       NanReturnThis();
     }
 
-    static NAN_METHOD(Sharpen)
-    {
+    static NAN_METHOD(Sharpen) {
       NanScope();
       REQ_INT_ARG(0, pct);
 
@@ -1774,8 +1698,7 @@ private:
     /**
      * Miscellaneous Functions
      */
-    static NAN_METHOD(Compare)
-    {
+    static NAN_METHOD(Compare) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
@@ -1797,8 +1720,7 @@ Persistent<FunctionTemplate> Gd::Image::constructor;
 
 extern "C"
 {
-  void init (Handle<Object> exports)
-  {
+  void init (Handle<Object> exports) {
     NanScope();
 
     Gd::Init(exports);

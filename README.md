@@ -3,7 +3,7 @@
 
 [![Build Status](https://api.travis-ci.org/y-a-v-a/node-gd.svg?branch=stable)](http://travis-ci.org/y-a-v-a/node-gd)
 
-GD graphic library, [libgd](http://www.libgd.org/), C++ bindings for Node.js. This version is the community-maintained [official NodeJS node-gd repo](https://npmjs.org/package/node-gd). With `node-gd` you can easily create, manipulate, open and save paletted and true color images from and to a variaty of image formats including JPEG, PNG, GIF and BMP.
+GD graphic library, [libgd](http://www.libgd.org/), C++ bindings for Node.js. This version is the community-maintained [official NodeJS node-gd repo](https://npmjs.org/package/node-gd). With `node-gd` you can easily create, manipulate, open and save paletted and true color images from and to a variety of image formats including JPEG, PNG, GIF and BMP.
 
 [![NPM](https://nodei.co/npm/node-gd.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/node-gd/) [![NPM](https://nodei.co/npm-dl/node-gd.png?months=6&height=3)](https://nodei.co/npm/node-gd/)
 
@@ -470,7 +470,7 @@ Be aware that since `node-gd` version 0.3.x libgd2 version 2.1.x is mostly suppo
 Another way to check the installed GD version on your system:
 
 ```javascript
-var gd = require('../js/node-gd.js');
+var gd = require('node-gd');
 
 // as of node-gd 0.4.x
 var version = gd.getGDVersion();
