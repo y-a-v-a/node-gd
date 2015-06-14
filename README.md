@@ -353,12 +353,13 @@ The value for contrast is a bit weird. A value of `100` wil return a complete gr
 #### gd.Image#selectiveBlur()
 #### gd.Image#emboss()
 #### gd.Image#flipHorizontal()
-Flip the image on the canvas over the vertical axis.
+Flip the image on the canvas over the vertical axis. This means that what's at the right side of the images will be reflected to the left side: pixels move only horizontally.
 #### gd.Image#flipVertical()
-Flip the image on the canvas over the horizontal axis.
+Flip the image on the canvas over the horizontal axis, the oposite of the above.
 #### gd.Image#flipBoth()
 Flip the image on the canvas over both axes.
 #### gd.Image#sharpen(pct)
+Does not work on non-true color images. A value lower than 0 for `pct` is ignored.
 ### Copying and resizing
 #### gd.Image#copy(dest, dx, dy, sx, sy, width, height)
 #### gd.Image#copyResized(dest, dx, dy, sx, sy, dw, dh, sw, sh)
