@@ -1,5 +1,6 @@
-# node-gd
+[![node-gd logo](https://raw.githubusercontent.com/y-a-v-a/node-gd-artwork/master/node-gd-mini.png)](https://github.com/y-a-v-a/node-gd)
 
+# node-gd
 
 [![Build Status](https://api.travis-ci.org/y-a-v-a/node-gd.svg?branch=stable)](http://travis-ci.org/y-a-v-a/node-gd)
 
