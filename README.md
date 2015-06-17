@@ -357,7 +357,7 @@ Specifies a color index (if a palette image) or an RGB color (if a truecolor ima
 #### gd.Image#colorReplace(fromColor, toColor)
 Replace one color with another. This returns the amount of changes pixels.
 #### gd.Image#colorReplaceThreshold(fromColor, toColor, threshold)
-Replace one color with another. The `threshold` will broaden the range of replaced colors.
+Replace one color with another. The `threshold` will broaden the range of replaced colors and is a decimal `Number` between `0` and `100`
 #### gd.Image#colorReplaceArray(fromColors, toColors)
 Replace colors in `fromColors` array to `toColors` array.
 ### Effects

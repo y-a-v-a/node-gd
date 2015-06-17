@@ -394,6 +394,7 @@ private:
        * Color Manipulation Functions
        */
       NODE_SET_PROTOTYPE_METHOD(t, "colorTransparent", ColorTransparent);
+#if (LATEST_GD)
       NODE_SET_PROTOTYPE_METHOD(t, "colorReplace", ColorReplace);
       NODE_SET_PROTOTYPE_METHOD(t, "colorReplaceThreshold", ColorReplaceThreshold);
       NODE_SET_PROTOTYPE_METHOD(t, "colorReplaceArray", ColorReplaceArray);
@@ -401,7 +402,6 @@ private:
       /**
        * Effects
        */
-#if (LATEST_GD)
       NODE_SET_PROTOTYPE_METHOD(t, "toGrayscale",GrayScale);
       NODE_SET_PROTOTYPE_METHOD(t, "gaussianBlur", GaussianBlur);
       NODE_SET_PROTOTYPE_METHOD(t, "negate", Negate);
@@ -1506,6 +1506,7 @@ private:
       NanReturnThis();
     }
 
+#if (LATEST_GD)
     static NAN_METHOD(ColorReplace) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
@@ -1566,7 +1567,6 @@ private:
       NanReturnValue(result);
     }
 
-#if (LATEST_GD)
     static NAN_METHOD(GrayScale) {
       NanScope();
       // Silently fail on missing gdImageGrayScale
