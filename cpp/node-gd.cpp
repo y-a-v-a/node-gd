@@ -349,9 +349,10 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "saveAlpha", SaveAlpha);
       NODE_SET_PROTOTYPE_METHOD(t, "setClip", SetClip);
       NODE_SET_PROTOTYPE_METHOD(t, "getClip", GetClip);
+#if (LATEST_GD)
       NODE_SET_PROTOTYPE_METHOD(t, "setResolution", SetResolution);
+#endif
       NODE_SET_PROTOTYPE_METHOD(t, "boundsSafe", BoundsSafe);
-
       /**
        * Query Functions
        */
@@ -1120,6 +1121,7 @@ private:
       NanReturnValue(result);
     }
 
+#if (LATEST_GD)
     static NAN_METHOD(SetResolution) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
@@ -1132,6 +1134,7 @@ private:
 
       NanReturnThis();
     }
+#endif
 
     static NAN_METHOD(BoundsSafe) {
       NanScope();
