@@ -4,3 +4,5 @@ node-debug.log
 .git/
 .travis.yml
 build/
+travis-linux-deps.sh
+travis-osx-deps.sh
