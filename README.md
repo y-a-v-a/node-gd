@@ -181,7 +181,8 @@ var red = 0xff0000; // red
 #### gd.trueColorAlpha(red, green, blue, alpha)
 Returns an integer representation of the supplied `rgba` values. Be aware that in libgd the value for `alpha` ranges from `0` to `127`. From its source code:
 ```c++
-[the alpha channel] occupies only the LOWER 7 BITS of the MSB (most significant bit). This very small loss of alpha channel resolution allows gd 2.x to keep backwards compatibility (...)```
+[the alpha channel] occupies only the LOWER 7 BITS of the MSB (most significant bit). This very small loss of alpha channel resolution allows gd 2.x to keep backwards compatibility (...)
+```
 Example:
 ```javascript
 var gd = require('node-gd');
