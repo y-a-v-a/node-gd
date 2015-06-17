@@ -352,7 +352,7 @@ private:
 #if (LATEST_GD)
       NODE_SET_PROTOTYPE_METHOD(t, "setResolution", SetResolution);
 #endif
-      NODE_SET_PROTOTYPE_METHOD(t, "boundsSafe", BoundsSafe);
+
       /**
        * Query Functions
        */
@@ -389,7 +389,14 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "blue", Blue);
       NODE_SET_PROTOTYPE_METHOD(t, "getTransparent", GetTransparent);
       NODE_SET_PROTOTYPE_METHOD(t, "colorDeallocate", ColorDeallocate);
+
+      /**
+       * Color Manipulation Functions
+       */
       NODE_SET_PROTOTYPE_METHOD(t, "colorTransparent", ColorTransparent);
+      NODE_SET_PROTOTYPE_METHOD(t, "colorReplace", ColorReplace);
+      NODE_SET_PROTOTYPE_METHOD(t, "colorReplaceThreshold", ColorReplaceThreshold);
+      NODE_SET_PROTOTYPE_METHOD(t, "colorReplaceArray", ColorReplaceArray);
 
       /**
        * Effects
@@ -1136,19 +1143,6 @@ private:
     }
 #endif
 
-    static NAN_METHOD(BoundsSafe) {
-      NanScope();
-
-      Image *im = ObjectWrap::Unwrap<Image>(args.This());
-
-      REQ_ARGS(2);
-      REQ_INT_ARG(0, x);
-      REQ_INT_ARG(1, y);
-
-      Local<Number> result = NanNew<Integer>(gdImageBoundsSafe(*im, x, y));
-      NanReturnValue(result);
-    }
-
     /**
      * Query Functions
      */
@@ -1510,6 +1504,66 @@ private:
       gdImageColorTransparent(*im, color);
 
       NanReturnThis();
+    }
+
+    static NAN_METHOD(ColorReplace) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      REQ_INT_ARG(0, fromColor);
+      REQ_INT_ARG(1, toColor);
+
+      Local<Number> result = NanNew<Integer>(gdImageColorReplace(*im, fromColor, toColor));
+
+      NanReturnValue(result);
+    }
+
+    static NAN_METHOD(ColorReplaceThreshold) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      REQ_INT_ARG(0, fromColor);
+      REQ_INT_ARG(1, toColor);
+      REQ_DOUBLE_ARG(2, threshold);
+
+      Local<Number> result = NanNew<Integer>(gdImageColorReplaceThreshold(*im, fromColor, toColor, threshold));
+
+      NanReturnValue(result);
+    }
+
+    static NAN_METHOD(ColorReplaceArray) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      REQ_ARGS(2);
+
+      Local<Array> fromArray = Local<Array>::Cast(args[0]);
+      int flen = fromArray->Length(), _flen = 0;
+      int *fromColors =  new int[flen];
+
+      for(int i = 0; i < flen; i++) {
+        Local<Value> v = fromArray->Get(NanNew<Integer>(i));
+        fromColors[i] = v->Int32Value();
+        _flen++;
+      }
+
+      Local<Array> toArray = Local<Array>::Cast(args[1]);
+      int tlen = toArray->Length(), _tlen = 0;
+      int *toColors =  new int[tlen];
+
+      for(int j = 0; j < tlen; j++) {
+        Local<Value> v = toArray->Get(NanNew<Integer>(j));
+        toColors[j] = v->Int32Value();
+        _tlen++;
+      }
+
+      if (_flen != _tlen) {
+        return NanThrowError("Color arrays should have same length.");
+      }
+
+      Local<Number> result = NanNew<Integer>(gdImageColorReplaceArray(*im, _flen, fromColors, toColors));
+
+      NanReturnValue(result);
     }
 
 #if (LATEST_GD)

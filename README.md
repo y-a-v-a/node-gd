@@ -346,8 +346,15 @@ Allocate a color in the color table with transparency value.
 #### gd.Image#blue(b)
 #### gd.Image#getTransparent()
 #### gd.Image#colorDeallocate(color)
+### Color Manipulation
 #### gd.Image#colorTransparent(color)
 Specifies a color index (if a palette image) or an RGB color (if a truecolor image) which should be considered 100% transparent. For truecolor images, this is ignored if an alpha channel is being saved. Use `gd.Image#saveAlpha(0)` to turn off the saving of a full alpha channel in a truecolor image.
+#### gd.Image#colorReplace(fromColor, toColor)
+Replace one color with another. This returns the amount of changes pixels.
+#### gd.Image#colorReplaceThreshold(fromColor, toColor, threshold)
+Replace one color with another. The `threshold` will broaden the range of replaced colors.
+#### gd.Image#colorReplaceArray(fromColors, toColors)
+Replace colors in `fromColors` array to `toColors` array.
 ### Effects
 #### gd.Image#toGrayscale()
 Remove all color from an image and create a grayscaled image. Only available from libgd2 version 2.1.x.
