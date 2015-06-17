@@ -349,6 +349,8 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "saveAlpha", SaveAlpha);
       NODE_SET_PROTOTYPE_METHOD(t, "setClip", SetClip);
       NODE_SET_PROTOTYPE_METHOD(t, "getClip", GetClip);
+      NODE_SET_PROTOTYPE_METHOD(t, "setResolution", SetResolution);
+      NODE_SET_PROTOTYPE_METHOD(t, "boundsSafe", BoundsSafe);
 
       /**
        * Query Functions
@@ -1115,6 +1117,32 @@ private:
       result->Set(NanNew<String>("x2"), NanNew<Integer>(x2));
       result->Set(NanNew<String>("y2"), NanNew<Integer>(y2));
 
+      NanReturnValue(result);
+    }
+
+    static NAN_METHOD(SetResolution) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      REQ_ARGS(2);
+      REQ_INT_ARG(0, res_x);
+      REQ_INT_ARG(1, res_y);
+
+      gdImageSetResolution(*im, res_x, res_y);
+
+      NanReturnThis();
+    }
+
+    static NAN_METHOD(BoundsSafe) {
+      NanScope();
+
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      REQ_ARGS(2);
+      REQ_INT_ARG(0, x);
+      REQ_INT_ARG(1, y);
+
+      Local<Number> result = NanNew<Integer>(gdImageBoundsSafe(*im, x, y));
       NanReturnValue(result);
     }
 

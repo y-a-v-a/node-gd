@@ -340,6 +340,7 @@ Allocate a color in the color table with transparency value.
 #### gd.Image#getTransparent()
 #### gd.Image#colorDeallocate(color)
 #### gd.Image#colorTransparent(color)
+Specifies a color index (if a palette image) or an RGB color (if a truecolor image) which should be considered 100% transparent. For truecolor images, this is ignored if an alpha channel is being saved. Use `gd.Image#saveAlpha(0)` to turn off the saving of a full alpha channel in a truecolor image.
 ### Effects
 #### gd.Image#toGrayscale()
 Remove all color from an image and create a grayscaled image. Only available from libgd2 version 2.1.x.
