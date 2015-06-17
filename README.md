@@ -295,6 +295,10 @@ img.saveFile('./test.png');
 Set the clipping area.
 #### gd.Image#getClip()
 Returns an object containing the coordinates of the clipping area.
+#### gd.Image#setResolution(res_x, res_y)
+Unsigned integers should be used for `res_x` and `res_y`.
+#### gd.Image#boundsSafe(x, y)
+Check if a set of coordinates are within the image bounds.
 ### Query image information
 #### gd.Image#Alpha(color)
 #### gd.Image#getPixel(x, y)
