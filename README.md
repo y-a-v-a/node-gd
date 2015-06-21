@@ -305,8 +305,6 @@ Set the clipping area.
 Returns an object containing the coordinates of the clipping area.
 #### gd.Image#setResolution(res_x, res_y)
 Unsigned integers should be used for `res_x` and `res_y`.
-#### gd.Image#boundsSafe(x, y)
-Check if a set of coordinates are within the image bounds.
 ### Query image information
 #### gd.Image#Alpha(color)
 #### gd.Image#getPixel(x, y)
@@ -357,9 +355,9 @@ Specifies a color index (if a palette image) or an RGB color (if a truecolor ima
 #### gd.Image#colorReplace(fromColor, toColor)
 Replace one color with another. This returns the amount of changes pixels.
 #### gd.Image#colorReplaceThreshold(fromColor, toColor, threshold)
-Replace one color with another. The `threshold` will broaden the range of replaced colors and is a decimal `Number` between `0` and `100`
+Replace one color with another. The `threshold` will broaden the range of replaced colors and is a decimal `Number` between `0` and `100`.
 #### gd.Image#colorReplaceArray(fromColors, toColors)
-Replace colors in `fromColors` array to `toColors` array.
+Replace colors in `fromColors` array to `toColors` array. The arrays should be of equal length.
 ### Effects
 #### gd.Image#toGrayscale()
 Remove all color from an image and create a grayscaled image. Only available from libgd2 version 2.1.x.

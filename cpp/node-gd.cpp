@@ -315,8 +315,10 @@ private:
 #if (LATEST_GD)
       NODE_SET_PROTOTYPE_METHOD(t, "bmp", Bmp);
       NODE_SET_PROTOTYPE_METHOD(t, "bmpPtr", BmpPtr);
+  #ifdef HAVE_LIBTIFF
       NODE_SET_PROTOTYPE_METHOD(t, "tiff", Tiff);
       NODE_SET_PROTOTYPE_METHOD(t, "tiffPtr", TiffPtr);
+  #endif
       NODE_SET_PROTOTYPE_METHOD(t, "file", File);
       NODE_SET_PROTOTYPE_METHOD(t, "fileCallback", FileCallback);
 #endif
@@ -646,6 +648,7 @@ private:
       RETURN_DATA()
     }
 
+  #ifdef HAVE_LIBTIFF
     static NAN_METHOD(Tiff) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
@@ -667,6 +670,7 @@ private:
 
       RETURN_DATA()
     }
+  #endif
 
     static NAN_METHOD(File) {
       NanScope();
