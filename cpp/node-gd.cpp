@@ -390,7 +390,7 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "bmpPtr", BmpPtr);
 #endif
 
-#ifdef HAS_LIBTIFF
+#if HAS_LIBTIFF
       NODE_SET_PROTOTYPE_METHOD(t, "tiff", Tiff);
       NODE_SET_PROTOTYPE_METHOD(t, "tiffPtr", TiffPtr);
 #endif
@@ -762,7 +762,7 @@ private:
     }
 #endif
 
-#ifdef HAS_LIBTIFF
+#if HAS_LIBTIFF
     static NAN_METHOD(Tiff) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
