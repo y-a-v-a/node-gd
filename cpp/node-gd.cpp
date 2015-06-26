@@ -26,10 +26,29 @@
 using namespace v8;
 using namespace node;
 
-#define LATEST_GD (defined(GD_MAJOR_VERSION)                            \
-                  && defined(GD_MINOR_VERSION)                          \
-                  && GD_MAJOR_VERSION >= 2                              \
-                  && GD_MINOR_VERSION >= 1)
+#define SUPPORTS_GD_2_2_0 (GD_MINOR_VERSION == 2                        \
+                  && GD_RELEASE_VERSION == 0)
+
+#define SUPPORTS_GD_2_1_1 (SUPPORTS_GD_2_2_0                            \
+                  || (GD_MINOR_VERSION == 1                             \
+                  && GD_RELEASE_VERSION == 1))
+
+#define SUPPORTS_GD_2_1_0 (SUPPORTS_GD_2_1_1                            \
+                  || (GD_MINOR_VERSION == 1                             \
+                  && GD_RELEASE_VERSION == 0))
+
+#define SUPPORTS_GD_2_0_36 (SUPPORTS_GD_2_1_0                           \
+                  || SUPPORTS_GD_2_1_0                                  \
+                  || (GD_MINOR_VERSION == 0                             \
+                  && GD_RELEASE_VERSION <= 36))
+
+#define HAS_LIBTIFF (HAVE_LIBTIFF && SUPPORTS_GD_2_1_0)
+#define HAS_LIBWEBP (HAVE_LIBWEBP && SUPPORTS_GD_2_1_0)
+
+// Since gd 2.0.28, these are always built in
+#define GD_GIF 1
+#define GD_GIFANIM 1
+#define GD_OPENPOLYGON 1
 
 #define THROW_ERROR(TYPE, STR)                                          \
   return NanThrowError(STR);
@@ -151,6 +170,42 @@ public:
     NODE_DEFINE_CONSTANT(exports, COLOR_TITLED);
     NODE_DEFINE_CONSTANT(exports, COLOR_TRANSPARENT);
 
+#ifdef HAVE_LIBTIFF
+    NODE_DEFINE_CONSTANT(exports, GD_TIFF);
+#endif
+
+#ifdef HAVE_LIBXPM
+    NODE_DEFINE_CONSTANT(exports, GD_XPM);
+#endif
+
+#ifdef HAVE_LIBJPEG
+    NODE_DEFINE_CONSTANT(exports, GD_JPEG);
+#endif
+
+#ifdef HAVE_LIBFONTCONFIG
+    NODE_DEFINE_CONSTANT(exports, GD_FONTCONFIG);
+#endif
+
+#ifdef HAVE_LIBFREETYPE
+    NODE_DEFINE_CONSTANT(exports, GD_FREETYPE);
+#endif
+
+#ifdef HAVE_LIBPNG
+    NODE_DEFINE_CONSTANT(exports, GD_PNG);
+#endif
+
+#ifdef HAVE_LIBWEBP
+    NODE_DEFINE_CONSTANT(exports, GD_WEBP);
+#endif
+
+#ifdef HAVE_LIBVPX
+    NODE_DEFINE_CONSTANT(exports, GD_VPX);
+#endif
+
+    NODE_DEFINE_CONSTANT(exports, GD_GIF);
+    NODE_DEFINE_CONSTANT(exports, GD_GIFANIM);
+    NODE_DEFINE_CONSTANT(exports, GD_OPENPOLYGON);
+
     NODE_SET_METHOD(exports, "create", ImageCreate);
     NODE_SET_METHOD(exports, "createTrueColor", ImageCreateTrueColor);
     NODE_SET_METHOD(exports, "createFromJpeg", CreateFromJpeg);
@@ -165,11 +220,19 @@ public:
     NODE_SET_METHOD(exports, "createFromGd2PartPtr", CreateFromGd2PartPtr);
     NODE_SET_METHOD(exports, "createFromWBMP", CreateFromWBMP);
     NODE_SET_METHOD(exports, "createFromWBMPPtr", CreateFromWBMPPtr);
-#if (LATEST_GD)
+#if HAS_LIBWEBP
+    NODE_SET_METHOD(exports, "createFromWebp", CreateFromWebp);
+    NODE_SET_METHOD(exports, "createFromWebpPtr", CreateFromWebpPtr);
+#endif
+
+#if SUPPORTS_GD_2_1_0
     NODE_SET_METHOD(exports, "createFromBmp", CreateFromBmp);
     NODE_SET_METHOD(exports, "createFromBmpPtr", CreateFromBmpPtr);
     // NODE_SET_METHOD(exports, "createFromTiff", CreateFromTiff);
     // NODE_SET_METHOD(exports, "createFromTiffPtr", CreateFromTiffPtr);
+#endif
+
+#if SUPPORTS_GD_2_1_1
     NODE_SET_METHOD(exports, "createFromFile", CreateFromFile);
 #endif
     NODE_SET_METHOD(exports, "trueColor", TrueColor);
@@ -205,12 +268,17 @@ private:
   DECLARE_CREATE_FROM(Gif)
   DECLARE_CREATE_FROM(Gd2)
   DECLARE_CREATE_FROM(WBMP)
+#if HAS_LIBWEBP
+  DECLARE_CREATE_FROM(Webp)
+#endif
 
-#if (LATEST_GD)
+#if SUPPORTS_GD_2_1_0
   DECLARE_CREATE_FROM(Bmp);
+#endif
   // libgd appears to open tiff's buggy...
   // DECLARE_CREATE_FROM(Tiff)
 
+#if SUPPORTS_GD_2_1_1
   static NAN_METHOD(CreateFromFile) {
     NanScope();
     REQ_STR_ARG(0, path);
@@ -312,16 +380,26 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "gd2Ptr", Gd2Ptr);
       NODE_SET_PROTOTYPE_METHOD(t, "wbmp", WBMP);
       NODE_SET_PROTOTYPE_METHOD(t, "wbmpPtr", WBMPPtr);
-#if (LATEST_GD)
+#if HAS_LIBWEBP
+      NODE_SET_PROTOTYPE_METHOD(t, "webp", Webp);
+      NODE_SET_PROTOTYPE_METHOD(t, "webpPtr", WebpPtr);
+#endif
+
+#if SUPPORTS_GD_2_1_0
       NODE_SET_PROTOTYPE_METHOD(t, "bmp", Bmp);
       NODE_SET_PROTOTYPE_METHOD(t, "bmpPtr", BmpPtr);
-  #ifdef HAVE_LIBTIFF
+#endif
+
+#ifdef HAS_LIBTIFF
       NODE_SET_PROTOTYPE_METHOD(t, "tiff", Tiff);
       NODE_SET_PROTOTYPE_METHOD(t, "tiffPtr", TiffPtr);
-  #endif
+#endif
+
+#if SUPPORTS_GD_2_1_1
       NODE_SET_PROTOTYPE_METHOD(t, "file", File);
       NODE_SET_PROTOTYPE_METHOD(t, "fileCallback", FileCallback);
 #endif
+
       NODE_SET_PROTOTYPE_METHOD(t, "destroy", Destroy);
 
       /**
@@ -351,7 +429,7 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "saveAlpha", SaveAlpha);
       NODE_SET_PROTOTYPE_METHOD(t, "setClip", SetClip);
       NODE_SET_PROTOTYPE_METHOD(t, "getClip", GetClip);
-#if (LATEST_GD)
+#if SUPPORTS_GD_2_1_0
       NODE_SET_PROTOTYPE_METHOD(t, "setResolution", SetResolution);
 #endif
 
@@ -364,10 +442,13 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "imageColorAt", ImageColorAt);
       NODE_SET_PROTOTYPE_METHOD(t, "getBoundsSafe", GetBoundsSafe);
       // trueColor
-      t->InstanceTemplate()->SetAccessor(NanNew("trueColor"), TrueColorGetter, 0, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
+      t->InstanceTemplate()->SetAccessor(NanNew("trueColor"),
+        TrueColorGetter, 0, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
       // width, height
-      t->InstanceTemplate()->SetAccessor(NanNew("width"), WidthGetter, 0, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
-      t->InstanceTemplate()->SetAccessor(NanNew("height"), HeightGetter, 0, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
+      t->InstanceTemplate()->SetAccessor(NanNew("width"),
+        WidthGetter, 0, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
+      t->InstanceTemplate()->SetAccessor(NanNew("height"),
+        HeightGetter, 0, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
 
       /**
        * Font and Text Handling Functions
@@ -396,7 +477,7 @@ private:
        * Color Manipulation Functions
        */
       NODE_SET_PROTOTYPE_METHOD(t, "colorTransparent", ColorTransparent);
-#if (LATEST_GD)
+#if SUPPORTS_GD_2_1_0
       NODE_SET_PROTOTYPE_METHOD(t, "colorReplace", ColorReplace);
       NODE_SET_PROTOTYPE_METHOD(t, "colorReplaceThreshold", ColorReplaceThreshold);
       NODE_SET_PROTOTYPE_METHOD(t, "colorReplaceArray", ColorReplaceArray);
@@ -404,13 +485,12 @@ private:
       /**
        * Effects
        */
-      NODE_SET_PROTOTYPE_METHOD(t, "toGrayscale",GrayScale);
+      NODE_SET_PROTOTYPE_METHOD(t, "toGrayscale", GrayScale);
       NODE_SET_PROTOTYPE_METHOD(t, "gaussianBlur", GaussianBlur);
       NODE_SET_PROTOTYPE_METHOD(t, "negate", Negate);
       NODE_SET_PROTOTYPE_METHOD(t, "brightness", Brightness);
       NODE_SET_PROTOTYPE_METHOD(t, "contrast", Contrast);
       NODE_SET_PROTOTYPE_METHOD(t, "selectiveBlur", SelectiveBlur);
-      NODE_SET_PROTOTYPE_METHOD(t, "emboss", Emboss);
       NODE_SET_PROTOTYPE_METHOD(t, "flipHorizontal", FlipHorizontal);
       NODE_SET_PROTOTYPE_METHOD(t, "flipVertical", FlipVertical);
       NODE_SET_PROTOTYPE_METHOD(t, "flipBoth", FlipBoth);
@@ -418,11 +498,17 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "cropAuto", CropAuto);
       NODE_SET_PROTOTYPE_METHOD(t, "cropThreshold", CropThreshold);
 #endif
+
+#if SUPPORTS_GD_2_1_1
+      NODE_SET_PROTOTYPE_METHOD(t, "emboss", Emboss);
+#endif
       NODE_SET_PROTOTYPE_METHOD(t, "sharpen", Sharpen);
 
       // interlace
-      t->InstanceTemplate()->SetAccessor(NanNew("interlace"), InterlaceGetter, InterlaceSetter, Handle<Value>(), PROHIBITS_OVERWRITING);
-      t->InstanceTemplate()->SetAccessor(NanNew("colorsTotal"), ColorsTotalGetter, 0, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
+      t->InstanceTemplate()->SetAccessor(NanNew("interlace"),
+        InterlaceGetter, InterlaceSetter, Handle<Value>(), PROHIBITS_OVERWRITING);
+      t->InstanceTemplate()->SetAccessor(NanNew("colorsTotal"),
+        ColorsTotalGetter, 0, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
 
       /**
        * Copying and Resizing Functions
@@ -573,6 +659,33 @@ private:
       RETURN_DATA()
     }
 
+#if HAS_LIBWEBP
+    static NAN_METHOD(Webp) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      REQ_STR_ARG(0, path);
+      OPT_INT_ARG(1, level, -1);
+
+      FILE *out = fopen(*path, "wb");
+      gdImageWebpEx(*im, out, level);
+      fclose(out);
+
+      NanReturnThis();
+    }
+
+    static NAN_METHOD(WebpPtr) {
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      OPT_INT_ARG(0, level, -1);
+
+      int size;
+      char *data = (char*)gdImageWebpPtrEx(*im, &size, level);
+
+      RETURN_DATA()
+    }
+#endif
+
     static NAN_METHOD(Gd) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
@@ -622,7 +735,7 @@ private:
       RETURN_DATA()
     }
 
-#if (LATEST_GD)
+#if SUPPORTS_GD_2_1_0
     static NAN_METHOD(Bmp) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
@@ -647,8 +760,9 @@ private:
 
       RETURN_DATA()
     }
+#endif
 
-  #ifdef HAVE_LIBTIFF
+#ifdef HAS_LIBTIFF
     static NAN_METHOD(Tiff) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
@@ -670,8 +784,9 @@ private:
 
       RETURN_DATA()
     }
-  #endif
+#endif
 
+#if SUPPORTS_GD_2_1_1
     static NAN_METHOD(File) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
@@ -1132,7 +1247,7 @@ private:
       NanReturnValue(result);
     }
 
-#if (LATEST_GD)
+#if SUPPORTS_GD_2_1_0
     static NAN_METHOD(SetResolution) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
@@ -1510,7 +1625,7 @@ private:
       NanReturnThis();
     }
 
-#if (LATEST_GD)
+#if SUPPORTS_GD_2_1_0
     static NAN_METHOD(ColorReplace) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
@@ -1531,7 +1646,8 @@ private:
       REQ_INT_ARG(1, toColor);
       REQ_DOUBLE_ARG(2, threshold);
 
-      Local<Number> result = NanNew<Integer>(gdImageColorReplaceThreshold(*im, fromColor, toColor, threshold));
+      Local<Number> result =
+        NanNew<Integer>(gdImageColorReplaceThreshold(*im, fromColor, toColor, threshold));
 
       NanReturnValue(result);
     }
@@ -1566,7 +1682,8 @@ private:
         return NanThrowError("Color arrays should have same length.");
       }
 
-      Local<Number> result = NanNew<Integer>(gdImageColorReplaceArray(*im, _flen, fromColors, toColors));
+      Local<Number> result =
+        NanNew<Integer>(gdImageColorReplaceArray(*im, _flen, fromColors, toColors));
 
       NanReturnValue(result);
     }
@@ -1627,14 +1744,6 @@ private:
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
       gdImageSelectiveBlur(*im);
-      NanReturnThis();
-    }
-
-    static NAN_METHOD(Emboss) {
-      NanScope();
-      Image *im = ObjectWrap::Unwrap<Image>(args.This());
-
-      gdImageEmboss(*im);
       NanReturnThis();
     }
 
@@ -1707,6 +1816,16 @@ private:
 
       gdImagePtr newImage = gdImageCropThreshold(*im, color, threshold);
       RETURN_IMAGE(newImage);
+    }
+#endif
+
+#if SUPPORTS_GD_2_1_1
+    static NAN_METHOD(Emboss) {
+      NanScope();
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      gdImageEmboss(*im);
+      NanReturnThis();
     }
 #endif
 

@@ -64,9 +64,14 @@ formats =
   gd2Part: [5, -1]
   WBMP: [1, 1]
 
-if gd_bindings.getGDVersion() >= '2.1.1'
+if gd_bindings.getGDVersion() >= '2.1.0'
   formats.bmp = [1, 2]
+
+if gd_bindings.GD_TIFF && gd_bindings.getGDVersion() >= '2.1.0'
   formats.tiff = [-1, 1]
+
+if gd_bindings.GD_WEBP && gd_bindings.getGDVersion() >= '2.1.0'
+  formats.webp = [1, 2]
 
 # create wrapper functions
 for format of formats
