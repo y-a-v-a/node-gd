@@ -22,6 +22,7 @@
 #include <string.h>
 #include <assert.h>
 #include <nan.h>
+#include <sstream>
 
 using namespace v8;
 using namespace node;
@@ -353,7 +354,9 @@ private:
 
   static NAN_METHOD(GdVersionGetter) {
     NanScope();
-    NanReturnValue(GD_VERSION_STRING);
+    std::stringstream version_string;
+    version_string << GD_MAJOR_VERSION << "." << GD_MINOR_VERSION << "." << GD_RELEASE_VERSION;
+    NanReturnValue(version_string.str());
   }
 
 
