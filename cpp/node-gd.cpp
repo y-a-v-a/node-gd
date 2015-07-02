@@ -418,7 +418,9 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "filledRectangle", FilledRectangle);
       NODE_SET_PROTOTYPE_METHOD(t, "arc", Arc);
       NODE_SET_PROTOTYPE_METHOD(t, "filledArc", FilledArc);
+#if SUPPORTS_GD_2_1_0
       NODE_SET_PROTOTYPE_METHOD(t, "ellipse", Ellipse);
+#endif
       NODE_SET_PROTOTYPE_METHOD(t, "filledEllipse", FilledEllipse);
       NODE_SET_PROTOTYPE_METHOD(t, "fillToBorder", FillToBorder);
       NODE_SET_PROTOTYPE_METHOD(t, "fill", Fill);
@@ -1057,6 +1059,7 @@ private:
       NanReturnThis();
     }
 
+#if SUPPORTS_GD_2_1_0
     static NAN_METHOD(Ellipse) {
       NanScope();
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
@@ -1072,6 +1075,7 @@ private:
 
       NanReturnThis();
     }
+#endif
 
     static NAN_METHOD(FilledEllipse) {
       NanScope();
