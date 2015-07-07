@@ -359,7 +359,7 @@ Replace one color with another. The `threshold` will broaden the range of replac
 #### gd.Image#colorReplaceArray(fromColors, toColors)
 Replace colors in `fromColors` array to `toColors` array. The arrays should be of equal length.
 ### Effects
-#### gd.Image#toGrayscale()
+#### gd.Image#grayscale()
 Remove all color from an image and create a grayscaled image. Only available from libgd2 version 2.1.x.
 #### gd.Image#gaussianBlur()
 Apply gaussian blur. Can by applied multiple times to an image to get more blur.
@@ -377,14 +377,38 @@ Flip the image on the canvas over the vertical axis. This means that what's at t
 Flip the image on the canvas over the horizontal axis, the oposite of the above.
 #### gd.Image#flipBoth()
 Flip the image on the canvas over both axes.
-#### gd.Image#sharpen(pct)
-Does not work on non-true color images. A value lower than 0 for `pct` is ignored.
 #### gd.Image#crop(x, y, width, height)
 Crop the supplied image from a certain point to a certain size. Will return a new instance of `gd.Image`. Negative numbers, i.e. when going out of the image bounds, can result in images with black parts.
 #### gd.Image#cropAuto(mode)
 The mode parameter is a value from 0 to 4, so there are 5 modes: `0`: default: 4 corners or background, `1`: crop using the transparent color, `2`: crop black borders, `3`: crop white borders, `4`: crop using colors of the 4 corners.
 #### gd.Image#cropThreshold(color, threshold)
 Crop by color, with a threshold. Use for color an integer and for threshold a number.
+#### gd.Image#sharpen(pct)
+Does not work on non-true color images. A value lower than 0 for `pct` is ignored.
+#### gd.Image#createPaletteFromTrueColor(ditherFlag, colorsWanted)
+Create and return a new palette based image instance of gd.Image. The `ditherFlag` is either `0` or `1` (a `Number`, not a `Boolean`), `colorsWanted` a value between 1 and 256.
+#### gd.Image#trueColorToPalette(ditherFlag, colorsWanted)
+Modify the current image into a palette based image. The `ditherFlag` is either `0` or `1` (a `Number`, not a `Boolean`), `colorsWanted` a value between 1 and 256.
+#### gd.Image#paletteToTrueColor()
+Modify the current image, if it is a palette based image, into a true color image.
+#### gd.Image#colorMatch(gd.Image)
+The parameter should be a palette based image, which will be modified and which can be saved afterwards. The return value is a `Number`. This method tries to better match the colors from the palette based image to those of its true color original.
+```javascript
+var gd = require('node-gd');
+// open a true color image
+gd.openFile('/path/to/image.jpg', function(err, trueColor) {
+  // create a new palette based image
+  var palette = trueColor.createPaletteFromTrueColor(1, 128);
+  // match colors to enhance the result of the palette image
+  trueColor.colorMatch(palette);
+  // save the palette based image
+  palette.saveFile('/path/to/result.gif', function(err) {
+    if (err) {
+      throw err;
+    }
+  });
+});
+```
 ### Copying and resizing
 #### gd.Image#copy(dest, dx, dy, sx, sy, width, height)
 #### gd.Image#copyResized(dest, dx, dy, sx, sy, dw, dh, sw, sh)

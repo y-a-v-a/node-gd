@@ -511,7 +511,7 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "createPaletteFromTrueColor", CreatePaletteFromTrueColor);
       NODE_SET_PROTOTYPE_METHOD(t, "trueColorToPalette", TrueColorToPalette);
 #if SUPPORTS_GD_2_1_0
-      NODE_SET_PROTOTYPE_METHOD(t, "palleteToTrueColor", PaletteToTrueColor);
+      NODE_SET_PROTOTYPE_METHOD(t, "paletteToTrueColor", PaletteToTrueColor);
       NODE_SET_PROTOTYPE_METHOD(t, "colorMatch", ColorMatch);
 #endif
 
