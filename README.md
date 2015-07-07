@@ -58,6 +58,7 @@ img.colorAllocate(0, 255, 0);
 
 // Set text color
 var txtColor = img.colorAllocate(255, 0, 255);
+
 // Set full path to font file
 var fontPath = '/full/path/to/font.ttf';
 
@@ -80,6 +81,7 @@ gd.openFile('/path/to/file.jpg', function(err, img) {
   if (err) {
     throw err;
   }
+
   img.emboss();
   img.brightness(75);
   img.saveFile('/path/to/newFile.bmp', function(err) {
@@ -122,11 +124,13 @@ Returns an object of type `gd.Image` . This is a true color image, and thus has 
 Open a JPG file. If no callback is supplied, it will return an instance of `gd.Image`. In case of a supplied callback, it will receive two parameters: `error` and an instance of `gd.Image`. Uses `fs.readFile()` and `gd.createFromJpegPtr()` to load the image asynchronously.
 ```javascript
 var gd = require('node-gd');
+
 // open Jpeg image
 gd.openJpeg('/path/to/file.jpg', function(error, image) {
   if (error) {
     throw error;
   }
+
   // save it as a PNG image
   image.savePng('/path/to/file.png', 0, function(error) {
     if (error) {
@@ -172,6 +176,7 @@ A synchronous version of the above.
 Returns an integer representation of the supplied color values.
 ```javascript
 var gd = require('node-gd');
+
 var red = gd.trueColor(255, 0, 0); // 16711680
 ```
 Alternatively, you can use the hex notation for color values for parameters for GD likewise:
@@ -190,6 +195,7 @@ compatibility (...)
 Example:
 ```javascript
 var gd = require('node-gd');
+
 var transparentRed = gd.trueColorAlpha(255, 0, 0, 63); // 1073676288
 ```
 #### gd.getGDVersion()
@@ -211,11 +217,13 @@ Draw a closed polygon. The first parameter shoud be an `Array` of `Object`s cont
 // draw a red triangle on a black background
 var gd = require('node-gd');
 var img = gd.createTrueColor(100, 100);
+
 var points = [
   { x: 10, y: 10 },
   { x: 70, y: 50 },
   { x: 30, y: 90 }
 ];
+
 img.polygon(points, 0xff0000);
 img.bmp('test.bmp', 0);
 ```
@@ -395,12 +403,16 @@ Modify the current image, if it is a palette based image, into a true color imag
 The parameter should be a palette based image, which will be modified and which can be saved afterwards. The return value is a `Number`. This method tries to better match the colors from the palette based image to those of its true color original.
 ```javascript
 var gd = require('node-gd');
+
 // open a true color image
 gd.openFile('/path/to/image.jpg', function(err, trueColor) {
+
   // create a new palette based image
   var palette = trueColor.createPaletteFromTrueColor(1, 128);
+
   // match colors to enhance the result of the palette image
   trueColor.colorMatch(palette);
+
   // save the palette based image
   palette.saveFile('/path/to/result.gif', function(err) {
     if (err) {
@@ -429,6 +441,7 @@ gd.openPng('/path/to/input.png', function(err, img) {
   if (err) {
     throw err;
   }
+
   // create jpg pointer from png
   var jpgImageData = img.jpegPtr(0); // jpeg quality 0
   // create gif pointer from png
@@ -439,13 +452,14 @@ gd.openPng('/path/to/input.png', function(err, img) {
   jpgImage.saveFile('./test01.jpg', function(err) {
     if (err) throw err;
   });
+
   // create instance of gd.Image() for gif file
   var gifImage = gd.createFromGifPtr(gifImageData);
   gifImage.saveFile('./test01.gif', function(err) {
     if (err) throw err;
   });
 
- img.destroy();
+  img.destroy();
 });
 ```
 The above example shows how to create a JPEG and GIF file from a PNG file.
@@ -478,11 +492,13 @@ console.log(img);
 ```
 Will yield to something like:
 ```javascript
-{ colorsTotal: 0,
+{
+  colorsTotal: 0,
   interlace: true,
   height: 100,
   width: 100,
-  trueColor: 1 }
+  trueColor: 1
+}
 ```
 #### gd.Image#colorsTotal
 For paletted images, returns the amount of colors in the palette.
@@ -492,6 +508,7 @@ For paletted images, returns the amount of colors in the palette.
 var gd = require('node-gd');
 var img = gd.createTrueColor(100,100);
 img.interlace = true; // set interlace to true
+
 // will save jpeg as progressive jpeg image.
 img.saveJpeg('/path/to/output.jpg', 100, function(err) {
   if (err) throw err;
