@@ -398,7 +398,7 @@ Create and return a new palette based image instance of gd.Image. The `ditherFla
 #### gd.Image#trueColorToPalette(ditherFlag, colorsWanted)
 Modify the current image into a palette based image. The `ditherFlag` is either `0` or `1` (a `Number`, not a `Boolean`), `colorsWanted` a value between 1 and 256.
 #### gd.Image#paletteToTrueColor()
-Modify the current image, if it is a palette based image, into a true color image.
+Modify the current image, if it is a palette based image, into a true color image. From libgd version `2.1.0` this returns either `0` or `1`, in version `2.0.26` it is void.
 #### gd.Image#colorMatch(gd.Image)
 The parameter should be a palette based image, which will be modified and which can be saved afterwards. The return value is a `Number`. This method tries to better match the colors from the palette based image to those of its true color original.
 ```javascript

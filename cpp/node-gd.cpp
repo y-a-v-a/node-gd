@@ -43,6 +43,9 @@ using namespace node;
                   || (GD_MINOR_VERSION == 0                             \
                   && GD_RELEASE_VERSION <= 36))
 
+#define SUPPORTS_UNTIL_GD_2_0_36 (GD_MINOR_VERSION == 0                  \
+                  && GD_RELEASE_VERSION <= 36)
+
 #define HAS_LIBTIFF (HAVE_LIBTIFF && SUPPORTS_GD_2_1_0)
 #define HAS_LIBWEBP (HAVE_LIBWEBP && SUPPORTS_GD_2_1_0)
 
@@ -2014,9 +2017,14 @@ private:
 
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
 
+#if SUPPORTS_GD_2_1_0
       Local<Number> result = NanNew<Integer>(gdImageTrueColorToPalette(*im, ditherFlag, colorsWanted));
-
       NanReturnValue(result);
+#endif
+#if SUPPORTS_UNTIL_GD_2_0_36
+      gdImageTrueColorToPalette(*im, ditherFlag, colorsWanted);
+      NanReturnUndefined();
+#endif
     }
 
 #if SUPPORTS_GD_2_1_0
