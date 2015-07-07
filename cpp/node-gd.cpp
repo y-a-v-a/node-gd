@@ -490,7 +490,7 @@ private:
       /**
        * Effects
        */
-      NODE_SET_PROTOTYPE_METHOD(t, "toGrayscale", GrayScale);
+      NODE_SET_PROTOTYPE_METHOD(t, "grayscale", GrayScale);
       NODE_SET_PROTOTYPE_METHOD(t, "gaussianBlur", GaussianBlur);
       NODE_SET_PROTOTYPE_METHOD(t, "negate", Negate);
       NODE_SET_PROTOTYPE_METHOD(t, "brightness", Brightness);
@@ -508,6 +508,12 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "emboss", Emboss);
 #endif
       NODE_SET_PROTOTYPE_METHOD(t, "sharpen", Sharpen);
+      NODE_SET_PROTOTYPE_METHOD(t, "createPaletteFromTrueColor", CreatePaletteFromTrueColor);
+      NODE_SET_PROTOTYPE_METHOD(t, "trueColorToPalette", TrueColorToPalette);
+#if SUPPORTS_GD_2_1_0
+      NODE_SET_PROTOTYPE_METHOD(t, "palleteToTrueColor", PaletteToTrueColor);
+      NODE_SET_PROTOTYPE_METHOD(t, "colorMatch", ColorMatch);
+#endif
 
       // interlace
       t->InstanceTemplate()->SetAccessor(NanNew("interlace"),
@@ -1986,6 +1992,56 @@ private:
 
       NanReturnThis();
     }
+
+    static NAN_METHOD(CreatePaletteFromTrueColor) {
+      NanScope();
+
+      OPT_INT_ARG(0, ditherFlag, 0);
+      OPT_INT_ARG(1, colorsWanted, 256);
+
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      gdImagePtr newImage = gdImageCreatePaletteFromTrueColor(*im, ditherFlag, colorsWanted);
+
+      RETURN_IMAGE(newImage);
+    }
+
+    static NAN_METHOD(TrueColorToPalette) {
+      NanScope();
+
+      OPT_INT_ARG(0, ditherFlag, 0);
+      OPT_INT_ARG(1, colorsWanted, 256);
+
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      Local<Number> result = NanNew<Integer>(gdImageTrueColorToPalette(*im, ditherFlag, colorsWanted));
+
+      NanReturnValue(result);
+    }
+
+#if SUPPORTS_GD_2_1_0
+    static NAN_METHOD(PaletteToTrueColor) {
+      NanScope();
+
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      Local<Number> result = NanNew<Integer>(gdImagePaletteToTrueColor(*im));
+
+      NanReturnValue(result);
+    }
+
+    static NAN_METHOD(ColorMatch) {
+      NanScope();
+
+      REQ_IMG_ARG(0, palette);
+
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      Local<Number> result = NanNew<Integer>(gdImageColorMatch(*im, *palette));
+
+      NanReturnValue(result);
+    }
+#endif
 
     /**
      * Miscellaneous Functions

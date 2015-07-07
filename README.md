@@ -461,7 +461,7 @@ Will yield to something like:
   trueColor: 1 }
 ```
 #### gd.Image#colorsTotal
-For paletted images, returns the amount of colors in the pallete.
+For paletted images, returns the amount of colors in the palette.
 #### gd.Image#interlace
 `Boolean` value for if the image is interlaced or not. This property can also be set. When set to `true` for Jpeg images, GD will save it as a progressive Jpeg image.
 ```javascript

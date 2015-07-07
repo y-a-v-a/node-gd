@@ -69,7 +69,7 @@ describe 'Node.js GD Graphics Library', ->
     gd.openPng s, (err, img) ->
       throw err if err
 
-      img.toGrayscale()
+      img.grayscale()
 
       img.savePng t, -1, (err) ->
         throw err if err
