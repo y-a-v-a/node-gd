@@ -94,7 +94,6 @@ using namespace node;
   Local<Object> _obj_ = Local<Object>::Cast(args[I]);                   \
   Image *VAR = ObjectWrap::Unwrap<Image>(_obj_);
 
-
 #define OPT_INT_ARG(I, VAR, DEFAULT)                                    \
   int VAR;                                                              \
   if (args.Length() <= (I)) {                                           \
@@ -517,6 +516,9 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "paletteToTrueColor", PaletteToTrueColor);
       NODE_SET_PROTOTYPE_METHOD(t, "colorMatch", ColorMatch);
 #endif
+      NODE_SET_PROTOTYPE_METHOD(t, "gifAnimBegin", GifAnimBegin);
+      NODE_SET_PROTOTYPE_METHOD(t, "gifAnimAdd", GifAnimAdd);
+      NODE_SET_PROTOTYPE_METHOD(t, "gifAnimEnd", GifAnimEnd);
 
       // interlace
       t->InstanceTemplate()->SetAccessor(NanNew("interlace"),
@@ -1197,7 +1199,6 @@ private:
 
       delete[] sty;
 
-
       NanReturnThis();
     }
 
@@ -1706,7 +1707,7 @@ private:
 
     static NAN_METHOD(GrayScale) {
       NanScope();
-      // Silently fail on missing gdImageGrayScale
+
       Image *im = ObjectWrap::Unwrap<Image>(args.This());
       gdImageGrayScale(*im);
 
@@ -2050,6 +2051,65 @@ private:
       NanReturnValue(result);
     }
 #endif
+
+    static NAN_METHOD(GifAnimBegin) {
+      NanScope();
+
+      REQ_STR_ARG(0, path);
+      REQ_INT_ARG(1, GlobalCM);
+      REQ_INT_ARG(2, Loops);
+
+      FILE *out = fopen(*path, "wb");
+
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      gdImageGifAnimBegin(*im, out, GlobalCM, Loops);
+      fclose(out);
+
+      NanReturnThis();
+    }
+
+    static NAN_METHOD(GifAnimAdd) {
+      NanScope();
+
+      REQ_STR_ARG(0, path);
+      REQ_INT_ARG(1, LocalCM);
+      REQ_INT_ARG(2, LeftOfs);
+      REQ_INT_ARG(3, TopOfs);
+      REQ_INT_ARG(4, Delay);
+      REQ_INT_ARG(5, Disposal);
+
+      FILE *out = fopen(*path, "ab");
+
+      Image *im = ObjectWrap::Unwrap<Image>(args.This());
+
+      if (args.Length() <= 6) {
+        return NanThrowError("Argument 6 must be an object");
+      } else if (args[6]->IsObject()) {
+        Image *prevFrame;
+        Local<Object> _obj_ = Local<Object>::Cast(args[6]);
+        prevFrame = ObjectWrap::Unwrap<Image>(_obj_);
+        gdImageGifAnimAdd(*im, out, LocalCM, LeftOfs, TopOfs, Delay, Disposal, *prevFrame);
+      } else {
+        gdImageGifAnimAdd(*im, out, LocalCM, LeftOfs, TopOfs, Delay, Disposal, NULL);
+      }
+
+      fclose(out);
+
+      NanReturnThis();
+    }
+
+    static NAN_METHOD(GifAnimEnd) {
+      NanScope();
+
+      REQ_STR_ARG(0, path);
+
+      FILE *out = fopen(*path, "ab");
+      gdImageGifAnimEnd(out);
+      fclose(out);
+
+      NanReturnThis();
+    }
 
     /**
      * Miscellaneous Functions
