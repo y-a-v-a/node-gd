@@ -421,6 +421,60 @@ gd.openFile('/path/to/image.jpg', function(err, trueColor) {
   });
 });
 ```
+#### gd.Image#gifAnimBegin(anim, useGlobalColorMap, loops)
+Create an animated GIF.
+
+* `anim` is a `String` referencing a filename to be created, like `./anim.gif`
+*  `useGlobalColorMap` a value being `-1`, `0` or `1` which determines if the colorMap of the current image will be used as the global colorMap for the whole animation. `-1` indicates `do default`.
+* The value for `loops` can be `-1` for no looping, `0` means infinite looping, any other value the amount of loops the animation should run.
+
+
+#### gd.Image#gifAnimAdd(anim, localColorMap, leftOffset, topOffset, delay, disposal, prevFrame)
+
+
+* Add current image to the specified `anim`.
+* `localColorMap` is a flag indicating wether GD should use this image's colorMap
+* `leftOffset` and `topOffset` indicate the offset of this frame
+* the `delay` is the delay before next frame (in 1/100 sec)
+* `disposal` defines how this frame is handled when the next frame is loads. Usually this value should be set to `0`, quote from gd's source: _meaning that the pixels changed by this frame should remain on the display when the next frame begins to render_
+
+
+#### gd.Image#gifAnimEnd(anim)
+Write and close the GIF animation. A complete working example could look like this:
+```javascript
+var gd = require('node-gd');
+var anim = './anim.gif';
+
+// create first frame
+var firstFrame = gd.create(200,200);
+
+// allocate some colors
+var whiteBackground = firstFrame.colorAllocate(255, 255, 255);
+var pink = firstFrame.colorAllocate(255, 0, 255);
+
+// create first frame and draw an ellipse
+firstFrame.ellipse(100, -50, 100, 100, pink);
+// start animation
+firstFrame.gifAnimBegin(anim, 1, -1);
+firstFrame.gifAnimAdd(anim, 0, 0, 0, 5, 1, null);
+
+var totalFrames = [];
+for(var i = 0; i < 30; i++) {
+  totalFrames.push(i);
+}
+
+totalFrames.forEach(function(i, idx, arr) {
+  var frame = gd.create(200, 200);
+  arr[idx] = frame;
+  frame.ellipse(100, (i * 10 - 40), 100, 100, pink);
+  var lastFrame = i === 0 ? firstFrame : arr[i - 1];
+  frame.gifAnimAdd(anim, 0, 0, 0, 5, 1, lastFrame);
+  frame.destroy();
+});
+
+firstFrame.gifAnimEnd(anim);
+firstFrame.destroy();
+```
 ### Copying and resizing
 #### gd.Image#copy(dest, dx, dy, sx, sy, width, height)
 #### gd.Image#copyResized(dest, dx, dy, sx, sy, dw, dh, sw, sh)
