@@ -437,6 +437,7 @@ Create an animated GIF.
 * `leftOffset` and `topOffset` indicate the offset of this frame
 * the `delay` is the delay before next frame (in 1/100 sec)
 * `disposal` defines how this frame is handled when the next frame is loads. Usually this value should be set to `0`, quote from gd's source: _meaning that the pixels changed by this frame should remain on the display when the next frame begins to render_
+* `prevFrame` should refer to the previous frame. If the current image is the first frame, supply `null`.
 
 
 #### gd.Image#gifAnimEnd(anim)
