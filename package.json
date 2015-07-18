@@ -1,7 +1,7 @@
 {
   "name": "node-gd",
   "version": "0.5.2",
-  "description": "GD graphic library (libgd) C++ bindings for Node.js",
+  "description": "GD graphics library (libgd) C++ bindings for Node.js",
   "main": "js/node-gd.js",
   "directories": {
     "test": "test"
