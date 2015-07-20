@@ -108,8 +108,8 @@ using namespace node;
   if (!IMG) NanReturnNull();                                            \
   Local<Value> _arg_ = NanNew<External>(IMG);                           \
   Persistent<Object> handle;                                            \
-  Handle<FunctionTemplate> func = NanNew(Image::constructor);           \
-  Handle<Object> _image_ = func->GetFunction()->NewInstance(1, &_arg_); \
+  Local<FunctionTemplate> func = NanNew(Image::constructor);           \
+  Local<Object> _image_ = func->GetFunction()->NewInstance(1, &_arg_); \
   NanAssignPersistent(handle, _image_);                                 \
   NanReturnValue(_image_);
 
@@ -163,7 +163,7 @@ using namespace node;
 
 class Gd : public node::ObjectWrap {
 public:
-  static void Init(Handle<Object> exports) {
+  static void Init(Local<Object> exports) {
     NanScope();
 
     NODE_DEFINE_CONSTANT(exports, COLOR_ANTIALIASED);
@@ -366,7 +366,7 @@ private:
   public:
     static Persistent<FunctionTemplate> constructor;
 
-    static void Init(v8::Handle<Object> exports) {
+    static void Init(v8::Local<Object> exports) {
       NanScope();
 
       Local<FunctionTemplate> t = NanNew<FunctionTemplate>(New);
@@ -450,12 +450,12 @@ private:
       NODE_SET_PROTOTYPE_METHOD(t, "getBoundsSafe", GetBoundsSafe);
       // trueColor
       t->InstanceTemplate()->SetAccessor(NanNew("trueColor"),
-        TrueColorGetter, 0, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
+        TrueColorGetter, 0, Local<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
       // width, height
       t->InstanceTemplate()->SetAccessor(NanNew("width"),
-        WidthGetter, 0, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
+        WidthGetter, 0, Local<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
       t->InstanceTemplate()->SetAccessor(NanNew("height"),
-        HeightGetter, 0, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
+        HeightGetter, 0, Local<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
 
       /**
        * Font and Text Handling Functions
@@ -522,9 +522,9 @@ private:
 
       // interlace
       t->InstanceTemplate()->SetAccessor(NanNew("interlace"),
-        InterlaceGetter, InterlaceSetter, Handle<Value>(), PROHIBITS_OVERWRITING);
+        InterlaceGetter, InterlaceSetter, Local<Value>(), PROHIBITS_OVERWRITING);
       t->InstanceTemplate()->SetAccessor(NanNew("colorsTotal"),
-        ColorsTotalGetter, 0, Handle<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
+        ColorsTotalGetter, 0, Local<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
 
       /**
        * Copying and Resizing Functions
@@ -826,13 +826,13 @@ private:
       bool result = gdImageFile(*im, *path);
       if (result == false) {
         Local<Value> err = Exception::Error(NanNew<String>("Unable to write file."));
-        Handle<Value> argv[] = {
+        Local<Value> argv[] = {
           // NanError(NanNew<String>("fail!"))
           err
         };
         callback->Call(1, argv);
       } else {
-        Handle<Value> argv[] = {
+        Local<Value> argv[] = {
           NanNull()
         };
         callback->Call(1, argv);
@@ -2136,7 +2136,7 @@ Persistent<FunctionTemplate> Gd::Image::constructor;
 
 extern "C"
 {
-  void init (Handle<Object> exports) {
+  void init (Local<Object> exports) {
     NanScope();
 
     Gd::Init(exports);
