@@ -16,7 +16,7 @@
   "targets": [
     {
       "target_name": "node_gd",
-      "sources": ["cpp/node-gd.cpp"],
+      "sources": ["cpp/addon.cc"],
       "libraries": ["-lgd"],
       "include_dirs": [
         "<!(node -e \"require('nan')\")"
