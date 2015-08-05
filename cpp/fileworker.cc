@@ -2,6 +2,7 @@
 #include "node_gd.h"
 #include <gd.h>
 
+#if SUPPORTS_GD_2_1_1
 class FileWorker : public Nan::AsyncWorker {
   public:
     FileWorker(Nan::Callback *callback, gdImagePtr image, char *path)
@@ -27,3 +28,4 @@ class FileWorker : public Nan::AsyncWorker {
     char *_path;
     bool result;
 };
+#endif
