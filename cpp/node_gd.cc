@@ -29,28 +29,6 @@
 using namespace v8;
 using namespace node;
 
-#define SUPPORTS_GD_2_2_0 (GD_MINOR_VERSION == 2                        \
-                  && GD_RELEASE_VERSION == 0)
-
-#define SUPPORTS_GD_2_1_1 (SUPPORTS_GD_2_2_0                            \
-                  || (GD_MINOR_VERSION == 1                             \
-                  && GD_RELEASE_VERSION == 1))
-
-#define SUPPORTS_GD_2_1_0 (SUPPORTS_GD_2_1_1                            \
-                  || (GD_MINOR_VERSION == 1                             \
-                  && GD_RELEASE_VERSION == 0))
-
-#define SUPPORTS_GD_2_0_36 (SUPPORTS_GD_2_1_0                           \
-                  || SUPPORTS_GD_2_1_0                                  \
-                  || (GD_MINOR_VERSION == 0                             \
-                  && GD_RELEASE_VERSION <= 36))
-
-#define SUPPORTS_UNTIL_GD_2_0_36 (GD_MINOR_VERSION == 0                  \
-                  && GD_RELEASE_VERSION <= 36)
-
-#define HAS_LIBTIFF (HAVE_LIBTIFF && SUPPORTS_GD_2_1_0)
-#define HAS_LIBWEBP (HAVE_LIBWEBP && SUPPORTS_GD_2_1_0)
-
 // Since gd 2.0.28, these are always built in
 #define GD_GIF 1
 #define GD_GIFANIM 1
@@ -150,7 +128,6 @@ using namespace node;
   Local<Value> result = Nan::Encode(data, size, Nan::BINARY);           \
   delete[] data;                                                        \
   info.GetReturnValue().Set(result);
-
 
 #define COLOR_ANTIALIASED    gdAntiAliased
 #define COLOR_BRUSHED        gdBrushed
@@ -345,13 +322,19 @@ NAN_METHOD(Gd::GdVersionGetter) {
   info.GetReturnValue().Set(s);
 }
 
-
-
+/**
+ * Image is a subclass of Gd
+ */
 void Gd::Image::Init(v8::Local<Object> exports) {
   Local<FunctionTemplate> t = Nan::New<FunctionTemplate>(New);
   t->SetClassName(Nan::New<String>("Image").ToLocalChecked());
   t->InstanceTemplate()->SetInternalFieldCount(1);
 
+  Nan::SetPrototypeMethod(t, "destroy", Destroy);
+
+  /**
+   * Type transform functions
+   */
   Nan::SetPrototypeMethod(t, "jpeg", Jpeg);
   Nan::SetPrototypeMethod(t, "jpegPtr", JpegPtr);
   Nan::SetPrototypeMethod(t, "png", Png);
@@ -368,23 +351,18 @@ void Gd::Image::Init(v8::Local<Object> exports) {
   Nan::SetPrototypeMethod(t, "webp", Webp);
   Nan::SetPrototypeMethod(t, "webpPtr", WebpPtr);
 #endif
-
 #if SUPPORTS_GD_2_1_0
   Nan::SetPrototypeMethod(t, "bmp", Bmp);
   Nan::SetPrototypeMethod(t, "bmpPtr", BmpPtr);
 #endif
-
 #if HAS_LIBTIFF
   Nan::SetPrototypeMethod(t, "tiff", Tiff);
   Nan::SetPrototypeMethod(t, "tiffPtr", TiffPtr);
 #endif
-
 #if SUPPORTS_GD_2_1_1
   Nan::SetPrototypeMethod(t, "file", File);
   Nan::SetPrototypeMethod(t, "fileCallback", FileCallback);
 #endif
-
-  Nan::SetPrototypeMethod(t, "destroy", Destroy);
 
   /**
    * Drawing Functions
@@ -427,6 +405,10 @@ void Gd::Image::Init(v8::Local<Object> exports) {
   Nan::SetPrototypeMethod(t, "getTrueColorPixel", GetTrueColorPixel);
   Nan::SetPrototypeMethod(t, "imageColorAt", ImageColorAt);
   Nan::SetPrototypeMethod(t, "getBoundsSafe", GetBoundsSafe);
+
+  /**
+   * Instance getters and setters
+   */
   // trueColor
   Nan::SetAccessor(t->InstanceTemplate(), Nan::New("trueColor").ToLocalChecked(),
     TrueColorGetter, 0, Local<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
@@ -435,6 +417,11 @@ void Gd::Image::Init(v8::Local<Object> exports) {
     WidthGetter, 0, Local<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
   Nan::SetAccessor(t->InstanceTemplate(), Nan::New("height").ToLocalChecked(),
     HeightGetter, 0, Local<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
+  // interlace
+  Nan::SetAccessor(t->InstanceTemplate(), Nan::New("interlace").ToLocalChecked(),
+    InterlaceGetter, InterlaceSetter, v8::Local<v8::Value>(), PROHIBITS_OVERWRITING);
+  Nan::SetAccessor(t->InstanceTemplate(), Nan::New("colorsTotal").ToLocalChecked(),
+    ColorsTotalGetter, 0, Local<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
 
   /**
    * Font and Text Handling Functions
@@ -469,7 +456,7 @@ void Gd::Image::Init(v8::Local<Object> exports) {
   Nan::SetPrototypeMethod(t, "colorReplaceArray", ColorReplaceArray);
 
   /**
-   * Effects
+   * Effects / filters
    */
   Nan::SetPrototypeMethod(t, "grayscale", GrayScale);
   Nan::SetPrototypeMethod(t, "gaussianBlur", GaussianBlur);
@@ -484,7 +471,6 @@ void Gd::Image::Init(v8::Local<Object> exports) {
   Nan::SetPrototypeMethod(t, "cropAuto", CropAuto);
   Nan::SetPrototypeMethod(t, "cropThreshold", CropThreshold);
 #endif
-
 #if SUPPORTS_GD_2_1_1
   Nan::SetPrototypeMethod(t, "emboss", Emboss);
 #endif
@@ -498,12 +484,6 @@ void Gd::Image::Init(v8::Local<Object> exports) {
   Nan::SetPrototypeMethod(t, "gifAnimBegin", GifAnimBegin);
   Nan::SetPrototypeMethod(t, "gifAnimAdd", GifAnimAdd);
   Nan::SetPrototypeMethod(t, "gifAnimEnd", GifAnimEnd);
-
-  // interlace
-  Nan::SetAccessor(t->InstanceTemplate(), Nan::New("interlace").ToLocalChecked(),
-    InterlaceGetter, InterlaceSetter, v8::Local<v8::Value>(), PROHIBITS_OVERWRITING);
-  Nan::SetAccessor(t->InstanceTemplate(), Nan::New("colorsTotal").ToLocalChecked(),
-    ColorsTotalGetter, 0, Local<Value>(), PROHIBITS_OVERWRITING, ReadOnly);
 
   /**
    * Copying and Resizing Functions
@@ -538,1454 +518,1453 @@ NAN_METHOD(Gd::Image::New) {
 Gd::Image::Image(gdImagePtr image) : _image(image) {}
 Gd::Image::~Image() { if(_image) gdImageDestroy(_image);  }
 
+/**
+ * Destruction, Loading and Saving Functions
+ */
+NAN_METHOD(Gd::Image::Destroy) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  if(im->_image){
+    gdImageDestroy(*im);
+    im->_image = NULL;
+  }
 
-    /**
-     * Destruction, Loading and Saving Functions
-     */
-    NAN_METHOD(Gd::Image::Destroy) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
-      if(im->_image){
-        gdImageDestroy(*im);
-        im->_image = NULL;
-      }
+  info.GetReturnValue().SetUndefined();
+}
 
-      info.GetReturnValue().SetUndefined();
-    }
+NAN_METHOD(Gd::Image::Jpeg) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    NAN_METHOD(Gd::Image::Jpeg) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  REQ_STR_ARG(0, path);
+  OPT_INT_ARG(1, quality, -1);
 
-      REQ_STR_ARG(0, path);
-      OPT_INT_ARG(1, quality, -1);
+  FILE *out = fopen(*path, "wb");
+  gdImageJpeg(*im, out, quality);
+  fclose(out);
 
-      FILE *out = fopen(*path, "wb");
-      gdImageJpeg(*im, out, quality);
-      fclose(out);
+  info.GetReturnValue().Set(info.This());
+}
 
-      info.GetReturnValue().Set(info.This());
-    }
+NAN_METHOD(Gd::Image::JpegPtr) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    NAN_METHOD(Gd::Image::JpegPtr) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  OPT_INT_ARG(0, quality, -1);
 
-      OPT_INT_ARG(0, quality, -1);
+  int size;
+  char *data = (char*)gdImageJpegPtr(*im, &size, quality);
 
-      int size;
-      char *data = (char*)gdImageJpegPtr(*im, &size, quality);
+  RETURN_DATA()
+}
 
-      RETURN_DATA()
-    }
+NAN_METHOD(Gd::Image::Gif) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    NAN_METHOD(Gd::Image::Gif) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  REQ_STR_ARG(0, path);
 
-      REQ_STR_ARG(0, path);
+  FILE *out = fopen(*path, "wb");
+  gdImageGif(*im, out);
+  fclose(out);
 
-      FILE *out = fopen(*path, "wb");
-      gdImageGif(*im, out);
-      fclose(out);
+  info.GetReturnValue().Set(info.This());
+}
 
-      info.GetReturnValue().Set(info.This());
-    }
+NAN_METHOD(Gd::Image::GifPtr) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    NAN_METHOD(Gd::Image::GifPtr) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  int size;
+  char *data = (char*)gdImageGifPtr(*im, &size);
 
-      int size;
-      char *data = (char*)gdImageGifPtr(*im, &size);
+  RETURN_DATA()
+}
 
-      RETURN_DATA()
-    }
+NAN_METHOD(Gd::Image::Png) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    NAN_METHOD(Gd::Image::Png) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  REQ_STR_ARG(0, path);
+  OPT_INT_ARG(1, level, -1);
 
-      REQ_STR_ARG(0, path);
-      OPT_INT_ARG(1, level, -1);
+  FILE *out = fopen(*path, "wb");
+  gdImagePngEx(*im, out, level);
+  fclose(out);
 
-      FILE *out = fopen(*path, "wb");
-      gdImagePngEx(*im, out, level);
-      fclose(out);
+  info.GetReturnValue().Set(info.This());
+}
 
-      info.GetReturnValue().Set(info.This());
-    }
+NAN_METHOD(Gd::Image::PngPtr) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    NAN_METHOD(Gd::Image::PngPtr) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  OPT_INT_ARG(0, level, -1);
 
-      OPT_INT_ARG(0, level, -1);
+  int size;
+  char *data = (char*)gdImagePngPtrEx(*im, &size, level);
 
-      int size;
-      char *data = (char*)gdImagePngPtrEx(*im, &size, level);
+  RETURN_DATA()
+}
 
-      RETURN_DATA()
-    }
+NAN_METHOD(Gd::Image::WBMP) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    NAN_METHOD(Gd::Image::WBMP) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  REQ_STR_ARG(0, path);
+  REQ_INT_ARG(1, foreground);
 
-      REQ_STR_ARG(0, path);
-      REQ_INT_ARG(1, foreground);
+  FILE *out = fopen(*path, "wb");
+  gdImageWBMP(*im, foreground, out);
+  fclose(out);
 
-      FILE *out = fopen(*path, "wb");
-      gdImageWBMP(*im, foreground, out);
-      fclose(out);
+  info.GetReturnValue().Set(info.This());
+}
 
-      info.GetReturnValue().Set(info.This());
-    }
+NAN_METHOD(Gd::Image::WBMPPtr) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    NAN_METHOD(Gd::Image::WBMPPtr) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  REQ_INT_ARG(0, foreground);
 
-      REQ_INT_ARG(0, foreground);
+  int size;
+  char *data = (char*)gdImageWBMPPtr(*im, &size, foreground);
 
-      int size;
-      char *data = (char*)gdImageWBMPPtr(*im, &size, foreground);
-
-      RETURN_DATA()
-    }
+  RETURN_DATA()
+}
 
 #if HAS_LIBWEBP
-    NAN_METHOD(Gd::Image::Webp) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::Webp) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_STR_ARG(0, path);
-      OPT_INT_ARG(1, level, -1);
+  REQ_STR_ARG(0, path);
+  OPT_INT_ARG(1, level, -1);
 
-      FILE *out = fopen(*path, "wb");
-      gdImageWebpEx(*im, out, level);
-      fclose(out);
+  FILE *out = fopen(*path, "wb");
+  gdImageWebpEx(*im, out, level);
+  fclose(out);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::WebpPtr) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::WebpPtr) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      OPT_INT_ARG(0, level, -1);
+  OPT_INT_ARG(0, level, -1);
 
-      int size;
-      char *data = (char*)gdImageWebpPtrEx(*im, &size, level);
+  int size;
+  char *data = (char*)gdImageWebpPtrEx(*im, &size, level);
 
-      RETURN_DATA()
-    }
+  RETURN_DATA()
+}
 #endif
 
-    NAN_METHOD(Gd::Image::Gd) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::Gd) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_STR_ARG(0, path);
+  REQ_STR_ARG(0, path);
 
-      FILE *out = fopen(*path, "wb");
-      gdImageGd(*im, out);
-      fclose(out);
+  FILE *out = fopen(*path, "wb");
+  gdImageGd(*im, out);
+  fclose(out);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::GdPtr) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::GdPtr) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      int size;
-      char *data = (char*)gdImageGdPtr(*im, &size);
+  int size;
+  char *data = (char*)gdImageGdPtr(*im, &size);
 
-      RETURN_DATA()
-    }
+  RETURN_DATA()
+}
 
-    NAN_METHOD(Gd::Image::Gd2) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::Gd2) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_STR_ARG(0, path);
-      REQ_INT_ARG(1, chunkSize);
-      OPT_INT_ARG(2, format, GD2_FMT_RAW);
+  REQ_STR_ARG(0, path);
+  REQ_INT_ARG(1, chunkSize);
+  OPT_INT_ARG(2, format, GD2_FMT_RAW);
 
-      FILE *out = fopen(*path, "wb");
-      gdImageGd2(*im, out, chunkSize, format);
-      fclose(out);
+  FILE *out = fopen(*path, "wb");
+  gdImageGd2(*im, out, chunkSize, format);
+  fclose(out);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::Gd2Ptr) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::Gd2Ptr) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_INT_ARG(0, chunkSize);
-      OPT_INT_ARG(1, format, GD2_FMT_RAW);
+  REQ_INT_ARG(0, chunkSize);
+  OPT_INT_ARG(1, format, GD2_FMT_RAW);
 
-      int size;
-      char *data = (char*)gdImageGd2Ptr(*im, chunkSize, format, &size);
+  int size;
+  char *data = (char*)gdImageGd2Ptr(*im, chunkSize, format, &size);
 
-      RETURN_DATA()
-    }
+  RETURN_DATA()
+}
 
 #if SUPPORTS_GD_2_1_0
-    NAN_METHOD(Gd::Image::Bmp) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::Bmp) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_STR_ARG(0, path);
-      REQ_INT_ARG(1, compression);
+  REQ_STR_ARG(0, path);
+  REQ_INT_ARG(1, compression);
 
-      FILE *out = fopen(*path, "wb");
-      gdImageBmp(*im, out, compression);
-      fclose(out);
+  FILE *out = fopen(*path, "wb");
+  gdImageBmp(*im, out, compression);
+  fclose(out);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::BmpPtr) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::BmpPtr) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      OPT_INT_ARG(0, compression, 0);
+  OPT_INT_ARG(0, compression, 0);
 
-      int size;
-      char *data = (char*)gdImageBmpPtr(*im, &size, compression);
+  int size;
+  char *data = (char*)gdImageBmpPtr(*im, &size, compression);
 
-      RETURN_DATA()
-    }
+  RETURN_DATA()
+}
 #endif
 
 #if HAS_LIBTIFF
-    NAN_METHOD(Gd::Image::Tiff) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::Tiff) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_STR_ARG(0, path);
+  REQ_STR_ARG(0, path);
 
-      FILE *out = fopen(*path, "wb");
-      gdImageTiff(*im, out);
-      fclose(out);
+  FILE *out = fopen(*path, "wb");
+  gdImageTiff(*im, out);
+  fclose(out);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::TiffPtr) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::TiffPtr) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      int size;
-      char *data = (char*)gdImageTiffPtr(*im, &size);
+  int size;
+  char *data = (char*)gdImageTiffPtr(*im, &size);
 
-      RETURN_DATA()
-    }
+  RETURN_DATA()
+}
 #endif
 
 #if SUPPORTS_GD_2_1_1
-    NAN_METHOD(Gd::Image::File) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::File) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_STR_ARG(0, path);
+  REQ_STR_ARG(0, path);
 
-      gdImageFile(*im, *path);
+  gdImageFile(*im, *path);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::FileCallback) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::FileCallback) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_STR_ARG(0, path);
-      REQ_FN_ARG(1, cb);
+  REQ_STR_ARG(0, path);
+  REQ_FN_ARG(1, cb);
 
-      Nan::Callback *callback = new Nan::Callback(cb);
+  Nan::Callback *callback = new Nan::Callback(cb);
 
-      Nan::AsyncQueueWorker(new FileWorker(callback, *im, *path));
-    }
+  Nan::AsyncQueueWorker(new FileWorker(callback, *im, *path));
+}
 #endif
 
-    /**
-     * Drawing Functions
-     */
-    NAN_METHOD(Gd::Image::SetPixel) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+/**
+ * Drawing Functions
+ */
+NAN_METHOD(Gd::Image::SetPixel) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_ARGS(3);
-      REQ_INT_ARG(0, x);
-      REQ_INT_ARG(1, y);
-      REQ_INT_ARG(2, color);
+  REQ_ARGS(3);
+  REQ_INT_ARG(0, x);
+  REQ_INT_ARG(1, y);
+  REQ_INT_ARG(2, color);
 
-      gdImageSetPixel(*im, x, y, color);
+  gdImageSetPixel(*im, x, y, color);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::Line) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::Line) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_INT_ARG(0, x1);
-      REQ_INT_ARG(1, y1);
-      REQ_INT_ARG(2, x2);
-      REQ_INT_ARG(3, y2);
-      REQ_INT_ARG(4, color);
+  REQ_INT_ARG(0, x1);
+  REQ_INT_ARG(1, y1);
+  REQ_INT_ARG(2, x2);
+  REQ_INT_ARG(3, y2);
+  REQ_INT_ARG(4, color);
 
-      gdImageLine(*im, x1, y1, x2, y2, color);
+  gdImageLine(*im, x1, y1, x2, y2, color);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::DashedLine) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::DashedLine) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_INT_ARG(0, x1);
-      REQ_INT_ARG(1, y1);
-      REQ_INT_ARG(2, x2);
-      REQ_INT_ARG(3, y2);
-      REQ_INT_ARG(4, color);
+  REQ_INT_ARG(0, x1);
+  REQ_INT_ARG(1, y1);
+  REQ_INT_ARG(2, x2);
+  REQ_INT_ARG(3, y2);
+  REQ_INT_ARG(4, color);
 
-      gdImageDashedLine(*im, x1, y1, x2, y2, color);
+  gdImageDashedLine(*im, x1, y1, x2, y2, color);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::Polygon) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::Polygon) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_ARGS(2);
-      REQ_INT_ARG(1, color);
+  REQ_ARGS(2);
+  REQ_INT_ARG(1, color);
 
-      if (!info[0]->IsArray()) {
-        return Nan::ThrowError("Arguments 0 must be an array");
-      }
+  if (!info[0]->IsArray()) {
+    return Nan::ThrowError("Arguments 0 must be an array");
+  }
 
-      Local<String> x = Nan::New("x").ToLocalChecked();
-      Local<String> y = Nan::New("y").ToLocalChecked();
+  Local<String> x = Nan::New("x").ToLocalChecked();
+  Local<String> y = Nan::New("y").ToLocalChecked();
 
-      Local<Array> array = Local<Array>::Cast(info[0]);
-      int len = array->Length(), _len = 0;
-      gdPoint *points =  new gdPoint[len];
+  Local<Array> array = Local<Array>::Cast(info[0]);
+  int len = array->Length(), _len = 0;
+  gdPoint *points =  new gdPoint[len];
 
-      for(int i=0; i < len; i++) {
-        Local<Value> v = array->Get(Nan::New<Integer>(i));
-        if (!v->IsObject()) continue;
+  for(int i=0; i < len; i++) {
+    Local<Value> v = array->Get(Nan::New<Integer>(i));
+    if (!v->IsObject()) continue;
 
-        Local<Object> o = v->ToObject();
-        if ( !o->Has(x) || !o->Has(y)) continue;
+    Local<Object> o = v->ToObject();
+    if ( !o->Has(x) || !o->Has(y)) continue;
 
-        points[i].x = o->Get(x)->Int32Value();
-        points[i].y = o->Get(y)->Int32Value();
-        _len++;
-      }
+    points[i].x = o->Get(x)->Int32Value();
+    points[i].y = o->Get(y)->Int32Value();
+    _len++;
+  }
 
-      gdImagePolygon(*im, points, _len, color);
+  gdImagePolygon(*im, points, _len, color);
 
-      delete[] points;
+  delete[] points;
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::OpenPolygon) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::OpenPolygon) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_ARGS(2);
-      REQ_INT_ARG(1, color);
+  REQ_ARGS(2);
+  REQ_INT_ARG(1, color);
 
-      if (!info[0]->IsArray()) {
-        return Nan::ThrowError("Arguments 0 must be an array");
-      }
+  if (!info[0]->IsArray()) {
+    return Nan::ThrowError("Arguments 0 must be an array");
+  }
 
-      Local<String> x = Nan::New("x").ToLocalChecked();
-      Local<String> y = Nan::New("y").ToLocalChecked();
+  Local<String> x = Nan::New("x").ToLocalChecked();
+  Local<String> y = Nan::New("y").ToLocalChecked();
 
-      Local<Array> array = Local<Array>::Cast(info[0]);
-      int len = array->Length(), _len = 0;
-      gdPoint *points =  new gdPoint[len];
+  Local<Array> array = Local<Array>::Cast(info[0]);
+  int len = array->Length(), _len = 0;
+  gdPoint *points =  new gdPoint[len];
 
-      for(int i=0; i < len; i++) {
-        Local<Value> v = array->Get(Nan::New<Integer>(i));
-        if (!v->IsObject()) continue;
+  for(int i=0; i < len; i++) {
+    Local<Value> v = array->Get(Nan::New<Integer>(i));
+    if (!v->IsObject()) continue;
 
-        Local<Object> o = v->ToObject();
-        if ( !o->Has(x) || !o->Has(y)) continue;
+    Local<Object> o = v->ToObject();
+    if ( !o->Has(x) || !o->Has(y)) continue;
 
-        points[i].x = o->Get(x)->Int32Value();
-        points[i].y = o->Get(y)->Int32Value();
-        _len++;
-      }
+    points[i].x = o->Get(x)->Int32Value();
+    points[i].y = o->Get(y)->Int32Value();
+    _len++;
+  }
 
-      gdImageOpenPolygon(*im, points, _len, color);
+  gdImageOpenPolygon(*im, points, _len, color);
 
-      delete[] points;
+  delete[] points;
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::FilledPolygon) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::FilledPolygon) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_ARGS(2);
-      REQ_INT_ARG(1, color);
+  REQ_ARGS(2);
+  REQ_INT_ARG(1, color);
 
-      if (!info[0]->IsArray()) {
-        return Nan::ThrowError("Arguments 0 must be an array");
-      }
+  if (!info[0]->IsArray()) {
+    return Nan::ThrowError("Arguments 0 must be an array");
+  }
 
-      Local<String> x = Nan::New("x").ToLocalChecked();
-      Local<String> y = Nan::New("y").ToLocalChecked();
+  Local<String> x = Nan::New("x").ToLocalChecked();
+  Local<String> y = Nan::New("y").ToLocalChecked();
 
-      Local<Array> array = Local<Array>::Cast(info[0]);
-      int len = array->Length(), _len = 0;
-      gdPoint *points =  new gdPoint[len];
+  Local<Array> array = Local<Array>::Cast(info[0]);
+  int len = array->Length(), _len = 0;
+  gdPoint *points =  new gdPoint[len];
 
-      for(int i=0; i < len; i++) {
-        Local<Value> v = array->Get(Nan::New<Integer>(i));
-        if (!v->IsObject()) continue;
+  for(int i=0; i < len; i++) {
+    Local<Value> v = array->Get(Nan::New<Integer>(i));
+    if (!v->IsObject()) continue;
 
-        Local<Object> o = v->ToObject();
-        if ( !o->Has(x) || !o->Has(y)) continue;
+    Local<Object> o = v->ToObject();
+    if ( !o->Has(x) || !o->Has(y)) continue;
 
-        points[i].x = o->Get(x)->Int32Value();
-        points[i].y = o->Get(y)->Int32Value();
-        _len++;
-      }
+    points[i].x = o->Get(x)->Int32Value();
+    points[i].y = o->Get(y)->Int32Value();
+    _len++;
+  }
 
-      gdImageFilledPolygon(*im, points, _len, color);
+  gdImageFilledPolygon(*im, points, _len, color);
 
-      delete[] points;
+  delete[] points;
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::Rectangle) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::Rectangle) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_ARGS(5);
-      REQ_INT_ARG(0, x1);
-      REQ_INT_ARG(1, y1);
-      REQ_INT_ARG(2, x2);
-      REQ_INT_ARG(3, y2);
-      REQ_INT_ARG(4, color);
+  REQ_ARGS(5);
+  REQ_INT_ARG(0, x1);
+  REQ_INT_ARG(1, y1);
+  REQ_INT_ARG(2, x2);
+  REQ_INT_ARG(3, y2);
+  REQ_INT_ARG(4, color);
 
-      gdImageRectangle(*im, x1, y1, x2, y2, color);
+  gdImageRectangle(*im, x1, y1, x2, y2, color);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::FilledRectangle) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::FilledRectangle) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_ARGS(5);
-      REQ_INT_ARG(0, x1);
-      REQ_INT_ARG(1, y1);
-      REQ_INT_ARG(2, x2);
-      REQ_INT_ARG(3, y2);
-      REQ_INT_ARG(4, color);
+  REQ_ARGS(5);
+  REQ_INT_ARG(0, x1);
+  REQ_INT_ARG(1, y1);
+  REQ_INT_ARG(2, x2);
+  REQ_INT_ARG(3, y2);
+  REQ_INT_ARG(4, color);
 
-      gdImageFilledRectangle(*im, x1, y1, x2, y2, color);
+  gdImageFilledRectangle(*im, x1, y1, x2, y2, color);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::Arc) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::Arc) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_ARGS(7);
-      REQ_INT_ARG(0, cx);
-      REQ_INT_ARG(1, cy);
-      REQ_INT_ARG(2, width);
-      REQ_INT_ARG(3, height);
-      REQ_INT_ARG(4, begin);
-      REQ_INT_ARG(5, end);
-      REQ_INT_ARG(6, color);
+  REQ_ARGS(7);
+  REQ_INT_ARG(0, cx);
+  REQ_INT_ARG(1, cy);
+  REQ_INT_ARG(2, width);
+  REQ_INT_ARG(3, height);
+  REQ_INT_ARG(4, begin);
+  REQ_INT_ARG(5, end);
+  REQ_INT_ARG(6, color);
 
-      gdImageArc(*im, cx, cy, width, height, begin, end, color);
+  gdImageArc(*im, cx, cy, width, height, begin, end, color);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::FilledArc) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::FilledArc) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_ARGS(8);
-      REQ_INT_ARG(0, cx);
-      REQ_INT_ARG(1, cy);
-      REQ_INT_ARG(2, width);
-      REQ_INT_ARG(3, height);
-      REQ_INT_ARG(4, begin);
-      REQ_INT_ARG(5, end);
-      REQ_INT_ARG(6, color);
-      REQ_INT_ARG(7, style);
+  REQ_ARGS(8);
+  REQ_INT_ARG(0, cx);
+  REQ_INT_ARG(1, cy);
+  REQ_INT_ARG(2, width);
+  REQ_INT_ARG(3, height);
+  REQ_INT_ARG(4, begin);
+  REQ_INT_ARG(5, end);
+  REQ_INT_ARG(6, color);
+  REQ_INT_ARG(7, style);
 
-      gdImageFilledArc(*im, cx, cy, width, height, begin, end, color, style);
+  gdImageFilledArc(*im, cx, cy, width, height, begin, end, color, style);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
 #if SUPPORTS_GD_2_1_0
-    NAN_METHOD(Gd::Image::Ellipse) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::Ellipse) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_ARGS(5);
-      REQ_INT_ARG(0, cx);
-      REQ_INT_ARG(1, cy);
-      REQ_INT_ARG(2, width);
-      REQ_INT_ARG(3, height);
-      REQ_INT_ARG(4, color);
+  REQ_ARGS(5);
+  REQ_INT_ARG(0, cx);
+  REQ_INT_ARG(1, cy);
+  REQ_INT_ARG(2, width);
+  REQ_INT_ARG(3, height);
+  REQ_INT_ARG(4, color);
 
-      gdImageEllipse(*im, cx, cy, width, height, color);
+  gdImageEllipse(*im, cx, cy, width, height, color);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 #endif
 
-    NAN_METHOD(Gd::Image::FilledEllipse) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::FilledEllipse) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_ARGS(5);
-      REQ_INT_ARG(0, cx);
-      REQ_INT_ARG(1, cy);
-      REQ_INT_ARG(2, width);
-      REQ_INT_ARG(3, height);
-      REQ_INT_ARG(4, color);
+  REQ_ARGS(5);
+  REQ_INT_ARG(0, cx);
+  REQ_INT_ARG(1, cy);
+  REQ_INT_ARG(2, width);
+  REQ_INT_ARG(3, height);
+  REQ_INT_ARG(4, color);
 
-      gdImageFilledEllipse(*im, cx, cy, width, height, color);
+  gdImageFilledEllipse(*im, cx, cy, width, height, color);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::FillToBorder) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::FillToBorder) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_ARGS(4);
-      REQ_INT_ARG(0, x);
-      REQ_INT_ARG(1, y);
-      REQ_INT_ARG(2, border);
-      REQ_INT_ARG(3, color);
+  REQ_ARGS(4);
+  REQ_INT_ARG(0, x);
+  REQ_INT_ARG(1, y);
+  REQ_INT_ARG(2, border);
+  REQ_INT_ARG(3, color);
 
-      gdImageFillToBorder(*im, x, y, border, color);
+  gdImageFillToBorder(*im, x, y, border, color);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::Fill) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::Fill) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_ARGS(3);
-      REQ_INT_ARG(0, x);
-      REQ_INT_ARG(1, y);
-      REQ_INT_ARG(2, color);
+  REQ_ARGS(3);
+  REQ_INT_ARG(0, x);
+  REQ_INT_ARG(1, y);
+  REQ_INT_ARG(2, color);
 
-      gdImageFill(*im, x, y, color);
+  gdImageFill(*im, x, y, color);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::SetAntiAliased) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::SetAntiAliased) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_INT_ARG(0, color);
+  REQ_INT_ARG(0, color);
 
-      gdImageSetAntiAliased(*im, color);
+  gdImageSetAntiAliased(*im, color);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::SetAntiAliasedDontBlend) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::SetAntiAliasedDontBlend) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_INT_ARG(0, color);
-      REQ_INT_ARG(1, dont_blend); // what does this mean?
+  REQ_INT_ARG(0, color);
+  REQ_INT_ARG(1, dont_blend); // what does this mean?
 
-      gdImageSetAntiAliasedDontBlend(*im, color, dont_blend);
+  gdImageSetAntiAliasedDontBlend(*im, color, dont_blend);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::SetBrush) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::SetBrush) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_IMG_ARG(0, brush)
-      gdImageSetBrush(*im, *brush);
+  REQ_IMG_ARG(0, brush)
+  gdImageSetBrush(*im, *brush);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::SetTile) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::SetTile) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_IMG_ARG(0, tile)
-      gdImageSetTile(*im, *tile);
+  REQ_IMG_ARG(0, tile)
+  gdImageSetTile(*im, *tile);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::SetStyle) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::SetStyle) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      if (info.Length() < 1 || !info[0]->IsArray())
-        return Nan::ThrowError("Arguments 0 must be an array");
+  if (info.Length() < 1 || !info[0]->IsArray())
+    return Nan::ThrowError("Arguments 0 must be an array");
 
-      Local<Array> array = Local<Array>::Cast(info[0]);
-      int len  = array->Length(), _len = 0;
-      int *sty =  new int[len];
+  Local<Array> array = Local<Array>::Cast(info[0]);
+  int len  = array->Length(), _len = 0;
+  int *sty =  new int[len];
 
-      for(int i=0; i < len; i++) {
-        Local<Value> v = array->Get(Nan::New<Integer>(i));
-        if (!v->IsNumber()) continue;
+  for(int i=0; i < len; i++) {
+    Local<Value> v = array->Get(Nan::New<Integer>(i));
+    if (!v->IsNumber()) continue;
 
-        sty[i] = v->Int32Value();
-        _len++;
-      }
+    sty[i] = v->Int32Value();
+    _len++;
+  }
 
-      gdImageSetStyle(*im, sty, _len);
+  gdImageSetStyle(*im, sty, _len);
 
-      delete[] sty;
+  delete[] sty;
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::SetThickness) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::SetThickness) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_INT_ARG(0, thickness)
+  REQ_INT_ARG(0, thickness)
 
-      gdImageSetThickness(*im, thickness);
+  gdImageSetThickness(*im, thickness);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::AlphaBlending) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::AlphaBlending) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_INT_ARG(0, blending)
-      gdImageAlphaBlending(*im, blending);
+  REQ_INT_ARG(0, blending)
+  gdImageAlphaBlending(*im, blending);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::SaveAlpha) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::SaveAlpha) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_INT_ARG(0, saveFlag)
-      gdImageSaveAlpha(*im, saveFlag);
+  REQ_INT_ARG(0, saveFlag)
+  gdImageSaveAlpha(*im, saveFlag);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::SetClip) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::SetClip) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_ARGS(4);
-      REQ_INT_ARG(0, x1);
-      REQ_INT_ARG(1, y1);
-      REQ_INT_ARG(2, x2);
-      REQ_INT_ARG(3, y2);
+  REQ_ARGS(4);
+  REQ_INT_ARG(0, x1);
+  REQ_INT_ARG(1, y1);
+  REQ_INT_ARG(2, x2);
+  REQ_INT_ARG(3, y2);
 
-      gdImageSetClip(*im, x1, y1, x2, y2);
+  gdImageSetClip(*im, x1, y1, x2, y2);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::GetClip) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::GetClip) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      int x1, y1, x2, y2;
-      gdImageGetClip(*im, &x1, &y1, &x2, &y2);
+  int x1, y1, x2, y2;
+  gdImageGetClip(*im, &x1, &y1, &x2, &y2);
 
-      Local<Object> result = Nan::New<Object>();
-      result->Set(Nan::New<String>("x1").ToLocalChecked(), Nan::New<Integer>(x1));
-      result->Set(Nan::New<String>("y1").ToLocalChecked(), Nan::New<Integer>(y1));
-      result->Set(Nan::New<String>("x2").ToLocalChecked(), Nan::New<Integer>(x2));
-      result->Set(Nan::New<String>("y2").ToLocalChecked(), Nan::New<Integer>(y2));
+  Local<Object> result = Nan::New<Object>();
+  result->Set(Nan::New<String>("x1").ToLocalChecked(), Nan::New<Integer>(x1));
+  result->Set(Nan::New<String>("y1").ToLocalChecked(), Nan::New<Integer>(y1));
+  result->Set(Nan::New<String>("x2").ToLocalChecked(), Nan::New<Integer>(x2));
+  result->Set(Nan::New<String>("y2").ToLocalChecked(), Nan::New<Integer>(y2));
 
-      info.GetReturnValue().Set(result);
-    }
+  info.GetReturnValue().Set(result);
+}
 
 #if SUPPORTS_GD_2_1_0
-    NAN_METHOD(Gd::Image::SetResolution) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::SetResolution) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_ARGS(2);
-      REQ_INT_ARG(0, res_x);
-      REQ_INT_ARG(1, res_y);
+  REQ_ARGS(2);
+  REQ_INT_ARG(0, res_x);
+  REQ_INT_ARG(1, res_y);
 
-      gdImageSetResolution(*im, res_x, res_y);
+  gdImageSetResolution(*im, res_x, res_y);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 #endif
 
-    /**
-     * Query Functions
-     */
-    NAN_METHOD(Gd::Image::Alpha) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+/**
+ * Query Functions
+ */
+NAN_METHOD(Gd::Image::Alpha) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_INT_ARG(0, color);
+  REQ_INT_ARG(0, color);
 
-      Local<Number> result = Nan::New<Integer>(gdImageAlpha(im->operator gdImagePtr(), color));
-      info.GetReturnValue().Set(result);
+  Local<Number> result = Nan::New<Integer>(gdImageAlpha(im->operator gdImagePtr(), color));
+  info.GetReturnValue().Set(result);
+}
+
+NAN_METHOD(Gd::Image::GetPixel) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
+
+  REQ_ARGS(2);
+  REQ_INT_ARG(0, x);
+  REQ_INT_ARG(1, y);
+
+  Local<Number> result = Nan::New<Integer>(gdImageGetPixel(*im, x, y));
+  info.GetReturnValue().Set(result);
+}
+
+NAN_METHOD(Gd::Image::GetTrueColorPixel) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
+
+  REQ_ARGS(2);
+  REQ_INT_ARG(0, x);
+  REQ_INT_ARG(1, y);
+
+  Local<Number> result = Nan::New<Integer>(gdImageGetTrueColorPixel(*im, x, y));
+  info.GetReturnValue().Set(result);
+}
+
+// This is implementation of the PHP-GD specific method imagecolorat
+NAN_METHOD(Gd::Image::ImageColorAt) {
+  Image *img = ObjectWrap::Unwrap<Image>(info.This());
+
+  REQ_ARGS(2);
+  REQ_INT_ARG(0, x);
+  REQ_INT_ARG(1, y);
+
+  Local<Number> result;
+  gdImagePtr im = *img;
+  if (gdImageTrueColor(im)) {
+    if(im->tpixels && gdImageBoundsSafe(im, x, y)){
+      result = Nan::New<Integer>(gdImageTrueColorPixel(im, x, y));
+    } else {
+      return Nan::ThrowError("[imageColorAt] Invalid pixel");
+    }
+  } else {
+    if (im->pixels && gdImageBoundsSafe(im, x, y)) {
+      result = Nan::New<Integer>(im->pixels[y][x]);
+    } else {
+      return Nan::ThrowError("[imageColorAt] Invalid pixel");
+    }
+  }
+  info.GetReturnValue().Set(result);
+}
+
+NAN_METHOD(Gd::Image::GetBoundsSafe) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
+
+  REQ_ARGS(2);
+  REQ_INT_ARG(0, x);
+  REQ_INT_ARG(1, y);
+
+  Local<Number> result = Nan::New<Integer>(gdImageBoundsSafe(*im, x, y));
+  info.GetReturnValue().Set(result);
+}
+
+NAN_PROPERTY_GETTER(Gd::Image::WidthGetter) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
+
+  Local<Number> result = Nan::New<Integer>(gdImageSX(im->operator gdImagePtr()));
+  info.GetReturnValue().Set(result);
+}
+
+NAN_PROPERTY_GETTER(Gd::Image::HeightGetter) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
+
+  Local<Number> result = Nan::New<Integer>(gdImageSY(im->operator gdImagePtr()));
+  info.GetReturnValue().Set(result);
+}
+
+NAN_PROPERTY_GETTER(Gd::Image::TrueColorGetter) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
+
+  Local<Number> result = Nan::New<Integer>(gdImageTrueColor(im->operator gdImagePtr()));
+  info.GetReturnValue().Set(result);
+}
+
+/**
+ * Font and Text Handling Funcitons
+ */
+NAN_METHOD(Gd::Image::StringFTBBox) {
+  REQ_ARGS(7);
+  REQ_INT_ARG(0, color);
+  REQ_STR_ARG(1, font);
+  REQ_DOUBLE_ARG(2, size);
+  REQ_DOUBLE_ARG(3, angle);
+  REQ_INT_ARG(4, x);
+  REQ_INT_ARG(5, y);
+  REQ_STR_ARG(6, str);
+
+  int brect[8];
+  char *err;
+
+
+  err = gdImageStringFT(NULL, &brect[0], color, *font, size, angle, x, y, *str);
+  if (err) return Nan::ThrowError(err);
+
+  Local<Array> result = Nan::New<Array>();
+
+  for (int i = 0; i < 8; i++) {
+    result->Set(Nan::New<Integer>(i), Nan::New<Number>(brect[i]));
+  }
+
+  info.GetReturnValue().Set(result);
+}
+
+NAN_METHOD(Gd::Image::StringFT) {
+  REQ_ARGS(7);
+  REQ_INT_ARG(0, color);
+  REQ_STR_ARG(1, font);
+  REQ_DOUBLE_ARG(2, size);
+  REQ_DOUBLE_ARG(3, angle);
+  REQ_INT_ARG(4, x);
+  REQ_INT_ARG(5, y);
+  REQ_STR_ARG(6, str);
+
+  /* return rectangle? */
+  bool return_rectangle = false;
+  if (info.Length() > 7 && info[7]->IsBoolean()) {
+    return_rectangle = info[7]->BooleanValue();
+  }
+
+  int brect[8];
+  char *err;
+
+
+  if (return_rectangle) {
+    err = gdImageStringFT(NULL, &brect[0], color, *font, size, angle, x, y, *str);
+    if (err) return Nan::ThrowError(err);
+
+    Local<Array> result = Nan::New<Array>();
+    for(int i=0; i < 8; i++) {
+      result->Set( Nan::New<Integer>(i), Nan::New<Number>(brect[i]) );
     }
 
-    NAN_METHOD(Gd::Image::GetPixel) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
-
-      REQ_ARGS(2);
-      REQ_INT_ARG(0, x);
-      REQ_INT_ARG(1, y);
-
-      Local<Number> result = Nan::New<Integer>(gdImageGetPixel(*im, x, y));
-      info.GetReturnValue().Set(result);
-    }
-
-    NAN_METHOD(Gd::Image::GetTrueColorPixel) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
-
-      REQ_ARGS(2);
-      REQ_INT_ARG(0, x);
-      REQ_INT_ARG(1, y);
-
-      Local<Number> result = Nan::New<Integer>(gdImageGetTrueColorPixel(*im, x, y));
-      info.GetReturnValue().Set(result);
-    }
-
-    // This is implementation of the PHP-GD specific method imagecolorat
-    NAN_METHOD(Gd::Image::ImageColorAt) {
-      Image *img = ObjectWrap::Unwrap<Image>(info.This());
-
-      REQ_ARGS(2);
-      REQ_INT_ARG(0, x);
-      REQ_INT_ARG(1, y);
-
-      Local<Number> result;
-      gdImagePtr im = *img;
-      if (gdImageTrueColor(im)) {
-        if(im->tpixels && gdImageBoundsSafe(im, x, y)){
-          result = Nan::New<Integer>(gdImageTrueColorPixel(im, x, y));
-        } else {
-          return Nan::ThrowError("[imageColorAt] Invalid pixel");
-        }
-      } else {
-        if (im->pixels && gdImageBoundsSafe(im, x, y)) {
-          result = Nan::New<Integer>(im->pixels[y][x]);
-        } else {
-          return Nan::ThrowError("[imageColorAt] Invalid pixel");
-        }
-      }
-      info.GetReturnValue().Set(result);
-    }
-
-    NAN_METHOD(Gd::Image::GetBoundsSafe) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
-
-      REQ_ARGS(2);
-      REQ_INT_ARG(0, x);
-      REQ_INT_ARG(1, y);
-
-      Local<Number> result = Nan::New<Integer>(gdImageBoundsSafe(*im, x, y));
-      info.GetReturnValue().Set(result);
-    }
-
-    NAN_PROPERTY_GETTER(Gd::Image::WidthGetter) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
-
-      Local<Number> result = Nan::New<Integer>(gdImageSX(im->operator gdImagePtr()));
-      info.GetReturnValue().Set(result);
-    }
-
-    NAN_PROPERTY_GETTER(Gd::Image::HeightGetter) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
-
-      Local<Number> result = Nan::New<Integer>(gdImageSY(im->operator gdImagePtr()));
-      info.GetReturnValue().Set(result);
-    }
-
-    NAN_PROPERTY_GETTER(Gd::Image::TrueColorGetter) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
-
-      Local<Number> result = Nan::New<Integer>(gdImageTrueColor(im->operator gdImagePtr()));
-      info.GetReturnValue().Set(result);
-    }
-
-    /**
-     * Font and Text Handling Funcitons
-     */
-    NAN_METHOD(Gd::Image::StringFTBBox) {
-      REQ_ARGS(7);
-      REQ_INT_ARG(0, color);
-      REQ_STR_ARG(1, font);
-      REQ_DOUBLE_ARG(2, size);
-      REQ_DOUBLE_ARG(3, angle);
-      REQ_INT_ARG(4, x);
-      REQ_INT_ARG(5, y);
-      REQ_STR_ARG(6, str);
-
-      int brect[8];
-      char *err;
-
-
-      err = gdImageStringFT(NULL, &brect[0], color, *font, size, angle, x, y, *str);
-      if (err) return Nan::ThrowError(err);
-
-      Local<Array> result = Nan::New<Array>();
-
-      for (int i = 0; i < 8; i++) {
-        result->Set(Nan::New<Integer>(i), Nan::New<Number>(brect[i]));
-      }
-
-      info.GetReturnValue().Set(result);
-    }
+    info.GetReturnValue().Set(result);
+  }
 
-    NAN_METHOD(Gd::Image::StringFT) {
-      REQ_ARGS(7);
-      REQ_INT_ARG(0, color);
-      REQ_STR_ARG(1, font);
-      REQ_DOUBLE_ARG(2, size);
-      REQ_DOUBLE_ARG(3, angle);
-      REQ_INT_ARG(4, x);
-      REQ_INT_ARG(5, y);
-      REQ_STR_ARG(6, str);
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      /* return rectangle? */
-      bool return_rectangle = false;
-      if (info.Length() > 7 && info[7]->IsBoolean()) {
-        return_rectangle = info[7]->BooleanValue();
-      }
+  err = gdImageStringFT(*im, &brect[0], color, *font, size, angle, x, y, *str);
+  if (err) return Nan::ThrowError(err);
 
-      int brect[8];
-      char *err;
+  info.GetReturnValue().Set(info.This());
+}
 
+/**
+ * Color Handling Functions
+ */
+NAN_METHOD(Gd::Image::ColorAllocate) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      if (return_rectangle) {
-        err = gdImageStringFT(NULL, &brect[0], color, *font, size, angle, x, y, *str);
-        if (err) return Nan::ThrowError(err);
+  REQ_ARGS(3);
+  OPT_INT_ARG(0, r, 0);
+  OPT_INT_ARG(1, g, 0);
+  OPT_INT_ARG(2, b, 0);
 
-        Local<Array> result = Nan::New<Array>();
-        for(int i=0; i < 8; i++) {
-          result->Set( Nan::New<Integer>(i), Nan::New<Number>(brect[i]) );
-        }
+  Local<Number> result = Nan::New<Integer>(gdImageColorAllocate(*im, r, g, b));
+  info.GetReturnValue().Set(result);
+}
 
-        info.GetReturnValue().Set(result);
-      }
+NAN_METHOD(Gd::Image::ColorAllocateAlpha) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  OPT_INT_ARG(0, r, 0);
+  OPT_INT_ARG(1, g, 0);
+  OPT_INT_ARG(2, b, 0);
+  OPT_INT_ARG(3, a, 100);
 
-      err = gdImageStringFT(*im, &brect[0], color, *font, size, angle, x, y, *str);
-      if (err) return Nan::ThrowError(err);
+  Local<Number> result = Nan::New<Integer>(gdImageColorAllocateAlpha(*im, r, g, b, a));
+  info.GetReturnValue().Set(result);
+}
 
-      info.GetReturnValue().Set(info.This());
-    }
+NAN_METHOD(Gd::Image::ColorClosest) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    /**
-     * Color Handling Functions
-     */
-    NAN_METHOD(Gd::Image::ColorAllocate) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  OPT_INT_ARG(0, r, 0);
+  OPT_INT_ARG(1, g, 0);
+  OPT_INT_ARG(2, b, 0);
 
-      REQ_ARGS(3);
-      OPT_INT_ARG(0, r, 0);
-      OPT_INT_ARG(1, g, 0);
-      OPT_INT_ARG(2, b, 0);
+  Local<Number> result = Nan::New<Integer>(gdImageColorClosest(*im, r, g, b));
+  info.GetReturnValue().Set(result);
+}
 
-      Local<Number> result = Nan::New<Integer>(gdImageColorAllocate(*im, r, g, b));
-      info.GetReturnValue().Set(result);
-    }
+NAN_METHOD(Gd::Image::ColorClosestAlpha) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    NAN_METHOD(Gd::Image::ColorAllocateAlpha) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  OPT_INT_ARG(0, r, 0);
+  OPT_INT_ARG(1, g, 0);
+  OPT_INT_ARG(2, b, 0);
+  OPT_INT_ARG(3, a, 100);
 
-      OPT_INT_ARG(0, r, 0);
-      OPT_INT_ARG(1, g, 0);
-      OPT_INT_ARG(2, b, 0);
-      OPT_INT_ARG(3, a, 100);
+  Local<Number> result = Nan::New<Integer>(gdImageColorClosestAlpha(*im, r, g, b, a));
+  info.GetReturnValue().Set(result);
+}
 
-      Local<Number> result = Nan::New<Integer>(gdImageColorAllocateAlpha(*im, r, g, b, a));
-      info.GetReturnValue().Set(result);
-    }
+NAN_METHOD(Gd::Image::ColorClosestHWB) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    NAN_METHOD(Gd::Image::ColorClosest) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  OPT_INT_ARG(0, r, 0);
+  OPT_INT_ARG(1, g, 0);
+  OPT_INT_ARG(2, b, 0);
 
-      OPT_INT_ARG(0, r, 0);
-      OPT_INT_ARG(1, g, 0);
-      OPT_INT_ARG(2, b, 0);
+  Local<Number> result = Nan::New<Integer>(gdImageColorClosestHWB(*im, r, g, b));
+  info.GetReturnValue().Set(result);
+}
 
-      Local<Number> result = Nan::New<Integer>(gdImageColorClosest(*im, r, g, b));
-      info.GetReturnValue().Set(result);
-    }
+NAN_METHOD(Gd::Image::ColorExact) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    NAN_METHOD(Gd::Image::ColorClosestAlpha) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  OPT_INT_ARG(0, r, 0);
+  OPT_INT_ARG(1, g, 0);
+  OPT_INT_ARG(2, b, 0);
 
-      OPT_INT_ARG(0, r, 0);
-      OPT_INT_ARG(1, g, 0);
-      OPT_INT_ARG(2, b, 0);
-      OPT_INT_ARG(3, a, 100);
+  Local<Number> result = Nan::New<Integer>(gdImageColorExact(*im, r, g, b));
+  info.GetReturnValue().Set(result);
+}
 
-      Local<Number> result = Nan::New<Integer>(gdImageColorClosestAlpha(*im, r, g, b, a));
-      info.GetReturnValue().Set(result);
-    }
+NAN_METHOD(Gd::Image::ColorResolve) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    NAN_METHOD(Gd::Image::ColorClosestHWB) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  OPT_INT_ARG(0, r, 0);
+  OPT_INT_ARG(1, g, 0);
+  OPT_INT_ARG(2, b, 0);
 
-      OPT_INT_ARG(0, r, 0);
-      OPT_INT_ARG(1, g, 0);
-      OPT_INT_ARG(2, b, 0);
+  Local<Number> result = Nan::New<Integer>(gdImageColorResolve(*im, r, g, b));
+  info.GetReturnValue().Set(result);
+}
 
-      Local<Number> result = Nan::New<Integer>(gdImageColorClosestHWB(*im, r, g, b));
-      info.GetReturnValue().Set(result);
-    }
+NAN_METHOD(Gd::Image::ColorResolveAlpha) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    NAN_METHOD(Gd::Image::ColorExact) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  OPT_INT_ARG(0, r, 0);
+  OPT_INT_ARG(1, g, 0);
+  OPT_INT_ARG(2, b, 0);
+  OPT_INT_ARG(3, a, 100);
 
-      OPT_INT_ARG(0, r, 0);
-      OPT_INT_ARG(1, g, 0);
-      OPT_INT_ARG(2, b, 0);
+  Local<Number> result = Nan::New<Integer>(gdImageColorResolveAlpha(*im, r, g, b, a));
+  info.GetReturnValue().Set(result);
+}
 
-      Local<Number> result = Nan::New<Integer>(gdImageColorExact(*im, r, g, b));
-      info.GetReturnValue().Set(result);
-    }
+NAN_PROPERTY_GETTER(Gd::Image::ColorsTotalGetter) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    NAN_METHOD(Gd::Image::ColorResolve) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  Local<Number> result = Nan::New<Integer>(gdImageColorsTotal(im->operator gdImagePtr()));
+  info.GetReturnValue().Set(result);
+}
 
-      OPT_INT_ARG(0, r, 0);
-      OPT_INT_ARG(1, g, 0);
-      OPT_INT_ARG(2, b, 0);
+NAN_METHOD(Gd::Image::Red) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      Local<Number> result = Nan::New<Integer>(gdImageColorResolve(*im, r, g, b));
-      info.GetReturnValue().Set(result);
-    }
+  REQ_INT_ARG(0, color);
 
-    NAN_METHOD(Gd::Image::ColorResolveAlpha) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  Local<Number> result = Nan::New<Integer>(gdImageRed(im->operator gdImagePtr(), color));
+  info.GetReturnValue().Set(result);
+}
 
-      OPT_INT_ARG(0, r, 0);
-      OPT_INT_ARG(1, g, 0);
-      OPT_INT_ARG(2, b, 0);
-      OPT_INT_ARG(3, a, 100);
+NAN_METHOD(Gd::Image::Blue) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      Local<Number> result = Nan::New<Integer>(gdImageColorResolveAlpha(*im, r, g, b, a));
-      info.GetReturnValue().Set(result);
-    }
+  REQ_INT_ARG(0, color);
 
-    NAN_PROPERTY_GETTER(Gd::Image::ColorsTotalGetter) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  Local<Number> result = Nan::New<Integer>(gdImageBlue(im->operator gdImagePtr(), color));
+  info.GetReturnValue().Set(result);
+}
 
-      Local<Number> result = Nan::New<Integer>(gdImageColorsTotal(im->operator gdImagePtr()));
-      info.GetReturnValue().Set(result);
-    }
+NAN_METHOD(Gd::Image::Green) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    NAN_METHOD(Gd::Image::Red) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  REQ_INT_ARG(0, color);
 
-      REQ_INT_ARG(0, color);
+  Local<Number> result = Nan::New<Integer>(gdImageGreen(im->operator gdImagePtr(), color));
+  info.GetReturnValue().Set(result);
+}
 
-      Local<Number> result = Nan::New<Integer>(gdImageRed(im->operator gdImagePtr(), color));
-      info.GetReturnValue().Set(result);
-    }
+NAN_PROPERTY_GETTER(Gd::Image::InterlaceGetter) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    NAN_METHOD(Gd::Image::Blue) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  bool interlaced = (gdImageGetInterlaced(im->operator gdImagePtr()) != 0);
+  Local<Boolean> result;
+  if (interlaced) {
+    result = Nan::True();
+  } else {
+    result = Nan::False();
+  }
 
-      REQ_INT_ARG(0, color);
+  info.GetReturnValue().Set(result);
+}
 
-      Local<Number> result = Nan::New<Integer>(gdImageBlue(im->operator gdImagePtr(), color));
-      info.GetReturnValue().Set(result);
-    }
+NAN_SETTER(Gd::Image::InterlaceSetter) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    NAN_METHOD(Gd::Image::Green) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  if (value->IsBoolean()) {
+    bool interlace = value->BooleanValue();
 
-      REQ_INT_ARG(0, color);
+    gdImageInterlace(*im, interlace?1:0);
+  }
+}
 
-      Local<Number> result = Nan::New<Integer>(gdImageGreen(im->operator gdImagePtr(), color));
-      info.GetReturnValue().Set(result);
-    }
+NAN_METHOD(Gd::Image::GetTransparent) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    NAN_PROPERTY_GETTER(Gd::Image::InterlaceGetter) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  Local<Number> result = Nan::New<Integer>(gdImageGetTransparent(im->operator gdImagePtr()));
+  info.GetReturnValue().Set(result);
+}
 
-      bool interlaced = (gdImageGetInterlaced(im->operator gdImagePtr()) != 0);
-      Local<Boolean> result;
-      if (interlaced) {
-        result = Nan::True();
-      } else {
-        result = Nan::False();
-      }
+NAN_METHOD(Gd::Image::ColorDeallocate) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      info.GetReturnValue().Set(result);
-    }
+  REQ_INT_ARG(0, color);
+  gdImageColorDeallocate(*im, color);
 
-    NAN_SETTER(Gd::Image::InterlaceSetter) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  info.GetReturnValue().Set(info.This());
+}
 
-      if (value->IsBoolean()) {
-        bool interlace = value->BooleanValue();
+NAN_METHOD(Gd::Image::ColorTransparent) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-        gdImageInterlace(*im, interlace?1:0);
-      }
-    }
+  REQ_INT_ARG(0, color);
+  gdImageColorTransparent(*im, color);
 
-    NAN_METHOD(Gd::Image::GetTransparent) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
-
-      Local<Number> result = Nan::New<Integer>(gdImageGetTransparent(im->operator gdImagePtr()));
-      info.GetReturnValue().Set(result);
-    }
-
-    NAN_METHOD(Gd::Image::ColorDeallocate) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
-
-      REQ_INT_ARG(0, color);
-      gdImageColorDeallocate(*im, color);
-
-      info.GetReturnValue().Set(info.This());
-    }
-
-    NAN_METHOD(Gd::Image::ColorTransparent) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
-
-      REQ_INT_ARG(0, color);
-      gdImageColorTransparent(*im, color);
-
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
 #if SUPPORTS_GD_2_1_0
-    NAN_METHOD(Gd::Image::ColorReplace) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::ColorReplace) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_INT_ARG(0, fromColor);
-      REQ_INT_ARG(1, toColor);
+  REQ_INT_ARG(0, fromColor);
+  REQ_INT_ARG(1, toColor);
 
-      Local<Number> result = Nan::New<Integer>(gdImageColorReplace(*im, fromColor, toColor));
+  Local<Number> result = Nan::New<Integer>(gdImageColorReplace(*im, fromColor, toColor));
 
-      info.GetReturnValue().Set(result);
-    }
+  info.GetReturnValue().Set(result);
+}
 
-    NAN_METHOD(Gd::Image::ColorReplaceThreshold) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::ColorReplaceThreshold) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_INT_ARG(0, fromColor);
-      REQ_INT_ARG(1, toColor);
-      REQ_DOUBLE_ARG(2, threshold);
+  REQ_INT_ARG(0, fromColor);
+  REQ_INT_ARG(1, toColor);
+  REQ_DOUBLE_ARG(2, threshold);
 
-      Local<Number> result =
-        Nan::New<Integer>(gdImageColorReplaceThreshold(*im, fromColor, toColor, threshold));
+  Local<Number> result =
+    Nan::New<Integer>(gdImageColorReplaceThreshold(*im, fromColor, toColor, threshold));
 
-      info.GetReturnValue().Set(result);
-    }
+  info.GetReturnValue().Set(result);
+}
 
-    NAN_METHOD(Gd::Image::ColorReplaceArray) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::ColorReplaceArray) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_ARGS(2);
+  REQ_ARGS(2);
 
-      Local<Array> fromArray = Local<Array>::Cast(info[0]);
-      int flen = fromArray->Length(), _flen = 0;
-      int *fromColors =  new int[flen];
+  Local<Array> fromArray = Local<Array>::Cast(info[0]);
+  int flen = fromArray->Length(), _flen = 0;
+  int *fromColors =  new int[flen];
 
-      for(int i = 0; i < flen; i++) {
-        Local<Value> v = fromArray->Get(Nan::New<Integer>(i));
-        fromColors[i] = v->Int32Value();
-        _flen++;
-      }
+  for(int i = 0; i < flen; i++) {
+    Local<Value> v = fromArray->Get(Nan::New<Integer>(i));
+    fromColors[i] = v->Int32Value();
+    _flen++;
+  }
 
-      Local<Array> toArray = Local<Array>::Cast(info[1]);
-      int tlen = toArray->Length(), _tlen = 0;
-      int *toColors =  new int[tlen];
+  Local<Array> toArray = Local<Array>::Cast(info[1]);
+  int tlen = toArray->Length(), _tlen = 0;
+  int *toColors =  new int[tlen];
 
-      for(int j = 0; j < tlen; j++) {
-        Local<Value> v = toArray->Get(Nan::New<Integer>(j));
-        toColors[j] = v->Int32Value();
-        _tlen++;
-      }
+  for(int j = 0; j < tlen; j++) {
+    Local<Value> v = toArray->Get(Nan::New<Integer>(j));
+    toColors[j] = v->Int32Value();
+    _tlen++;
+  }
 
-      if (_flen != _tlen) {
-        return Nan::ThrowError("Color arrays should have same length.");
-      }
+  if (_flen != _tlen) {
+    return Nan::ThrowError("Color arrays should have same length.");
+  }
 
-      Local<Number> result =
-        Nan::New<Integer>(gdImageColorReplaceArray(*im, _flen, fromColors, toColors));
+  Local<Number> result =
+    Nan::New<Integer>(gdImageColorReplaceArray(*im, _flen, fromColors, toColors));
 
-      info.GetReturnValue().Set(result);
-    }
+  info.GetReturnValue().Set(result);
+}
 
-    NAN_METHOD(Gd::Image::GrayScale) {
+NAN_METHOD(Gd::Image::GrayScale) {
 
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
-      gdImageGrayScale(*im);
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  gdImageGrayScale(*im);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::GaussianBlur) {
+NAN_METHOD(Gd::Image::GaussianBlur) {
 
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImageGaussianBlur(*im);
+  gdImageGaussianBlur(*im);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::Negate) {
+NAN_METHOD(Gd::Image::Negate) {
 
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImageNegate(*im);
+  gdImageNegate(*im);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::Brightness) {
-      REQ_INT_ARG(0, brightness);
+NAN_METHOD(Gd::Image::Brightness) {
+  REQ_INT_ARG(0, brightness);
 
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImageBrightness(*im, brightness);
+  gdImageBrightness(*im, brightness);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::Contrast) {
-      REQ_DOUBLE_ARG(0, contrast);
+NAN_METHOD(Gd::Image::Contrast) {
+  REQ_DOUBLE_ARG(0, contrast);
 
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImageContrast(*im, contrast);
+  gdImageContrast(*im, contrast);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::SelectiveBlur) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::SelectiveBlur) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImageSelectiveBlur(*im);
-      info.GetReturnValue().Set(info.This());
-    }
+  gdImageSelectiveBlur(*im);
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::FlipHorizontal) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::FlipHorizontal) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImageFlipHorizontal(*im);
-      info.GetReturnValue().Set(info.This());
-    }
+  gdImageFlipHorizontal(*im);
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::FlipVertical) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::FlipVertical) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImageFlipVertical(*im);
-      info.GetReturnValue().Set(info.This());
-    }
+  gdImageFlipVertical(*im);
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::FlipBoth) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::FlipBoth) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImageFlipBoth(*im);
-      info.GetReturnValue().Set(info.This());
-    }
+  gdImageFlipBoth(*im);
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::Crop) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::Crop) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_INT_ARG(0, x);
-      REQ_INT_ARG(1, y);
-      REQ_INT_ARG(2, width);
-      REQ_INT_ARG(3, height);
+  REQ_INT_ARG(0, x);
+  REQ_INT_ARG(1, y);
+  REQ_INT_ARG(2, width);
+  REQ_INT_ARG(3, height);
 
-      gdRect *rect = new gdRect;
+  gdRect *rect = new gdRect;
 
-      rect->x = x;
-      rect->y = y;
-      rect->width = (width == 0) ? 100 : width;
-      rect->height = (height == 0) ? 100 : height;
+  rect->x = x;
+  rect->y = y;
+  rect->width = (width == 0) ? 100 : width;
+  rect->height = (height == 0) ? 100 : height;
 
-      gdImagePtr newImage = gdImageCrop(*im, rect);
+  gdImagePtr newImage = gdImageCrop(*im, rect);
 
-      RETURN_IMAGE(newImage);
-    }
+  RETURN_IMAGE(newImage);
+}
 
-    NAN_METHOD(Gd::Image::CropAuto) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::CropAuto) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_INT_ARG(0, mode);
+  REQ_INT_ARG(0, mode);
 
-      if (mode > 4) {
-        return Nan::ThrowError("Crop mode should be between 0 and 5");
-      }
+  if (mode > 4) {
+    return Nan::ThrowError("Crop mode should be between 0 and 5");
+  }
 
-      gdImagePtr newImage = gdImageCropAuto(*im, mode);
+  gdImagePtr newImage = gdImageCropAuto(*im, mode);
 
-      RETURN_IMAGE(newImage);
-    }
+  RETURN_IMAGE(newImage);
+}
 
-    NAN_METHOD(Gd::Image::CropThreshold) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::CropThreshold) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_INT_ARG(0, color);
-      REQ_DOUBLE_ARG(1, threshold);
+  REQ_INT_ARG(0, color);
+  REQ_DOUBLE_ARG(1, threshold);
 
-      gdImagePtr newImage = gdImageCropThreshold(*im, color, threshold);
-      RETURN_IMAGE(newImage);
-    }
+  gdImagePtr newImage = gdImageCropThreshold(*im, color, threshold);
+  RETURN_IMAGE(newImage);
+}
 #endif
 
 #if SUPPORTS_GD_2_1_1
-    NAN_METHOD(Gd::Image::Emboss) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::Emboss) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImageEmboss(*im);
-      info.GetReturnValue().Set(info.This());
-    }
+  gdImageEmboss(*im);
+  info.GetReturnValue().Set(info.This());
+}
 #endif
 
-    /**
-     * Copying and Resizing Functions
-     */
-    NAN_METHOD(Gd::Image::Copy) {
-      REQ_ARGS(7);
-      REQ_IMG_ARG(0, dest);
-      REQ_INT_ARG(1, dstX);
-      REQ_INT_ARG(2, dstY);
-      REQ_INT_ARG(3, srcX);
-      REQ_INT_ARG(4, srcY);
-      REQ_INT_ARG(5, width);
-      REQ_INT_ARG(6, height);
+/**
+ * Copying and Resizing Functions
+ */
+NAN_METHOD(Gd::Image::Copy) {
+  REQ_ARGS(7);
+  REQ_IMG_ARG(0, dest);
+  REQ_INT_ARG(1, dstX);
+  REQ_INT_ARG(2, dstY);
+  REQ_INT_ARG(3, srcX);
+  REQ_INT_ARG(4, srcY);
+  REQ_INT_ARG(5, width);
+  REQ_INT_ARG(6, height);
 
-      Image *im   = ObjectWrap::Unwrap<Image>(info.This());
+  Image *im   = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImageCopy(*dest, *im, dstX, dstY, srcX, srcY, width, height);
+  gdImageCopy(*dest, *im, dstX, dstY, srcX, srcY, width, height);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::CopyResized) {
-      REQ_ARGS(9);
-      REQ_IMG_ARG(0, dest);
-      REQ_INT_ARG(1, dstX);
-      REQ_INT_ARG(2, dstY);
-      REQ_INT_ARG(3, srcX);
-      REQ_INT_ARG(4, srcY);
-      REQ_INT_ARG(5, destW);
-      REQ_INT_ARG(6, destH);
-      REQ_INT_ARG(7, srcW);
-      REQ_INT_ARG(8, srcH);
+NAN_METHOD(Gd::Image::CopyResized) {
+  REQ_ARGS(9);
+  REQ_IMG_ARG(0, dest);
+  REQ_INT_ARG(1, dstX);
+  REQ_INT_ARG(2, dstY);
+  REQ_INT_ARG(3, srcX);
+  REQ_INT_ARG(4, srcY);
+  REQ_INT_ARG(5, destW);
+  REQ_INT_ARG(6, destH);
+  REQ_INT_ARG(7, srcW);
+  REQ_INT_ARG(8, srcH);
 
-      Image *im   = ObjectWrap::Unwrap<Image>(info.This());
+  Image *im   = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImageCopyResized(*dest, *im, dstX, dstY, srcX, srcY, destW, destH, srcW, srcH);
+  gdImageCopyResized(*dest, *im, dstX, dstY, srcX, srcY, destW, destH, srcW, srcH);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::CopyResampled) {
-      REQ_ARGS(9);
-      REQ_IMG_ARG(0, dest);
-      REQ_INT_ARG(1, dstX);
-      REQ_INT_ARG(2, dstY);
-      REQ_INT_ARG(3, srcX);
-      REQ_INT_ARG(4, srcY);
-      REQ_INT_ARG(5, destW);
-      REQ_INT_ARG(6, destH);
-      REQ_INT_ARG(7, srcW);
-      REQ_INT_ARG(8, srcH);
+NAN_METHOD(Gd::Image::CopyResampled) {
+  REQ_ARGS(9);
+  REQ_IMG_ARG(0, dest);
+  REQ_INT_ARG(1, dstX);
+  REQ_INT_ARG(2, dstY);
+  REQ_INT_ARG(3, srcX);
+  REQ_INT_ARG(4, srcY);
+  REQ_INT_ARG(5, destW);
+  REQ_INT_ARG(6, destH);
+  REQ_INT_ARG(7, srcW);
+  REQ_INT_ARG(8, srcH);
 
-      Image *im   = ObjectWrap::Unwrap<Image>(info.This());
+  Image *im   = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImageCopyResampled(*dest, *im, dstX, dstY, srcX, srcY, destW, destH, srcW, srcH);
+  gdImageCopyResampled(*dest, *im, dstX, dstY, srcX, srcY, destW, destH, srcW, srcH);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::CopyRotated) {
-      REQ_ARGS(8);
-      REQ_IMG_ARG(0, dest);
-      REQ_DOUBLE_ARG(1, dstX);
-      REQ_DOUBLE_ARG(2, dstY);
-      REQ_INT_ARG(3, srcX);
-      REQ_INT_ARG(4, srcY);
-      REQ_INT_ARG(5, srcW);
-      REQ_INT_ARG(6, srcH);
-      REQ_INT_ARG(7, angle);
+NAN_METHOD(Gd::Image::CopyRotated) {
+  REQ_ARGS(8);
+  REQ_IMG_ARG(0, dest);
+  REQ_DOUBLE_ARG(1, dstX);
+  REQ_DOUBLE_ARG(2, dstY);
+  REQ_INT_ARG(3, srcX);
+  REQ_INT_ARG(4, srcY);
+  REQ_INT_ARG(5, srcW);
+  REQ_INT_ARG(6, srcH);
+  REQ_INT_ARG(7, angle);
 
-      Image *im   = ObjectWrap::Unwrap<Image>(info.This());
+  Image *im   = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImageCopyRotated(*dest, *im, dstX, dstY, srcX, srcY, srcW, srcH, angle);
+  gdImageCopyRotated(*dest, *im, dstX, dstY, srcX, srcY, srcW, srcH, angle);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::CopyMerge) {
-      REQ_ARGS(8);
-      REQ_IMG_ARG(0, dest);
-      REQ_INT_ARG(1, dstX);
-      REQ_INT_ARG(2, dstY);
-      REQ_INT_ARG(3, srcX);
-      REQ_INT_ARG(4, srcY);
-      REQ_INT_ARG(5, width);
-      REQ_INT_ARG(6, height);
-      REQ_INT_ARG(7, pct);
+NAN_METHOD(Gd::Image::CopyMerge) {
+  REQ_ARGS(8);
+  REQ_IMG_ARG(0, dest);
+  REQ_INT_ARG(1, dstX);
+  REQ_INT_ARG(2, dstY);
+  REQ_INT_ARG(3, srcX);
+  REQ_INT_ARG(4, srcY);
+  REQ_INT_ARG(5, width);
+  REQ_INT_ARG(6, height);
+  REQ_INT_ARG(7, pct);
 
-      Image *im   = ObjectWrap::Unwrap<Image>(info.This());
+  Image *im   = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImageCopyMerge(*dest, *im, dstX, dstY, srcX, srcY, width, height, pct);
+  gdImageCopyMerge(*dest, *im, dstX, dstY, srcX, srcY, width, height, pct);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::CopyMergeGray) {
-      REQ_ARGS(8);
-      REQ_IMG_ARG(0, dest);
-      REQ_INT_ARG(1, dstX);
-      REQ_INT_ARG(2, dstY);
-      REQ_INT_ARG(3, srcX);
-      REQ_INT_ARG(4, srcY);
-      REQ_INT_ARG(5, width);
-      REQ_INT_ARG(6, height);
-      REQ_INT_ARG(7, pct);
+NAN_METHOD(Gd::Image::CopyMergeGray) {
+  REQ_ARGS(8);
+  REQ_IMG_ARG(0, dest);
+  REQ_INT_ARG(1, dstX);
+  REQ_INT_ARG(2, dstY);
+  REQ_INT_ARG(3, srcX);
+  REQ_INT_ARG(4, srcY);
+  REQ_INT_ARG(5, width);
+  REQ_INT_ARG(6, height);
+  REQ_INT_ARG(7, pct);
 
-      Image *im   = ObjectWrap::Unwrap<Image>(info.This());
+  Image *im   = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImageCopyMergeGray(*dest, *im, dstX, dstY, srcX, srcY, width, height, pct);
+  gdImageCopyMergeGray(*dest, *im, dstX, dstY, srcX, srcY, width, height, pct);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::PaletteCopy) {
-      REQ_IMG_ARG(0, dest);
+NAN_METHOD(Gd::Image::PaletteCopy) {
+  REQ_IMG_ARG(0, dest);
 
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImagePaletteCopy(*dest, *im);
+  gdImagePaletteCopy(*dest, *im);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::SquareToCircle) {
-      REQ_INT_ARG(0, radius);
+NAN_METHOD(Gd::Image::SquareToCircle) {
+  REQ_INT_ARG(0, radius);
 
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImageSquareToCircle(*im, radius);
+  gdImageSquareToCircle(*im, radius);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::Sharpen) {
-      REQ_INT_ARG(0, pct);
+NAN_METHOD(Gd::Image::Sharpen) {
+  REQ_INT_ARG(0, pct);
 
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImageSharpen(*im, pct);
+  gdImageSharpen(*im, pct);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::CreatePaletteFromTrueColor) {
-      OPT_INT_ARG(0, ditherFlag, 0);
-      OPT_INT_ARG(1, colorsWanted, 256);
+NAN_METHOD(Gd::Image::CreatePaletteFromTrueColor) {
+  OPT_INT_ARG(0, ditherFlag, 0);
+  OPT_INT_ARG(1, colorsWanted, 256);
 
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImagePtr newImage = gdImageCreatePaletteFromTrueColor(*im, ditherFlag, colorsWanted);
+  gdImagePtr newImage = gdImageCreatePaletteFromTrueColor(*im, ditherFlag, colorsWanted);
 
-      RETURN_IMAGE(newImage);
-    }
+  RETURN_IMAGE(newImage);
+}
 
-    NAN_METHOD(Gd::Image::TrueColorToPalette) {
-      OPT_INT_ARG(0, ditherFlag, 0);
-      OPT_INT_ARG(1, colorsWanted, 256);
+NAN_METHOD(Gd::Image::TrueColorToPalette) {
+  OPT_INT_ARG(0, ditherFlag, 0);
+  OPT_INT_ARG(1, colorsWanted, 256);
 
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
 #if SUPPORTS_GD_2_1_0
-      Local<Number> result = Nan::New<Integer>(gdImageTrueColorToPalette(*im, ditherFlag, colorsWanted));
-      info.GetReturnValue().Set(result);
+  Local<Number> result = Nan::New<Integer>(gdImageTrueColorToPalette(*im, ditherFlag, colorsWanted));
+  info.GetReturnValue().Set(result);
 #endif
 #if SUPPORTS_UNTIL_GD_2_0_36
-      gdImageTrueColorToPalette(*im, ditherFlag, colorsWanted);
-      info.GetReturnValue().SetUndefined();
+  gdImageTrueColorToPalette(*im, ditherFlag, colorsWanted);
+  info.GetReturnValue().SetUndefined();
 #endif
-    }
+}
 
 #if SUPPORTS_GD_2_1_0
-    NAN_METHOD(Gd::Image::PaletteToTrueColor) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::PaletteToTrueColor) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      Local<Number> result = Nan::New<Integer>(gdImagePaletteToTrueColor(*im));
+  Local<Number> result = Nan::New<Integer>(gdImagePaletteToTrueColor(*im));
 
-      info.GetReturnValue().Set(result);
-    }
+  info.GetReturnValue().Set(result);
+}
 
-    NAN_METHOD(Gd::Image::ColorMatch) {
-      REQ_IMG_ARG(0, palette);
+NAN_METHOD(Gd::Image::ColorMatch) {
+  REQ_IMG_ARG(0, palette);
 
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      Local<Number> result = Nan::New<Integer>(gdImageColorMatch(*im, *palette));
+  Local<Number> result = Nan::New<Integer>(gdImageColorMatch(*im, *palette));
 
-      info.GetReturnValue().Set(result);
-    }
+  info.GetReturnValue().Set(result);
+}
 #endif
 
-    NAN_METHOD(Gd::Image::GifAnimBegin) {
-      REQ_STR_ARG(0, path);
-      REQ_INT_ARG(1, GlobalCM);
-      REQ_INT_ARG(2, Loops);
+NAN_METHOD(Gd::Image::GifAnimBegin) {
+  REQ_STR_ARG(0, path);
+  REQ_INT_ARG(1, GlobalCM);
+  REQ_INT_ARG(2, Loops);
 
-      FILE *out = fopen(*path, "wb");
+  FILE *out = fopen(*path, "wb");
 
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      gdImageGifAnimBegin(*im, out, GlobalCM, Loops);
-      fclose(out);
+  gdImageGifAnimBegin(*im, out, GlobalCM, Loops);
+  fclose(out);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::GifAnimAdd) {
-      REQ_STR_ARG(0, path);
-      REQ_INT_ARG(1, LocalCM);
-      REQ_INT_ARG(2, LeftOfs);
-      REQ_INT_ARG(3, TopOfs);
-      REQ_INT_ARG(4, Delay);
-      REQ_INT_ARG(5, Disposal);
+NAN_METHOD(Gd::Image::GifAnimAdd) {
+  REQ_STR_ARG(0, path);
+  REQ_INT_ARG(1, LocalCM);
+  REQ_INT_ARG(2, LeftOfs);
+  REQ_INT_ARG(3, TopOfs);
+  REQ_INT_ARG(4, Delay);
+  REQ_INT_ARG(5, Disposal);
 
-      FILE *out = fopen(*path, "ab");
+  FILE *out = fopen(*path, "ab");
 
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      if (info.Length() <= 6) {
-        return Nan::ThrowError("Argument 6 must be an object");
-      } else if (info[6]->IsObject()) {
-        Image *prevFrame;
-        Local<Object> _obj_ = Local<Object>::Cast(info[6]);
-        prevFrame = ObjectWrap::Unwrap<Image>(_obj_);
-        gdImageGifAnimAdd(*im, out, LocalCM, LeftOfs, TopOfs, Delay, Disposal, *prevFrame);
-      } else {
-        gdImageGifAnimAdd(*im, out, LocalCM, LeftOfs, TopOfs, Delay, Disposal, NULL);
-      }
+  if (info.Length() <= 6) {
+    return Nan::ThrowError("Argument 6 must be an object");
+  } else if (info[6]->IsObject()) {
+    Image *prevFrame;
+    Local<Object> _obj_ = Local<Object>::Cast(info[6]);
+    prevFrame = ObjectWrap::Unwrap<Image>(_obj_);
+    gdImageGifAnimAdd(*im, out, LocalCM, LeftOfs, TopOfs, Delay, Disposal, *prevFrame);
+  } else {
+    gdImageGifAnimAdd(*im, out, LocalCM, LeftOfs, TopOfs, Delay, Disposal, NULL);
+  }
 
-      fclose(out);
+  fclose(out);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    NAN_METHOD(Gd::Image::GifAnimEnd) {
-      REQ_STR_ARG(0, path);
+NAN_METHOD(Gd::Image::GifAnimEnd) {
+  REQ_STR_ARG(0, path);
 
-      FILE *out = fopen(*path, "ab");
-      gdImageGifAnimEnd(out);
-      fclose(out);
+  FILE *out = fopen(*path, "ab");
+  gdImageGifAnimEnd(out);
+  fclose(out);
 
-      info.GetReturnValue().Set(info.This());
-    }
+  info.GetReturnValue().Set(info.This());
+}
 
-    /**
-     * Miscellaneous Functions
-     */
-    NAN_METHOD(Gd::Image::Compare) {
-      Image *im = ObjectWrap::Unwrap<Image>(info.This());
+/**
+ * Miscellaneous Functions
+ */
+NAN_METHOD(Gd::Image::Compare) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-      REQ_ARGS(1);
-      if (!info[0]->IsObject())
-        return Nan::ThrowError("Argument 0  must be an image");
+  REQ_ARGS(1);
+  if (!info[0]->IsObject())
+    return Nan::ThrowError("Argument 0  must be an image");
 
-      Local<Object> obj = Local<Object>::Cast(info[0]);
-      Image *im2 = ObjectWrap::Unwrap<Image>(obj);
+  Local<Object> obj = Local<Object>::Cast(info[0]);
+  Image *im2 = ObjectWrap::Unwrap<Image>(obj);
 
-      Local<Number> result = Nan::New<Integer>(gdImageCompare(*im, *im2));
+  Local<Number> result = Nan::New<Integer>(gdImageCompare(*im, *im2));
 
-      info.GetReturnValue().Set(result);
-    }
+  info.GetReturnValue().Set(result);
+}
 
 Nan::Persistent<v8::FunctionTemplate> Gd::Image::constructor;
