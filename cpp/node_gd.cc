@@ -24,7 +24,7 @@
 #include <nan.h>
 #include <sstream>
 #include "node_gd.h"
-#include "fileworker.cc"
+#include "createworker.cc"
 
 using namespace v8;
 using namespace node;
@@ -89,17 +89,19 @@ using namespace node;
   Local<Value> _arg_ = Nan::New<External>(IMG);                         \
   Local<FunctionTemplate> func = Nan::New(Image::constructor);          \
   Local<Object> _image_ = func->GetFunction()->NewInstance(1, &_arg_);  \
+  Nan::Persistent<v8::Object> persistent;                               \
+  persistent.Reset(_image_);                                            \
   info.GetReturnValue().Set(_image_);
 
 #define DECLARE_CREATE_FROM(TYPE)                                       \
-  NAN_METHOD(Gd::CreateFrom##TYPE) {                                 \
+  NAN_METHOD(Gd::CreateFrom##TYPE) {                                    \
     REQ_STR_ARG(0, path);                                               \
     FILE *in; in = fopen(*path, "rb");                                  \
     gdImagePtr im = gdImageCreateFrom##TYPE(in);                        \
     fclose(in);                                                         \
     RETURN_IMAGE(im)                                                    \
   }                                                                     \
-  NAN_METHOD(Gd::CreateFrom##TYPE##Ptr) {                            \
+  NAN_METHOD(Gd::CreateFrom##TYPE##Ptr) {                               \
     REQ_ARGS(1);                                                        \
     ASSERT_IS_STRING_OR_BUFFER(info[0]);                                \
     gdImagePtr im;                                                      \
@@ -181,7 +183,9 @@ void Gd::Init(Local<Object> exports) {
   NODE_DEFINE_CONSTANT(exports, GD_OPENPOLYGON);
 
   Nan::SetMethod(exports, "create", ImageCreate);
+  Nan::SetMethod(exports, "createSync", ImageCreateSync);
   Nan::SetMethod(exports, "createTrueColor", ImageCreateTrueColor);
+  Nan::SetMethod(exports, "createTrueColorSync", ImageCreateTrueColorSync);
   Nan::SetMethod(exports, "createFromJpeg", CreateFromJpeg);
   Nan::SetMethod(exports, "createFromJpegPtr", CreateFromJpegPtr);
   Nan::SetMethod(exports, "createFromPng", CreateFromPng);
@@ -219,6 +223,18 @@ void Gd::Init(Local<Object> exports) {
 NAN_METHOD(Gd::ImageCreate) {
   REQ_INT_ARG(0, width);
   REQ_INT_ARG(1, height);
+  REQ_FN_ARG(2, cb);
+
+  Nan::Callback *callback = new Nan::Callback(cb);
+
+  Nan::AsyncQueueWorker(new CreateWorker(callback, width, height, 0));
+
+  info.GetReturnValue().SetUndefined();
+}
+
+NAN_METHOD(Gd::ImageCreateSync) {
+  REQ_INT_ARG(0, width);
+  REQ_INT_ARG(1, height);
 
   gdImagePtr im = gdImageCreate(width, height);
 
@@ -226,6 +242,18 @@ NAN_METHOD(Gd::ImageCreate) {
 }
 
 NAN_METHOD(Gd::ImageCreateTrueColor) {
+  REQ_INT_ARG(0, width);
+  REQ_INT_ARG(1, height);
+  REQ_FN_ARG(2, cb);
+
+  Nan::Callback *callback = new Nan::Callback(cb);
+
+  Nan::AsyncQueueWorker(new CreateWorker(callback, width, height, 1));
+
+  info.GetReturnValue().SetUndefined();
+}
+
+NAN_METHOD(Gd::ImageCreateTrueColorSync) {
   REQ_INT_ARG(0, width);
   REQ_INT_ARG(1, height);
 
@@ -763,9 +791,23 @@ NAN_METHOD(Gd::Image::FileCallback) {
   REQ_STR_ARG(0, path);
   REQ_FN_ARG(1, cb);
 
-  Nan::Callback *callback = new Nan::Callback(cb);
+  Nan::Callback callback(cb);
 
-  Nan::AsyncQueueWorker(new FileWorker(callback, *im, *path));
+  bool result = gdImageFile(*im, *path);
+  if (result == false) {
+    Local<Value> argv[] = {
+      Nan::Error(Nan::New<String>("Unable to write file.").ToLocalChecked())
+    };
+    callback.Call(1, argv);
+  } else {
+    Local<Value> argv[] = {
+      Nan::Null()
+    };
+    callback.Call(1, argv);
+  }
+
+  // delete callback;
+  info.GetReturnValue().Set(info.This());
 }
 #endif
 

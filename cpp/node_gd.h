@@ -46,9 +46,10 @@ class Gd : public Nan::ObjectWrap {
 public:
   static void Init(v8::Local<v8::Object> exports);
 
-private:
   static NAN_METHOD(ImageCreate);
+  static NAN_METHOD(ImageCreateSync);
   static NAN_METHOD(ImageCreateTrueColor);
+  static NAN_METHOD(ImageCreateTrueColorSync);
 
   static NAN_METHOD(CreateFromJpeg);
   static NAN_METHOD(CreateFromJpegPtr);
@@ -89,7 +90,7 @@ private:
 
     static void Init(v8::Local<v8::Object> exports);
     static NAN_METHOD(New);
-  protected:
+
     Image(gdImagePtr image);
     ~Image();
 
