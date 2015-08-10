@@ -550,7 +550,7 @@ Only available from GD version 2.1.1. The compression parameter is eiterh `0` fo
 #### gd.Image#saveTiff(path[, callback])
 Currently, opening TIFF files with GD has some errors, but saving image data as TIFF works fine. Therefore, there is no `gd.openTiff()` at this moment. Only available from GD version 2.1.1.
 #### gd.Image#saveFile(path[, callback])
-Lets GD decide in which format the image should be stored to disk, based on the supplied file name extension. Only available from GD version 2.1.1.
+Lets GD decide in which format the image should be stored to disk, based on the supplied file name extension. Only available from GD version 2.1.1. This is not really asynchronous, since it uses a GD implementation of writing to disk, instead of a node / libuv based one.
 
 ### Image properties
 Any instance of `gd.Image()` has a basic set of instance properties accessible as read only values.
