@@ -28,7 +28,7 @@ describe 'Node.js GD Graphics Library', ->
       h = Math.floor(img.height / scale)
 
       # create new blank image canvas
-      canvas = gd.createTrueColor w, h
+      canvas = gd.createTrueColorSync w, h
 
       # copy existing image to canvas, scaled
       img.copyResampled canvas, 0, 0, 0, 0, w, h, img.width, img.height
@@ -48,7 +48,7 @@ describe 'Node.js GD Graphics Library', ->
       throw err if err
       w = 100
       h = 100
-      canvas = gd.createTrueColor w, h
+      canvas = gd.createTrueColorSync w, h
 
       img.copyRotated canvas, 50, 50, 0, 0, img.width, img.height, 45
 
@@ -81,7 +81,7 @@ describe 'Node.js GD Graphics Library', ->
     f = source + 'FreeSans.ttf'
     t = target + 'output-string.png'
 
-    img = gd.create 200, 80
+    img = gd.createSync 200, 80
 
     img.colorAllocate 0, 255, 0
     txtColor = img.colorAllocate 255, 0, 255
@@ -98,7 +98,7 @@ describe 'Node.js GD Graphics Library', ->
     f = source + 'FreeSans.ttf'
     t = target + 'output-truecolor-string.png'
 
-    img = gd.createTrueColor 120, 20
+    img = gd.createTrueColorSync 120, 20
 
     txtColor = img.colorAllocate 255, 255, 0
 
@@ -241,7 +241,7 @@ describe 'Node.js GD Graphics Library', ->
     f = source + 'FreeSans.ttf'
     t = target + 'output-truecolor-string.bmp'
 
-    img = gd.createTrueColor 120, 20
+    img = gd.createTrueColorSync 120, 20
 
     txtColor = img.colorAllocate 255, 255, 0
 
@@ -259,7 +259,7 @@ describe 'Node.js GD Graphics Library', ->
     f = source + 'FreeSans.ttf'
     t = target + 'output-truecolor-string.tif'
 
-    img = gd.createTrueColor 120, 20
+    img = gd.createTrueColorSync 120, 20
 
     txtColor = img.colorAllocate 255, 255, 0
 
@@ -278,7 +278,7 @@ describe 'Node.js GD Graphics Library', ->
       gd.openPng s, (err, img) ->
         throw err if err
 
-        canvas = gd.createTrueColor 100, 100
+        canvas = gd.createTrueColorSync 100, 100
 
         img.copyResampled canvas, 0, 0, 0, 0, 100, 100, img.width, img.height
 
@@ -294,7 +294,7 @@ describe 'Node.js GD Graphics Library', ->
       gd.openPng s, (err, img) ->
         throw err if err
 
-        canvas = gd.createTrueColor img.width, img.height
+        canvas = gd.createTrueColorSync img.width, img.height
 
         img.copyResampled canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height
 
@@ -310,7 +310,7 @@ describe 'Node.js GD Graphics Library', ->
       gd.openPng s, (err, img) ->
         throw err if err
 
-        canvas = gd.createTrueColor img.width, img.height
+        canvas = gd.createTrueColorSync img.width, img.height
 
         img.copyResampled canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height
 
@@ -345,7 +345,7 @@ describe 'Node.js GD Graphics Library', ->
       gd.openPng s, (err, img) ->
         throw err if err
 
-        canvas = gd.createTrueColor img.width, img.height
+        canvas = gd.createTrueColorSync img.width, img.height
 
         img.copyResampled canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height
 

@@ -116,10 +116,24 @@ output_img.savePng "out.png", 0, (err) ->
 
 ## API
 ### Opening and creating graphic images
-#### gd.create(width, height)
-Create a new image in memory of specified size and return an instance of `gd.Image`. This is a paletted image, thus has a white background and a limited color range of at most 256 colors.
-#### gd.createTrueColor(width, height)
-Returns an object of type `gd.Image` . This is a true color image, and thus has a black background and a palette of millions of colors.
+#### gd.create(width, height, callback)
+Create a new image in memory of specified size and calls a callback that can have an argument being instance of `gd.Image`. This is a paletted image, thus has a white background and a limited color range of at most 256 colors.
+#### gd.createSync(width, height)
+Synchronous version of the above, returns an object of type `gd.Image`.
+#### gd.createTrueColor(width, height, callback)
+This is a true color image, and thus has a black background and a palette of millions of colors.
+```javascript
+var gd = require('node-gd');
+
+gd.createTrueColor(100, 100, function(error, img) {
+  if (error) throw error;
+  img.saveJpeg('./test.jpg', 100, function(error) {
+    if (error) throw error;
+  });
+});
+```
+#### gd.createTrueColorSync(width, height)
+Synchronous version of the above, returns an object of type `gd.Image`.
 #### gd.openJpeg(path[, callback])
 Open a JPG file. If no callback is supplied, it will return an instance of `gd.Image`. In case of a supplied callback, it will receive two parameters: `error` and an instance of `gd.Image`. Uses `fs.readFile()` and `gd.createFromJpegPtr()` to load the image asynchronously.
 ```javascript
@@ -536,7 +550,7 @@ Only available from GD version 2.1.1. The compression parameter is eiterh `0` fo
 #### gd.Image#saveTiff(path[, callback])
 Currently, opening TIFF files with GD has some errors, but saving image data as TIFF works fine. Therefore, there is no `gd.openTiff()` at this moment. Only available from GD version 2.1.1.
 #### gd.Image#saveFile(path[, callback])
-Lets GD decide in which format the image should be stored to disk, based on the supplied file name extension. Only available from GD version 2.1.1.
+Lets GD decide in which format the image should be stored to disk, based on the supplied file name extension. Only available from GD version 2.1.1. This is not really asynchronous, since it uses a GD implementation of writing to disk, instead of a node / libuv based one.
 
 ### Image properties
 Any instance of `gd.Image()` has a basic set of instance properties accessible as read only values.
