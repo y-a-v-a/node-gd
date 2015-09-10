@@ -105,15 +105,15 @@ using namespace node;
     REQ_ARGS(1);                                                        \
     ASSERT_IS_STRING_OR_BUFFER(info[0]);                                \
     gdImagePtr im;                                                      \
+    Local<Value> obj = info[0]->ToObject();                             \
     if(Buffer::HasInstance(info[0])) {                                  \
-      Local<Value> obj = info[0]->ToObject();                           \
       char *buffer_data = Buffer::Data(obj);                            \
       size_t buffer_length = Buffer::Length(obj);                       \
       im = gdImageCreateFrom##TYPE##Ptr(buffer_length, buffer_data);    \
     } else {                                                            \
-      ssize_t len = DecodeBytes(info[0], BINARY);                       \
+      ssize_t len = Nan::DecodeBytes(obj, Nan::Encoding(BINARY));       \
       char* buf = new char[len];                                        \
-      ssize_t written = DecodeWrite(buf, len, info[0]);                 \
+      ssize_t written = Nan::DecodeWrite(buf, len, obj);                \
       assert(written == len);                                           \
       im = gdImageCreateFrom##TYPE##Ptr(len, buf);                      \
       delete[] buf;                                                     \
@@ -309,9 +309,9 @@ NAN_METHOD(Gd::CreateFromGd2PartPtr) {
   REQ_INT_ARG(3, width);
   REQ_INT_ARG(4, height);
 
-  ssize_t len = DecodeBytes(info[0]);
+  ssize_t len = Nan::DecodeBytes(info[0]);
   char *buf   = new char[len];
-  ssize_t written = DecodeWrite(buf, len, info[0]);
+  ssize_t written = Nan::DecodeWrite(buf, len, info[0]);
   assert(written == len);
 
   gdImagePtr im = gdImageCreateFromGd2PartPtr(len, buf, srcX, srcY, width, height);
