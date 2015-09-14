@@ -36,9 +36,9 @@ $ sudo port install gd2
 $ npm install node-gd
 ```
 
-## Installation on Windows 7
+## Installation on Windows 8
 
-Please open an issue if you have the answer. I'm sure it works, I just don't have ready the exact commands.
+Hopefully will be working on this soon. Up until then: sorry, won't build on Windows.
 
 ## Usage
 
@@ -46,12 +46,15 @@ There are different flavours of images, of which the main ones are palette-based
 
 ### Using javascript
 
+Note! Since node-gd@1.0.0, gd.create and gd.createTrueColor are async. *You will have to modify your code.*
+
+
 ```javascript
 // Require library
 var gd = require('node-gd');
 
 // Create blank new image in memory
-var img = gd.create(200, 80);
+var img = gd.createSync(200, 80);
 
 // Set background color
 img.colorAllocate(0, 255, 0);
@@ -99,7 +102,7 @@ gd.openFile('/path/to/file.jpg', function(err, img) {
 gd = require 'node-gd'
 
 # Create blank new image in memory
-output_img = gd.create width, height
+output_img = gd.createSync width, height
 
 # Load existing image file on disk into memory
 gd.openPng "test.png", (err, input_img) ->
@@ -230,7 +233,7 @@ Draw a closed polygon. The first parameter shoud be an `Array` of `Object`s cont
 ```javascript
 // draw a red triangle on a black background
 var gd = require('node-gd');
-var img = gd.createTrueColor(100, 100);
+var img = gd.createTrueColorSync(100, 100);
 
 var points = [
   { x: 10, y: 10 },
@@ -249,7 +252,7 @@ Same as the above but color value will be used to fill the polygon.
 Create a rectangle. The x and y values indicate upper left and lower right corner respectively.
 ```javascript
 var gd = require('node-gd');
-var img = gd.create(300, 200);
+var img = gd.createSync(300, 200);
 var color0 = img.colorAllocate(255,255,255);
 var color1 = img.colorAllocate(255,0,255);
 img.rectangle(20, 20, 280, 180, color1);
@@ -259,7 +262,7 @@ img.saveFile('./test.png');
 Create a filled rectangle i.e. a solid bar.
 ```javascript
 var gd = require('node-gd');
-var img = gd.create(300, 200);
+var img = gd.createSync(300, 200);
 var color0 = img.colorAllocate(255,255,255);
 var color1 = img.colorAllocate(255,0,255);
 img.filledRectangle(20, 20, 280, 180, color1);
@@ -269,7 +272,7 @@ img.saveFile('./test.png');
 Draw an arc. `cx` and `cy` denote the center of the arc. The `begin` and `end` parameters are in degrees, from 0 to 360.
 ```javascript
 var gd = require('node-gd');
-var img = gd.create(300, 200);
+var img = gd.createSync(300, 200);
 var color0 = img.colorAllocate(255, 255, 255);
 var color1 = img.colorAllocate(255, 0, 255);
 var color2 = img.colorAllocate(0, 255, 255);
@@ -289,7 +292,7 @@ Draw a filled ellipse.
 Fill a drawn form up until its border.
 ```javascript
 var gd = require('node-gd');
-var img = gd.create(300, 200);
+var img = gd.createSync(300, 200);
 var color0 = img.colorAllocate(255, 255, 255);
 var color1 = img.colorAllocate(255, 0, 255);
 var color2 = img.colorAllocate(0, 255, 255);
@@ -309,7 +312,7 @@ img.saveFile('./test.png');
 Set the thickness for lines.
 ```javascript
 var gd = require('node-gd');
-var img = gd.create(300, 200);
+var img = gd.createSync(300, 200);
 var color0 = img.colorAllocate(255, 255, 255);
 var color1 = img.colorAllocate(255, 0, 255);
 
@@ -335,7 +338,7 @@ For paletted images, this will return the palette index of the color for that pi
 This will return the color integer representation.
 ```javascript
 var gd = require('node-gd');
-var img = gd.createTrueColor(300, 200);
+var img = gd.createTrueColorSync(300, 200);
 var color = img.colorAllocate(255, 0, 255);
 
 img.setThickness(30);
@@ -461,7 +464,7 @@ var gd = require('node-gd');
 var anim = './anim.gif';
 
 // create first frame
-var firstFrame = gd.create(200,200);
+var firstFrame = gd.createSync(200,200);
 
 // allocate some colors
 var whiteBackground = firstFrame.colorAllocate(255, 255, 255);
@@ -479,7 +482,7 @@ for(var i = 0; i < 30; i++) {
 }
 
 totalFrames.forEach(function(i, idx, arr) {
-  var frame = gd.create(200, 200);
+  var frame = gd.createSync(200, 200);
   arr[idx] = frame;
   frame.ellipse(100, (i * 10 - 40), 100, 100, pink);
   var lastFrame = i === 0 ? firstFrame : arr[i - 1];
@@ -575,7 +578,7 @@ For paletted images, returns the amount of colors in the palette.
 `Boolean` value for if the image is interlaced or not. This property can also be set. When set to `true` for Jpeg images, GD will save it as a progressive Jpeg image.
 ```javascript
 var gd = require('node-gd');
-var img = gd.createTrueColor(100,100);
+var img = gd.createTrueColorSync(100,100);
 img.interlace = true; // set interlace to true
 
 // will save jpeg as progressive jpeg image.
