@@ -8,7 +8,7 @@
   },
   "scripts": {
     "pretest": "coffee --bare -o js coffee/node-gd.coffee && node-gyp rebuild",
-    "test": "mocha --reporter spec --bail --ui bdd --colors --compilers coffee:coffee-script/register --require coffee-script test/test.coffee",
+    "test": "mocha --reporter spec --bail --ui bdd --colors test/test.js",
     "prepublish": "coffee --bare -o js coffee/node-gd.coffee",
     "install": "node-gyp rebuild"
   },
