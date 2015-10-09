@@ -410,7 +410,6 @@ describe('Node.js GD Graphics Library', function() {
           return done();
         });
       });
-      return done();
     });
     it('can open a jpeg file and save it as png', function(done) {
       var s, t;

@@ -34,9 +34,6 @@ using namespace node;
 #define GD_GIFANIM 1
 #define GD_OPENPOLYGON 1
 
-#define THROW_ERROR(TYPE, STR)                                          \
-  return Nan::ThrowError(STR);
-
 #define REQ_ARGS(N)                                                     \
   if (info.Length() < (N))                                              \
     return Nan::ThrowError("Expected " #N " arguments");
@@ -84,6 +81,16 @@ using namespace node;
     return Nan::ThrowError("Argument " #I " must be an integer");       \
   }
 
+#define OPT_BOOL_ARG(I, VAR, DEFAULT)                                   \
+  bool VAR;                                                             \
+  if (info.Length() <= (I)) {                                           \
+    VAR = (DEFAULT);                                                    \
+  } else if (info[I]->IsBoolean()) {                                    \
+    VAR = info[I]->BooleanValue();                                      \
+  } else {                                                              \
+    return Nan::ThrowError("Argument " #I " must be a boolean");        \
+  }
+
 #define RETURN_IMAGE(IMG)                                               \
   if (!IMG) info.GetReturnValue().SetNull();                            \
   Local<Value> _arg_ = Nan::New<External>(IMG);                         \
@@ -123,13 +130,18 @@ using namespace node;
 
 #define ASSERT_IS_STRING_OR_BUFFER(val)                                 \
   if (!val->IsString() && !Buffer::HasInstance(val)) {                  \
-    return Nan::ThrowError("Not a string or buffer");                   \
+    return Nan::ThrowError("Argument not a String or Buffer");          \
   }
 
-#define RETURN_DATA()                                                   \
-  Local<Value> result = Nan::Encode(data, size, Nan::BINARY);           \
-  delete[] data;                                                        \
-  info.GetReturnValue().Set(result);
+#define RETURN_DATA(asBuffer)                                           \
+  if (asBuffer) {                                                       \
+    Nan::MaybeLocal<Object> result = Nan::NewBuffer(data, size);        \
+    info.GetReturnValue().Set(result.ToLocalChecked());                 \
+  } else {                                                              \
+    Local<Value> result = Nan::Encode(data, size, Nan::BINARY);         \
+    delete[] data;                                                      \
+    info.GetReturnValue().Set(result);                                  \
+  }
 
 #define COLOR_ANTIALIASED    gdAntiAliased
 #define COLOR_BRUSHED        gdBrushed
@@ -576,11 +588,12 @@ NAN_METHOD(Gd::Image::JpegPtr) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
   OPT_INT_ARG(0, quality, -1);
+  OPT_BOOL_ARG(1, asBuffer, false);
 
   int size;
   char *data = (char*)gdImageJpegPtr(*im, &size, quality);
 
-  RETURN_DATA()
+  RETURN_DATA(asBuffer)
 }
 
 NAN_METHOD(Gd::Image::Gif) {
@@ -598,10 +611,12 @@ NAN_METHOD(Gd::Image::Gif) {
 NAN_METHOD(Gd::Image::GifPtr) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
+  OPT_BOOL_ARG(0, asBuffer, false);
+
   int size;
   char *data = (char*)gdImageGifPtr(*im, &size);
 
-  RETURN_DATA()
+  RETURN_DATA(asBuffer)
 }
 
 NAN_METHOD(Gd::Image::Png) {
@@ -621,11 +636,12 @@ NAN_METHOD(Gd::Image::PngPtr) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
   OPT_INT_ARG(0, level, -1);
+  OPT_BOOL_ARG(1, asBuffer, false);
 
   int size;
   char *data = (char*)gdImagePngPtrEx(*im, &size, level);
 
-  RETURN_DATA()
+  RETURN_DATA(asBuffer)
 }
 
 NAN_METHOD(Gd::Image::WBMP) {
@@ -645,11 +661,12 @@ NAN_METHOD(Gd::Image::WBMPPtr) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
   REQ_INT_ARG(0, foreground);
+  OPT_BOOL_ARG(1, asBuffer, false);
 
   int size;
   char *data = (char*)gdImageWBMPPtr(*im, &size, foreground);
 
-  RETURN_DATA()
+  RETURN_DATA(asBuffer)
 }
 
 #if HAS_LIBWEBP
@@ -670,11 +687,12 @@ NAN_METHOD(Gd::Image::WebpPtr) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
   OPT_INT_ARG(0, level, -1);
+  OPT_BOOL_ARG(1, asBuffer, false);
 
   int size;
   char *data = (char*)gdImageWebpPtrEx(*im, &size, level);
 
-  RETURN_DATA()
+  RETURN_DATA(asBuffer)
 }
 #endif
 
@@ -693,10 +711,12 @@ NAN_METHOD(Gd::Image::Gd) {
 NAN_METHOD(Gd::Image::GdPtr) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
+  OPT_BOOL_ARG(0, asBuffer, false);
+
   int size;
   char *data = (char*)gdImageGdPtr(*im, &size);
 
-  RETURN_DATA()
+  RETURN_DATA(asBuffer)
 }
 
 NAN_METHOD(Gd::Image::Gd2) {
@@ -718,11 +738,12 @@ NAN_METHOD(Gd::Image::Gd2Ptr) {
 
   REQ_INT_ARG(0, chunkSize);
   OPT_INT_ARG(1, format, GD2_FMT_RAW);
+  OPT_BOOL_ARG(2, asBuffer, false);
 
   int size;
   char *data = (char*)gdImageGd2Ptr(*im, chunkSize, format, &size);
 
-  RETURN_DATA()
+  RETURN_DATA(asBuffer)
 }
 
 #if SUPPORTS_GD_2_1_0
@@ -743,11 +764,12 @@ NAN_METHOD(Gd::Image::BmpPtr) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
   OPT_INT_ARG(0, compression, 0);
+  OPT_BOOL_ARG(1, asBuffer, false);
 
   int size;
   char *data = (char*)gdImageBmpPtr(*im, &size, compression);
 
-  RETURN_DATA()
+  RETURN_DATA(asBuffer)
 }
 #endif
 
@@ -767,10 +789,12 @@ NAN_METHOD(Gd::Image::Tiff) {
 NAN_METHOD(Gd::Image::TiffPtr) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
+  OPT_BOOL_ARG(0, asBuffer, false);
+
   int size;
   char *data = (char*)gdImageTiffPtr(*im, &size);
 
-  RETURN_DATA()
+  RETURN_DATA(asBuffer)
 }
 #endif
 
@@ -1965,16 +1989,14 @@ NAN_METHOD(Gd::Image::GifAnimAdd) {
 
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
+  Image *prevFrame = NULL;
   if (info.Length() <= 6) {
     return Nan::ThrowError("Argument 6 must be an object");
   } else if (info[6]->IsObject()) {
-    Image *prevFrame;
     Local<Object> _obj_ = Local<Object>::Cast(info[6]);
     prevFrame = ObjectWrap::Unwrap<Image>(_obj_);
-    gdImageGifAnimAdd(*im, out, LocalCM, LeftOfs, TopOfs, Delay, Disposal, *prevFrame);
-  } else {
-    gdImageGifAnimAdd(*im, out, LocalCM, LeftOfs, TopOfs, Delay, Disposal, NULL);
   }
+  gdImageGifAnimAdd(*im, out, LocalCM, LeftOfs, TopOfs, Delay, Disposal, *prevFrame);
 
   fclose(out);
 
