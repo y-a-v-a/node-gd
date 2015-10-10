@@ -62,12 +62,6 @@
       "email": "vebruijn@gmail.com"
     }
   ],
-  "maintainers": [
-    {
-      "name": "Vincent Bruijn (y_a_v_a)",
-      "email": "vebruijn@gmail.com"
-    }
-  ],
   "gypfile": true,
   "readmeFilename": "README.md",
   "devDependencies": {
