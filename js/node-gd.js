@@ -5,7 +5,11 @@ var gdBindings;
 
 function openFormatFunction(format) {
   return function () {
-    var args = Array.prototype.slice.call(arguments);
+    var args = [];
+    for (var i = 0; i < arguments.length; i++) {
+      args[i] = (arguments[i]);
+    }
+
     var filename = args.shift();
     var callback = args.pop();
 
@@ -28,7 +32,11 @@ function saveFormatFunction(format) {
 
   return function () {
     var data;
-    var args = Array.prototype.slice.call(arguments);
+    var args = [];
+    for (var i = 0; i < arguments.length; i++) {
+      args[i] = (arguments[i]);
+    }
+
     var filename = args.shift();
     var callback = args.pop();
 
@@ -80,9 +88,12 @@ function exportFormats() {
 
   if (gdBindings.getGDVersion() >= '2.1.1') {
     gdBindings.Image.prototype["saveFile"] = function() {
-      var args, callback;
-      args = Array.prototype.slice.call(arguments);
-      callback = args[args.length - 1];
+      var args = [];
+      for (var i = 0; i < arguments.length; i++) {
+        args[i] = (arguments[i]);
+      }
+
+      var callback = args[args.length - 1];
       if (typeof callback !== "function") {
         return this["file"].apply(this, args);
       }
@@ -90,9 +101,12 @@ function exportFormats() {
     };
 
     gdBindings.openFile = function() {
-      var args, callback;
-      args = Array.prototype.slice.call(arguments);
-      callback = args[args.length - 1];
+      var args = [];
+      for (var i = 0; i < arguments.length; i++) {
+        args[i] = (arguments[i]);
+      }
+
+      var callback = args[args.length - 1];
       if (typeof callback !== "function") {
         return this["createFromFile"].apply(this, args);
       }
