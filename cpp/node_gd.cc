@@ -1989,14 +1989,16 @@ NAN_METHOD(Gd::Image::GifAnimAdd) {
 
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-  Image *prevFrame = NULL;
   if (info.Length() <= 6) {
     return Nan::ThrowError("Argument 6 must be an object");
   } else if (info[6]->IsObject()) {
+    Image *prevFrame;
     Local<Object> _obj_ = Local<Object>::Cast(info[6]);
     prevFrame = ObjectWrap::Unwrap<Image>(_obj_);
+    gdImageGifAnimAdd(*im, out, LocalCM, LeftOfs, TopOfs, Delay, Disposal, *prevFrame);
+  } else {
+    gdImageGifAnimAdd(*im, out, LocalCM, LeftOfs, TopOfs, Delay, Disposal, NULL);
   }
-  gdImageGifAnimAdd(*im, out, LocalCM, LeftOfs, TopOfs, Delay, Disposal, *prevFrame);
 
   fclose(out);
 
