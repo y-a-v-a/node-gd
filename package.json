@@ -6,6 +6,8 @@
   "directories": {
     "test": "test"
   },
+  "homepage": "https://github.com/y-a-v-a/node-gd",
+  "bugs": "https://github.com/y-a-v-a/node-gd/issues",
   "scripts": {
     "pretest": "node-gyp rebuild",
     "test": "mocha --reporter spec --bail --ui bdd --colors test/test.js",
@@ -55,6 +57,12 @@
       "name": "Mike Smullin",
       "email": "mike@smullindesign.com"
     },
+    {
+      "name": "Vincent Bruijn (y_a_v_a)",
+      "email": "vebruijn@gmail.com"
+    }
+  ],
+  "maintainers": [
     {
       "name": "Vincent Bruijn (y_a_v_a)",
       "email": "vebruijn@gmail.com"
