@@ -8,14 +8,20 @@ node_js:
   - "0.12"
   - "0.10"
 
-sudo: required
-
-env:
- - TRAVIS_OS_UNAME=$(uname -s)
+sudo: false
 
 install:
- - if [[ $TRAVIS_OS_UNAME = 'Linux' ]]; then bash travis-linux-deps.sh; fi
- - if [[ $TRAVIS_OS_UNAME = 'Darwin' ]]; then bash travis-osx-deps.sh; fi
+  - export CXX=g++-4.8
+  - $CXX --version
+  - npm i
+
 notifications:
   email:
     - vebruijn@gmail.com
+
+addons:
+  apt:
+    sources:
+    - libgd2-xpm-dev
+    packages:
+    - g++-4.8
