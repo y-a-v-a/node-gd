@@ -4,6 +4,7 @@ os:
   - linux
 
 node_js:
+  - "4.1"
   - "0.12"
   - "0.10"
 
@@ -15,3 +16,6 @@ env:
 install:
  - if [[ $TRAVIS_OS_UNAME = 'Linux' ]]; then bash travis-linux-deps.sh; fi
  - if [[ $TRAVIS_OS_UNAME = 'Darwin' ]]; then bash travis-osx-deps.sh; fi
+notifications:
+  email:
+    - vebruijn@gmail.com
