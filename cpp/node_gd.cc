@@ -16,7 +16,6 @@
  */
 
 #include <gd.h>
-#include <gd_errors.h>
 #include <v8.h>
 #include <node.h>
 #include <node_object_wrap.h>
@@ -26,10 +25,14 @@
 #include <sstream>
 #include "node_gd.h"
 #include "createworker.cc"
+#if SUPPORTS_GD_2_1_0
+  #include <gd_errors.h>
+#endif
 
 using namespace v8;
 using namespace node;
 
+#if SUPPORTS_GD_2_1_0
 void nodeGdErrorWrapper(int priority, const char *format, va_list args)
 {
   static char error[256];
@@ -55,6 +58,7 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
   }
   return Nan::ThrowError(Nan::New<String>(error).ToLocalChecked());
 }
+#endif
 
 // Since gd 2.0.28, these are always built in
 #define GD_GIF 1
@@ -181,9 +185,9 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
 #define COLOR_TRANSPARENT    gdTransparent
 
 void Gd::Init(Local<Object> exports) {
-
+#if SUPPORTS_GD_2_1_0
   gdSetErrorMethod(nodeGdErrorWrapper);
-
+#endif
   NODE_DEFINE_CONSTANT(exports, COLOR_ANTIALIASED);
   NODE_DEFINE_CONSTANT(exports, COLOR_BRUSHED);
   NODE_DEFINE_CONSTANT(exports, COLOR_STYLED);
