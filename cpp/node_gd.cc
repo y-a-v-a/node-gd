@@ -16,6 +16,7 @@
  */
 
 #include <gd.h>
+#include <gd_errors.h>
 #include <v8.h>
 #include <node.h>
 #include <node_object_wrap.h>
@@ -28,6 +29,32 @@
 
 using namespace v8;
 using namespace node;
+
+void nodeGdErrorWrapper(int priority, const char *format, va_list args)
+{
+  static char error[256];
+  static char msg[256];
+  vsprintf(msg, format, args);
+
+  switch (priority) {
+  case GD_ERROR:
+    snprintf(error, 256, "GD Error: %s", msg);
+    break;
+  case GD_WARNING:
+    snprintf(error, 256, "GD Warning: %s", msg);
+    break;
+  case GD_NOTICE:
+    snprintf(error, 256, "GD Notice: %s", msg);
+    break;
+  case GD_INFO:
+    snprintf(error, 256, "GD Info: %s", msg);
+    break;
+  case GD_DEBUG:
+    snprintf(error, 256, "GD Debug: %s", msg);
+    break;
+  }
+  return Nan::ThrowError(Nan::New<String>(error).ToLocalChecked());
+}
 
 // Since gd 2.0.28, these are always built in
 #define GD_GIF 1
@@ -92,13 +119,16 @@ using namespace node;
   }
 
 #define RETURN_IMAGE(IMG)                                               \
-  if (!IMG) info.GetReturnValue().SetNull();                            \
-  Local<Value> _arg_ = Nan::New<External>(IMG);                         \
-  Local<FunctionTemplate> func = Nan::New(Image::constructor);          \
-  Local<Object> _image_ = func->GetFunction()->NewInstance(1, &_arg_);  \
-  Nan::Persistent<v8::Object> persistent;                               \
-  persistent.Reset(_image_);                                            \
-  info.GetReturnValue().Set(_image_);
+  if (!IMG) {                                                           \
+    info.GetReturnValue().SetNull();                                    \
+  } else {                                                              \
+    Local<Value> _arg_ = Nan::New<External>(IMG);                       \
+    Local<FunctionTemplate> func = Nan::New(Image::constructor);        \
+    Local<Object> _image_ = func->GetFunction()->NewInstance(1, &_arg_);\
+    Nan::Persistent<v8::Object> persistent;                             \
+    persistent.Reset(_image_);                                          \
+    info.GetReturnValue().Set(_image_);                                 \
+  }
 
 #define DECLARE_CREATE_FROM(TYPE)                                       \
   NAN_METHOD(Gd::CreateFrom##TYPE) {                                    \
@@ -151,6 +181,9 @@ using namespace node;
 #define COLOR_TRANSPARENT    gdTransparent
 
 void Gd::Init(Local<Object> exports) {
+
+  gdSetErrorMethod(nodeGdErrorWrapper);
+
   NODE_DEFINE_CONSTANT(exports, COLOR_ANTIALIASED);
   NODE_DEFINE_CONSTANT(exports, COLOR_BRUSHED);
   NODE_DEFINE_CONSTANT(exports, COLOR_STYLED);

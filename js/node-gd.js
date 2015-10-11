@@ -18,10 +18,16 @@ function openFormatFunction(format) {
     }
 
     return fs.readFile(filename, function (err, data) {
+      var image;
       if (err) {
         return callback(err);
       } else {
-        return callback(null, gdBindings["createFrom" + format + "Ptr"](data));
+        try {
+          image = gdBindings["createFrom" + format + "Ptr"](data);
+        } catch(e) {
+          return callback(e);
+        }
+        return callback(null, image);
       }
     });
   };
@@ -95,22 +101,29 @@ function exportFormats() {
 
       var callback = args[args.length - 1];
       if (typeof callback !== "function") {
-        return this["file"].apply(this, args);
+        return this.file.apply(this, args);
       }
-      return this["fileCallback"].apply(this, args);
+      return this.fileCallback.apply(this, args);
     };
 
     gdBindings.openFile = function() {
       var args = [];
+      var image;
       for (var i = 0; i < arguments.length; i++) {
         args[i] = (arguments[i]);
       }
 
       var callback = args[args.length - 1];
       if (typeof callback !== "function") {
-        return this["createFromFile"].apply(this, args);
+        return this.createFromFile.apply(this, args);
       }
-      return callback(null, this["createFromFile"].apply(this, args));
+
+      try {
+        image = this.createFromFile.apply(this, args);
+      } catch(e) {
+        return callback(e);
+      }
+      return callback(null, image);
     };
   }
 }
