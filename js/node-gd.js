@@ -135,8 +135,13 @@ var libPaths = [
 
 try {
   gdBindings = require(libPaths.shift());
-} catch(e) {
-  gdBindings = require(libPaths.shift());
+} catch (e) {
+  try {
+    gdBindings = require(libPaths.shift());
+  } catch (e) {
+    console.log('Unable to find addon node_gd.node in build directory.');
+    process.exit(1);
+  }
 }
 
 exportFormats();
