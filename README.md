@@ -123,7 +123,7 @@ gd.openFile('/path/to/file.jpg', function(err, img) {
   img.brightness(75);
   img.saveFile('/path/to/newFile.bmp', function(err) {
     if (err) {
-      thorw err;
+      throw err;
     }
   });
 });
