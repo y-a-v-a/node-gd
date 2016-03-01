@@ -6,6 +6,7 @@
   "directories": {
     "test": "test"
   },
+  "os" : [ "!win32" ],
   "homepage": "https://github.com/y-a-v-a/node-gd",
   "bugs": "https://github.com/y-a-v-a/node-gd/issues",
   "scripts": {

@@ -40,9 +40,9 @@ $ sudo port install gd2
 $ npm install node-gd
 ```
 
-### On Windows
+### Will not build on Windows!
 
-Hopefully will be working on this soon. Up until then: sorry, won't build on Windows.
+Sorry, will not build on Windows.
 
 ## Usage
 
@@ -133,7 +133,7 @@ Some output functions are synchronous because they are handled by libgd. An exam
 
 ## License & copyright
 
-Copyright (c) 2010-2015 the contributors.
+Copyright (c) 2010-2016 the contributors.
 Apparently since [December 27th 2012](https://github.com/andris9/node-gd/commit/ad2a80897efc1926ca505b511ffdf0cc1236135a), node-gd is licensed under an MIT license.
 
 ## Contributors
