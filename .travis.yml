@@ -10,6 +10,8 @@ node_js:
 
 sudo: required
 
+dist: trusty
+
 env:
  - TRAVIS_OS_UNAME=$(uname -s)
 
@@ -20,3 +22,15 @@ install:
 notifications:
   email:
     - vebruijn@gmail.com
+
+addons:
+  apt:
+    sources:
+    # add PPAs with more up-to-date toolchains
+    - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.6
+    packages:
+    # install toolchains
+    - gcc-5
+    - g++-5
+    - clang-3.6
