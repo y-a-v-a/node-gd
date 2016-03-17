@@ -66,11 +66,11 @@
   "gypfile": true,
   "readmeFilename": "README.md",
   "devDependencies": {
-    "chai": "3.2.0",
-    "mocha": "2.3.2"
+    "chai": "3.5.0",
+    "mocha": "2.4.5"
   },
   "dependencies": {
-    "node-gyp": "3.0.3",
-    "nan": "2.1.0"
+    "node-gyp": "3.3.1",
+    "nan": "2.2.0"
   }
 }
