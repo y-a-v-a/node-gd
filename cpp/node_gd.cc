@@ -71,34 +71,34 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
 
 #define REQ_STR_ARG(I, VAR)                                             \
   if (info.Length() <= (I) || !info[I]->IsString())                     \
-    return Nan::ThrowError("Argument " #I " must be a string");         \
+    return Nan::ThrowTypeError("Argument " #I " must be a string");     \
   v8::String::Utf8Value VAR(info[I]->ToString());
 
 #define REQ_INT_ARG(I, VAR)                                             \
   int VAR;                                                              \
   if (info.Length() <= (I) || !info[I]->IsInt32())                      \
-    return Nan::ThrowError("Argument " #I " must be an integer");       \
+    return Nan::ThrowTypeError("Argument " #I " must be an integer");   \
   VAR = info[I]->Int32Value();
 
 #define REQ_FN_ARG(I, VAR)                                              \
   if (info.Length() <= (I) || !info[I]->IsFunction())                   \
-    return Nan::ThrowError("Argument " #I " must be a function");       \
+    return Nan::ThrowTypeError("Argument " #I " must be a function");   \
   Local<Function> VAR = info[I].As<Function>();
 
 #define REQ_DOUBLE_ARG(I, VAR)                                          \
   double VAR;                                                           \
   if (info.Length() <= (I) || !info[I]->IsNumber())                     \
-    return Nan::ThrowError("Argument " #I " must be a number");         \
+    return Nan::ThrowTypeError("Argument " #I " must be a number");     \
   VAR = info[I]->NumberValue();
 
 #define REQ_EXT_ARG(I, VAR)                                             \
   if (info.Length() <= (I) || !info[I]->IsExternal())                   \
-    return Nan::ThrowError("Argument " #I " invalid");                  \
+    return Nan::ThrowTypeError("Argument " #I " invalid");              \
   Local<External> VAR = Local<External>::Cast(info[I]);
 
 #define REQ_IMG_ARG(I, VAR)                                             \
   if (info.Length() <= (I) || !info[I]->IsObject())                     \
-    return Nan::ThrowError("Argument " #I " must be an object");        \
+    return Nan::ThrowTypeError("Argument " #I " must be an object");    \
   Local<Object> _obj_ = Local<Object>::Cast(info[I]);                   \
   Image *VAR = ObjectWrap::Unwrap<Image>(_obj_);
 
@@ -109,7 +109,7 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
   } else if (info[I]->IsInt32()) {                                      \
     VAR = info[I]->Int32Value();                                        \
   } else {                                                              \
-    return Nan::ThrowError("Argument " #I " must be an integer");       \
+    return Nan::ThrowTypeError("Argument " #I " must be an integer");   \
   }
 
 #define OPT_BOOL_ARG(I, VAR, DEFAULT)                                   \
@@ -119,7 +119,7 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
   } else if (info[I]->IsBoolean()) {                                    \
     VAR = info[I]->BooleanValue();                                      \
   } else {                                                              \
-    return Nan::ThrowError("Argument " #I " must be a boolean");        \
+    return Nan::ThrowTypeError("Argument " #I " must be a boolean");    \
   }
 
 #define RETURN_IMAGE(IMG)                                               \
@@ -164,7 +164,7 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
 
 #define ASSERT_IS_STRING_OR_BUFFER(val)                                 \
   if (!val->IsString() && !Buffer::HasInstance(val)) {                  \
-    return Nan::ThrowError("Argument not a String or Buffer");          \
+    return Nan::ThrowTypeError("Argument not a String or Buffer");      \
   }
 
 #define RETURN_DATA(asBuffer)                                           \
@@ -923,7 +923,7 @@ NAN_METHOD(Gd::Image::Polygon) {
   REQ_INT_ARG(1, color);
 
   if (!info[0]->IsArray()) {
-    return Nan::ThrowError("Arguments 0 must be an array");
+    return Nan::ThrowTypeError("Arguments 0 must be an array");
   }
 
   Local<String> x = Nan::New("x").ToLocalChecked();
@@ -959,7 +959,7 @@ NAN_METHOD(Gd::Image::OpenPolygon) {
   REQ_INT_ARG(1, color);
 
   if (!info[0]->IsArray()) {
-    return Nan::ThrowError("Arguments 0 must be an array");
+    return Nan::ThrowTypeError("Arguments 0 must be an array");
   }
 
   Local<String> x = Nan::New("x").ToLocalChecked();
@@ -995,7 +995,7 @@ NAN_METHOD(Gd::Image::FilledPolygon) {
   REQ_INT_ARG(1, color);
 
   if (!info[0]->IsArray()) {
-    return Nan::ThrowError("Arguments 0 must be an array");
+    return Nan::ThrowTypeError("Arguments 0 must be an array");
   }
 
   Local<String> x = Nan::New("x").ToLocalChecked();
@@ -1191,7 +1191,7 @@ NAN_METHOD(Gd::Image::SetStyle) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
   if (info.Length() < 1 || !info[0]->IsArray())
-    return Nan::ThrowError("Arguments 0 must be an array");
+    return Nan::ThrowTypeError("Arguments 0 must be an array");
 
   Local<Array> array = Local<Array>::Cast(info[0]);
   int len  = array->Length(), _len = 0;
@@ -1673,7 +1673,7 @@ NAN_METHOD(Gd::Image::ColorReplaceArray) {
   }
 
   if (_flen != _tlen) {
-    return Nan::ThrowError("Color arrays should have same length.");
+    return Nan::ThrowRangeError("Color arrays should have same length.");
   }
 
   Local<Number> result =
@@ -1782,7 +1782,7 @@ NAN_METHOD(Gd::Image::CropAuto) {
   REQ_INT_ARG(0, mode);
 
   if (mode > 4) {
-    return Nan::ThrowError("Crop mode should be between 0 and 5");
+    return Nan::ThrowRangeError("Crop mode should be between 0 and 5");
   }
 
   gdImagePtr newImage = gdImageCropAuto(*im, mode);
@@ -2027,7 +2027,7 @@ NAN_METHOD(Gd::Image::GifAnimAdd) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
   if (info.Length() <= 6) {
-    return Nan::ThrowError("Argument 6 must be an object");
+    return Nan::ThrowTypeError("Argument 6 must be an object");
   } else if (info[6]->IsObject()) {
     Image *prevFrame;
     Local<Object> _obj_ = Local<Object>::Cast(info[6]);
@@ -2060,7 +2060,7 @@ NAN_METHOD(Gd::Image::Compare) {
 
   REQ_ARGS(1);
   if (!info[0]->IsObject())
-    return Nan::ThrowError("Argument 0  must be an image");
+    return Nan::ThrowTypeError("Argument 0  must be an image");
 
   Local<Object> obj = Local<Object>::Cast(info[0]);
   Image *im2 = ObjectWrap::Unwrap<Image>(obj);
