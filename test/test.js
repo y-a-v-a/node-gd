@@ -279,6 +279,36 @@ describe('Node.js GD Graphics Library', function() {
       });
     });
   });
+  it('can replace a color to another color', function(done) {
+    var img, s, t;
+    s = source + 'input.png';
+    t = target + 'output-replaced.png';
+    return gd.openPng(s, function(error, image) {
+      if (error) throw error;
+
+      var colors = [
+        image.getTrueColorPixel(10,10),
+        image.getTrueColorPixel(10,11),
+        image.getTrueColorPixel(10,12),
+        image.getTrueColorPixel(10,13),
+        image.getTrueColorPixel(10,14),
+        image.getTrueColorPixel(10,15)
+      ];
+      var colorTo = gd.trueColor(0,255,255);
+
+      for (var i = 0; i < colors.length; i++) {
+        image.colorReplace(colors[i], colorTo);
+      }
+
+      image.savePng(t, 0, function(error) {
+        if (error) throw error;
+
+        assert.ok(fs.existsSync(t));
+        image.destroy();
+        return done();
+      });
+    });
+  });
   it('can create a truecolor BMP image with text', function(done) {
     var f, img, t, txtColor;
     if (gd.getGDVersion() < '2.1.1') {
