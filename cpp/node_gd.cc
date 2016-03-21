@@ -80,6 +80,11 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
     return Nan::ThrowTypeError("Argument " #I " must be an integer");   \
   VAR = info[I]->Int32Value();
 
+#define INT_ARG_RANGE(I, PROP)                                          \
+  if ((I) < 1) {                                                        \
+    return Nan::ThrowRangeError("Value for " #PROP  " must be higher than 0");\
+  }
+
 #define REQ_FN_ARG(I, VAR)                                              \
   if (info.Length() <= (I) || !info[I]->IsFunction())                   \
     return Nan::ThrowTypeError("Argument " #I " must be a function");   \
@@ -275,6 +280,9 @@ NAN_METHOD(Gd::ImageCreate) {
   REQ_INT_ARG(1, height);
   REQ_FN_ARG(2, cb);
 
+  INT_ARG_RANGE(width, "width");
+  INT_ARG_RANGE(height, "height");
+
   Nan::Callback *callback = new Nan::Callback(cb);
 
   Nan::AsyncQueueWorker(new CreateWorker(callback, width, height, 0));
@@ -287,6 +295,9 @@ NAN_METHOD(Gd::ImageCreateSync) {
   REQ_INT_ARG(0, width);
   REQ_INT_ARG(1, height);
 
+  INT_ARG_RANGE(width, "width");
+  INT_ARG_RANGE(height, "height");
+
   gdImagePtr im = gdImageCreate(width, height);
 
   RETURN_IMAGE(im);
@@ -297,6 +308,9 @@ NAN_METHOD(Gd::ImageCreateTrueColor) {
   REQ_INT_ARG(0, width);
   REQ_INT_ARG(1, height);
   REQ_FN_ARG(2, cb);
+
+  INT_ARG_RANGE(width, "width");
+  INT_ARG_RANGE(height, "height");
 
   Nan::Callback *callback = new Nan::Callback(cb);
 
@@ -309,6 +323,9 @@ NAN_METHOD(Gd::ImageCreateTrueColorSync) {
   REQ_ARGS(2);
   REQ_INT_ARG(0, width);
   REQ_INT_ARG(1, height);
+
+  INT_ARG_RANGE(width, "width");
+  INT_ARG_RANGE(height, "height");
 
   gdImagePtr im = gdImageCreateTrueColor(width, height);
 

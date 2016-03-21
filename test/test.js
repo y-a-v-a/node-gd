@@ -29,6 +29,165 @@ describe('Node.js GD Graphics Library', function() {
       });
     });
   });
+
+
+  /**
+   * gd.create and gd.createSync
+   */
+  describe('Creating a paletted image', function() {
+    it('can be done synchronously.', function(done) {
+      var img = gd.createSync(100,100);
+      assert.ok(img instanceof gd.Image);
+      img.destroy();
+      return done();
+    });
+
+    it('throws an Error when too few arguments are supplied', function(done) {
+      var img;
+      try {
+        img = gd.createSync(100);
+      } catch (e) {
+        assert.ok(e instanceof Error);
+        return done();
+      }
+    });
+
+    it('throws an TypeError when the first argument if of wrong type', function(done) {
+      var img;
+      try {
+        img = gd.createSync('bogus', undefined);
+      } catch (e) {
+        assert.ok(e instanceof TypeError);
+        return done();
+      }
+    });
+
+    it('throws an TypeError when the second argument if of wrong type', function(done) {
+      var img;
+      try {
+        img = gd.createSync(100, 'bogus');
+      } catch (e) {
+        assert.ok(e instanceof TypeError);
+        return done();
+      }
+    });
+
+    it('can be done asynchronously.', function(done) {
+      return gd.create(10, 10, function(error, img) {
+        assert.ok(img instanceof gd.Image);
+        img.destroy();
+
+        return done();
+      });
+    });
+
+    it('throws a RangeError when the width parameter is 0', function(done) {
+      var img;
+      try {
+        img = gd.createSync(0, 100);
+      } catch (e) {
+        assert.ok(e instanceof RangeError);
+        return done();
+      }
+    });
+
+    it('throws a RangeError when the height parameter is 0', function(done) {
+      var img;
+      try {
+        img = gd.createSync(100, 0);
+      } catch (e) {
+        assert.ok(e instanceof RangeError);
+        return done();
+      }
+    });
+
+    it('returns an object containing basic information about the created image', function(done) {
+      var img = gd.createSync(100, 100);
+      assert.ok(img.width === 100 && img.height === 100 && img.trueColor === 0);
+      img.destroy();
+      return done();
+    });
+  });
+
+  /**
+   * gd.createTrueColor and gd.createTrueColorSync
+   */
+  describe('Create a true color image', function() {
+    it('can be done synchronously.', function(done) {
+      var img = gd.createTrueColorSync(100,100);
+      assert.ok(img instanceof gd.Image);
+      img.destroy();
+      return done();
+    });
+
+    it('throws an Error when too few arguments are supplied', function(done) {
+      var img;
+      try {
+        img = gd.createTrueColorSync(100);
+      } catch (e) {
+        assert.ok(e instanceof Error);
+        return done();
+      }
+    });
+
+    it('throws an TypeError when the first argument if of wrong type', function(done) {
+      var img;
+      try {
+        img = gd.createTrueColorSync('bogus', undefined);
+      } catch (e) {
+        assert.ok(e instanceof TypeError);
+        return done();
+      }
+    });
+
+    it('throws an TypeError when the second argument if of wrong type', function(done) {
+      var img;
+      try {
+        img = gd.createTrueColorSync(100, 'bogus');
+      } catch (e) {
+        assert.ok(e instanceof TypeError);
+        return done();
+      }
+    });
+
+    it('can be done asynchronously.', function(done) {
+      return gd.createTrueColor(10, 10, function(error, img) {
+        assert.ok(img instanceof gd.Image);
+        img.destroy();
+
+        return done();
+      });
+    });
+
+    it('throws a RangeError when the width parameter is 0', function(done) {
+      var img;
+      try {
+        img = gd.createTrueColorSync(0, 100);
+      } catch (e) {
+        assert.ok(e instanceof RangeError);
+        return done();
+      }
+    });
+
+    it('throws a RangeError when the height parameter is 0', function(done) {
+      var img;
+      try {
+        img = gd.createTrueColorSync(100, 0);
+      } catch (e) {
+        assert.ok(e instanceof RangeError);
+        return done();
+      }
+    });
+
+    it('returns an object containing basic information about the created image', function(done) {
+      var img = gd.createTrueColorSync(100, 100);
+      assert.ok(img.width === 100 && img.height === 100 && img.trueColor === 1);
+      img.destroy();
+      return done();
+    });
+  });
+
+
   it('can scale-down (resize) an image', function(done) {
     var s, t;
     s = source + 'input.png';
@@ -347,7 +506,9 @@ describe('Node.js GD Graphics Library', function() {
       return done();
     });
   });
-  return describe('section Handling file types', function() {
+
+
+  describe('section Handling file types', function() {
     it('can copy a png into a jpeg', function(done) {
       var s, t;
       s = source + 'input.png';
