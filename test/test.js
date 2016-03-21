@@ -459,6 +459,14 @@ describe('Node.js GD Graphics Library', function() {
         });
       });
     });
+    it('throws an Error when creating an image without width and height', function(done) {
+      try {
+        gd.create();
+      } catch (exception) {
+        assert.ok(exception instanceof Error);
+        return done();
+      }
+    });
     return it('can open a bmp and save it as png', function(done) {
       var s, t;
       if (gd.getGDVersion() < '2.1.1') {

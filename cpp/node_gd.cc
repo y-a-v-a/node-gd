@@ -270,6 +270,7 @@ void Gd::Init(Local<Object> exports) {
 }
 
 NAN_METHOD(Gd::ImageCreate) {
+  REQ_ARGS(3);
   REQ_INT_ARG(0, width);
   REQ_INT_ARG(1, height);
   REQ_FN_ARG(2, cb);
@@ -282,6 +283,7 @@ NAN_METHOD(Gd::ImageCreate) {
 }
 
 NAN_METHOD(Gd::ImageCreateSync) {
+  REQ_ARGS(2);
   REQ_INT_ARG(0, width);
   REQ_INT_ARG(1, height);
 
@@ -291,6 +293,7 @@ NAN_METHOD(Gd::ImageCreateSync) {
 }
 
 NAN_METHOD(Gd::ImageCreateTrueColor) {
+  REQ_ARGS(3);
   REQ_INT_ARG(0, width);
   REQ_INT_ARG(1, height);
   REQ_FN_ARG(2, cb);
@@ -303,6 +306,7 @@ NAN_METHOD(Gd::ImageCreateTrueColor) {
 }
 
 NAN_METHOD(Gd::ImageCreateTrueColorSync) {
+  REQ_ARGS(2);
   REQ_INT_ARG(0, width);
   REQ_INT_ARG(1, height);
 
@@ -337,6 +341,7 @@ NAN_METHOD(Gd::CreateFromFile) {
 #endif
 
 NAN_METHOD(Gd::CreateFromGd2Part) {
+  REQ_ARGS(5);
   REQ_STR_ARG(0, path);
   REQ_INT_ARG(1, srcX);
   REQ_INT_ARG(2, srcY);
@@ -787,6 +792,7 @@ NAN_METHOD(Gd::Image::Gd2Ptr) {
 NAN_METHOD(Gd::Image::Bmp) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
+  REQ_ARGS(2);
   REQ_STR_ARG(0, path);
   REQ_INT_ARG(1, compression);
 
@@ -849,6 +855,7 @@ NAN_METHOD(Gd::Image::File) {
 NAN_METHOD(Gd::Image::FileCallback) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
+  REQ_ARGS(2);
   REQ_STR_ARG(0, path);
   REQ_FN_ARG(1, cb);
 
@@ -891,6 +898,7 @@ NAN_METHOD(Gd::Image::SetPixel) {
 NAN_METHOD(Gd::Image::Line) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
+  REQ_ARGS(5);
   REQ_INT_ARG(0, x1);
   REQ_INT_ARG(1, y1);
   REQ_INT_ARG(2, x2);
@@ -905,6 +913,7 @@ NAN_METHOD(Gd::Image::Line) {
 NAN_METHOD(Gd::Image::DashedLine) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
+  REQ_ARGS(5);
   REQ_INT_ARG(0, x1);
   REQ_INT_ARG(1, y1);
   REQ_INT_ARG(2, x2);
@@ -1161,6 +1170,7 @@ NAN_METHOD(Gd::Image::SetAntiAliased) {
 NAN_METHOD(Gd::Image::SetAntiAliasedDontBlend) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
+  REQ_ARGS(2);
   REQ_INT_ARG(0, color);
   REQ_INT_ARG(1, dont_blend); // what does this mean?
 
@@ -1626,6 +1636,7 @@ NAN_METHOD(Gd::Image::ColorTransparent) {
 NAN_METHOD(Gd::Image::ColorReplace) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
+  REQ_ARGS(2);
   REQ_INT_ARG(0, fromColor);
   REQ_INT_ARG(1, toColor);
 
@@ -1637,6 +1648,7 @@ NAN_METHOD(Gd::Image::ColorReplace) {
 NAN_METHOD(Gd::Image::ColorReplaceThreshold) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
+  REQ_ARGS(3);
   REQ_INT_ARG(0, fromColor);
   REQ_INT_ARG(1, toColor);
   REQ_DOUBLE_ARG(2, threshold);
@@ -1673,7 +1685,7 @@ NAN_METHOD(Gd::Image::ColorReplaceArray) {
   }
 
   if (_flen != _tlen) {
-    return Nan::ThrowRangeError("Color arrays should have same length.");
+    return Nan::ThrowError("Color arrays should have same length.");
   }
 
   Local<Number> result =
@@ -1759,6 +1771,7 @@ NAN_METHOD(Gd::Image::FlipBoth) {
 NAN_METHOD(Gd::Image::Crop) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
+  REQ_ARGS(4);
   REQ_INT_ARG(0, x);
   REQ_INT_ARG(1, y);
   REQ_INT_ARG(2, width);
@@ -2000,6 +2013,7 @@ NAN_METHOD(Gd::Image::ColorMatch) {
 #endif
 
 NAN_METHOD(Gd::Image::GifAnimBegin) {
+  REQ_ARGS(3);
   REQ_STR_ARG(0, path);
   REQ_INT_ARG(1, GlobalCM);
   REQ_INT_ARG(2, Loops);
@@ -2015,6 +2029,7 @@ NAN_METHOD(Gd::Image::GifAnimBegin) {
 }
 
 NAN_METHOD(Gd::Image::GifAnimAdd) {
+  REQ_ARGS(6);
   REQ_STR_ARG(0, path);
   REQ_INT_ARG(1, LocalCM);
   REQ_INT_ARG(2, LeftOfs);
