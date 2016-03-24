@@ -1,12 +1,14 @@
 {
   "name": "node-gd",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "GD graphics library (libgd) C++ bindings for Node.js",
   "main": "js/node-gd.js",
   "directories": {
     "test": "test"
   },
-  "os" : [ "!win32" ],
+  "os": [
+    "!win32"
+  ],
   "homepage": "https://github.com/y-a-v-a/node-gd",
   "bugs": "https://github.com/y-a-v-a/node-gd/issues",
   "scripts": {
