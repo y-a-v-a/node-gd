@@ -287,6 +287,7 @@ Unsigned integers should be used for `res_x` and `res_y`.
 ### Query image information
 
 #### gd.Image#Alpha(color)
+Get the alpha value of a color.
 
 #### gd.Image#getPixel(x, y)
 For paletted images, this will return the palette index of the color for that pixel.

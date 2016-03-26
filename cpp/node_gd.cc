@@ -82,7 +82,7 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
 
 #define INT_ARG_RANGE(I, PROP)                                          \
   if ((I) < 1) {                                                        \
-    return Nan::ThrowRangeError("Value for " #PROP  " must be higher than 0");\
+    return Nan::ThrowRangeError("Value for " #PROP  " must be greater than 0");\
   }
 
 #define REQ_FN_ARG(I, VAR)                                              \

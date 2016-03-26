@@ -188,6 +188,115 @@ describe('Node.js GD Graphics Library', function() {
   });
 
 
+  describe('GD color functions', function() {
+    // it('', function(done) {});
+
+    it('can return an integer representation of rgb color values', function(done) {
+      var red = gd.trueColor(255, 0, 0);
+      assert.ok(16711680 === red);
+      return done();
+    });
+
+    it('can return an integer representation of rgba color values', function(done) {
+      var transparentRed = gd.trueColorAlpha(255, 0, 0, 63);
+      assert.ok(1073676288 === transparentRed);
+      return done();
+    });
+  });
+
+  describe('From the gd.Image query functions,', function() {
+    it('getBoundsSafe should return 0 if the coordinate [-10, 1000] is checked against the image bounds.', function(done) {
+      var s = source + 'input.png';
+      var coord = [-10, 1000];
+      return gd.openPng(s, function(error, image) {
+        if (error) {
+          throw error;
+        }
+
+        assert.ok(image.getBoundsSafe(coord[0], coord[1]) === 0);
+        image.destroy();
+        return done();
+      });
+    });
+
+    it('getBoundsSafe should return 1 if the coordinate [10, 10] is checked against the image bounds.', function(done) {
+      var s = source + 'input.png';
+      var coord = [10, 10];
+      return gd.openPng(s, function(error, image) {
+        if (error) {
+          throw error;
+        }
+
+        assert.ok(image.getBoundsSafe(coord[0], coord[1]) === 1);
+        image.destroy();
+        return done();
+      });
+    });
+
+    it('getTrueColorPixel should return "e6e6e6" when queried for coordinate [10, 10].', function(done) {
+      var s = source + 'input.png';
+      var coord = [10, 10];
+      return gd.openPng(s, function(error, image) {
+        var color;
+        if (error) {
+          throw error;
+        }
+        color = image.getTrueColorPixel(coord[0], coord[1]);
+
+        assert.ok(color.toString(16) === 'e6e6e6');
+        return done();
+      });
+    });
+
+    it('getTrueColorPixel should return 0 when queried for coordinate [101, 101].', function(done) {
+      var s = source + 'input.png';
+      var coord = [101, 101];
+      return gd.openPng(s, function(error, image) {
+        var color;
+        if (error) {
+          throw error;
+        }
+        color = image.getTrueColorPixel(coord[0], coord[1]);
+
+        assert.ok(color === 0);
+        return done();
+      });
+    });
+
+    it('imageColorAt should return "be392e" when queried for coordinate [50, 50].', function(done) {
+      var s = source + 'input.png';
+      var coord = [50, 50];
+      return gd.openPng(s, function(error, image) {
+        var color;
+        if (error) {
+          throw error;
+        }
+        color = image.imageColorAt(coord[0], coord[1]);
+
+        assert.ok(color.toString(16) === 'be392e');
+        return done();
+      });
+    });
+
+    it('imageColorAt should throw an error when queried for coordinate [101, 101].', function(done) {
+      var s = source + 'input.png';
+      var coord = [101, 101];
+      return gd.openPng(s, function(error, image) {
+        var color;
+        if (error) {
+          throw error;
+        }
+        try {
+          color = image.imageColorAt(coord[0], coord[1]);
+        } catch (exception) {
+          assert.ok(exception instanceof Error);
+
+          return done();
+        }
+      });
+    });
+  });
+
   it('can scale-down (resize) an image', function(done) {
     var s, t;
     s = source + 'input.png';
