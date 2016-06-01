@@ -66,18 +66,21 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
 #define GD_OPENPOLYGON 1
 
 #define REQ_ARGS(N)                                                     \
-  if (info.Length() < (N))                                              \
-    return Nan::ThrowError("Expected " #N " arguments");
+  if (info.Length() < (N)) {                                            \
+    return Nan::ThrowError("Expected " #N " arguments");                \
+  }
 
 #define REQ_STR_ARG(I, VAR)                                             \
-  if (info.Length() <= (I) || !info[I]->IsString())                     \
+  if (info.Length() <= (I) || !info[I]->IsString()) {                   \
     return Nan::ThrowTypeError("Argument " #I " must be a string");     \
+  }                                                                     \
   v8::String::Utf8Value VAR(info[I]->ToString());
 
 #define REQ_INT_ARG(I, VAR)                                             \
   int VAR;                                                              \
-  if (info.Length() <= (I) || !info[I]->IsInt32())                      \
+  if (info.Length() <= (I) || !info[I]->IsInt32()) {                    \
     return Nan::ThrowTypeError("Argument " #I " must be an integer");   \
+  }                                                                     \
   VAR = info[I]->Int32Value();
 
 #define INT_ARG_RANGE(I, PROP)                                          \
@@ -86,24 +89,28 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
   }
 
 #define REQ_FN_ARG(I, VAR)                                              \
-  if (info.Length() <= (I) || !info[I]->IsFunction())                   \
+  if (info.Length() <= (I) || !info[I]->IsFunction()) {                 \
     return Nan::ThrowTypeError("Argument " #I " must be a function");   \
+  }                                                                     \
   Local<Function> VAR = info[I].As<Function>();
 
 #define REQ_DOUBLE_ARG(I, VAR)                                          \
   double VAR;                                                           \
-  if (info.Length() <= (I) || !info[I]->IsNumber())                     \
+  if (info.Length() <= (I) || !info[I]->IsNumber()) {                   \
     return Nan::ThrowTypeError("Argument " #I " must be a number");     \
+  }                                                                     \
   VAR = info[I]->NumberValue();
 
 #define REQ_EXT_ARG(I, VAR)                                             \
-  if (info.Length() <= (I) || !info[I]->IsExternal())                   \
+  if (info.Length() <= (I) || !info[I]->IsExternal()) {                 \
     return Nan::ThrowTypeError("Argument " #I " invalid");              \
+  }                                                                     \
   Local<External> VAR = Local<External>::Cast(info[I]);
 
 #define REQ_IMG_ARG(I, VAR)                                             \
-  if (info.Length() <= (I) || !info[I]->IsObject())                     \
+  if (info.Length() <= (I) || !info[I]->IsObject()) {                   \
     return Nan::ThrowTypeError("Argument " #I " must be an object");    \
+  }                                                                     \
   Local<Object> _obj_ = Local<Object>::Cast(info[I]);                   \
   Image *VAR = ObjectWrap::Unwrap<Image>(_obj_);
 
