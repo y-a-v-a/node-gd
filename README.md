@@ -2,7 +2,7 @@
 
 # node-gd
 
-[![Build Status](https://api.travis-ci.org/y-a-v-a/node-gd.svg?branch=stable)](http://travis-ci.org/y-a-v-a/node-gd)
+[![Build Status](https://api.travis-ci.org/sheershoff/node-gd.svg?branch=stable)](http://travis-ci.org/sheershoff/node-gd)
 
 GD graphics library, [libgd](http://www.libgd.org/), C++ bindings for Node.js. This version is the community-maintained [official NodeJS node-gd repo](https://npmjs.org/package/node-gd). With `node-gd` you can easily create, manipulate, open and save paletted and true color images from and to a variety of image formats including JPEG, PNG, GIF and BMP.
 
