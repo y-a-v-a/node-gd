@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-LIST=`gdlib-config --features`
+LIST=`gdlib-config --features 2>/dev/null`
 PRESENT=0
 
 for i in $LIST; do
