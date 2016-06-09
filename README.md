@@ -13,7 +13,7 @@ GD graphics library, [libgd](http://www.libgd.org/), C++ bindings for Node.js. T
 ### On Debian/Ubuntu
 
 ```bash
-$ sudo apt-get install libgd2-xpm-dev # libgd
+$ sudo apt-get install libgd2-dev # libgd
 $ npm install node-gd
 ```
 
@@ -29,14 +29,14 @@ $ npm install node-gd
 Using Homebrew
 
 ```bash
-$ brew install gd
+$ brew install pkg-config gd
 $ npm install node-gd
 ```
 
 ...or using MacPorts
 
 ```bash
-$ sudo port install gd2
+$ sudo port install pkgconfig gd2
 $ npm install node-gd
 ```
 
