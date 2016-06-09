@@ -1,10 +1,9 @@
 #!/usr/bin/env sh
-
-LIST=`gdlib-config --features 2>/dev/null`
+LIST=`pkg-config --static --libs-only-l gdlib | sed s/-l//g`
 PRESENT=0
 
 for i in $LIST; do
-  if test $i = $1; then
+  if test "$i" = "$1"; then
     PRESENT=1
   fi
 done

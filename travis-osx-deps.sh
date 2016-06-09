@@ -2,5 +2,5 @@
 set -ev
 
 brew update
-brew outdated gd || brew upgrade gd
+brew outdated gd pkg-config || brew upgrade gd pkg-config
 npm install
