@@ -319,9 +319,24 @@ Returns `0` if either x or y are out of the bounds of the image canvas, or `1` w
 ### Font and text
 
 #### gd.Image#stringFTBBox(color, font, size, angle, x, y, string)
+`BBox` in this funcion name refers to the _bounding box_ of the supplied `string` parameter when it would be rendered on the image. This might be handy in case you want to check wether the text fits the image bounds. The return value of this function is an array of 8 elements, weirdly ordered: [xll, yll, xlr, ylr, xur, yur, xul, yul]. In ascii-art:
+```
+   xul           xur
+yul ._____________. yur
+    | Lorem ipsum |
+    | dolor sit   |
+yll ._____________. ylr
+   xll           xlr
+
+legend:
+xul = x upper left
+ylr = y lower right
+```
+
 The font color can be allocated with `img.colorAllocate(r, g, b)`. The `font` parameter should be an absolute path to a `ttf` font file.
 
-#### gd.Image#stringFT(color, font, size, angle, x, y, string)
+#### gd.Image#stringFT(color, font, size, angle, x, y, string, boundingbox)
+Add text to the image. When the `boundingbox` parameter is set to be `true`, the return of this function is identical to `gd.Image#stringFTBBox`.
 
 ### Color handling
 

@@ -369,6 +369,11 @@ describe('Node.js GD Graphics Library', function() {
       });
     });
   });
+
+
+  /**
+   * Text / fonts in images
+   */
   it('can create an image with text', function(done) {
     var f, img, t, txtColor;
     f = source + 'FreeSans.ttf';
@@ -402,6 +407,32 @@ describe('Node.js GD Graphics Library', function() {
       return done();
     });
   });
+  it('can return the coordinates of the bounding box of a string', function(done) {
+    var f = source + 'FreeSans.ttf';
+    var t = target + 'output-truecolor-string-2.png';
+
+    img = gd.createTrueColorSync(300, 300);
+    txtColor = img.colorAllocate(127, 90, 90);
+    var boundingBox = img.stringFT(txtColor, f, 16, 0, 8, 18, "Hello World2!", true);
+    assert.equal(boundingBox.length, 8, 'BoundingBox not eight coordinates?');
+    assert.deepEqual(boundingBox, [ 8, 20, 136, 20, 136, 0, 8, 0 ], 'BoundingBox size changed?');
+    return done();
+  });
+
+  it('can return the coordinates of the bounding box of a string using a specific function', function(done) {
+    var f = source + 'FreeSans.ttf';
+    var t = target + 'output-truecolor-string-2.png';
+
+    img = gd.createTrueColorSync(300, 300);
+    txtColor = img.colorAllocate(127, 90, 90);
+    var boundingBox = img.stringFTBBox(txtColor, f, 16, -45, 20, 20, "Hello World2!", true);
+    assert.equal(boundingBox.length, 8, 'BoundingBox not eight coordinates?');
+    assert.deepEqual(boundingBox, [ 18, 21, 85, 130, 101, 120, 34, 11 ], 'BoundingBox size changed?');
+    return done();
+  });
+  // end fonts
+
+
   it('can add gaussian blur to an image', function(done) {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {

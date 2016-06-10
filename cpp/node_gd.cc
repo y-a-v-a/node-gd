@@ -1410,7 +1410,7 @@ NAN_PROPERTY_GETTER(Gd::Image::TrueColorGetter) {
 }
 
 /**
- * Font and Text Handling Funcitons
+ * Font and Text Handling Functions
  */
 NAN_METHOD(Gd::Image::StringFTBBox) {
   REQ_ARGS(7);
@@ -1468,6 +1468,7 @@ NAN_METHOD(Gd::Image::StringFT) {
     }
 
     info.GetReturnValue().Set(result);
+    return;
   }
 
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
