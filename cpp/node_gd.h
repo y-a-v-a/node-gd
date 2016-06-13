@@ -21,7 +21,7 @@
 #include <gd.h>
 
 #define SUPPORTS_GD_2_2_0 (GD_MINOR_VERSION == 2                        \
-                  && GD_RELEASE_VERSION == 0)
+                  && GD_RELEASE_VERSION >= 0)
 
 #define SUPPORTS_GD_2_1_1 (SUPPORTS_GD_2_2_0                            \
                   || (GD_MINOR_VERSION == 1                             \
