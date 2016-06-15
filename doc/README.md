@@ -319,7 +319,7 @@ Returns `0` if either x or y are out of the bounds of the image canvas, or `1` w
 ### Font and text
 
 #### gd.Image#stringFTBBox(color, font, size, angle, x, y, string)
-`BBox` in this funcion name refers to the _bounding box_ of the supplied `string` parameter when it would be rendered on the image. This might be handy in case you want to check wether the text fits the image bounds. The return value of this function is an array of 8 elements, weirdly ordered: [xll, yll, xlr, ylr, xur, yur, xul, yul]. In ascii-art:
+`BBox` in this function name refers to the _bounding box_ of the supplied `string` parameter when it would be rendered on the image. This might be handy in case you want to check wether the text fits the image bounds. The return value of this function is an array of 8 elements, weirdly ordered: [xll, yll, xlr, ylr, xur, yur, xul, yul]. In ascii-art:
 ```
    xul           xur
 yul ._____________. yur
@@ -336,7 +336,7 @@ ylr = y lower right
 The font color can be allocated with `img.colorAllocate(r, g, b)`. The `font` parameter should be an absolute path to a `ttf` font file.
 
 #### gd.Image#stringFT(color, font, size, angle, x, y, string, boundingbox)
-Add text to the image. When the `boundingbox` parameter is set to be `true`, the return of this function is identical to `gd.Image#stringFTBBox`.
+`FT` refers to FreeType. Add text to the image. When the `boundingbox` parameter is set to be `true`, the return of this function is identical to `gd.Image#stringFTBBox`.
 
 ### Color handling
 
@@ -516,6 +516,53 @@ firstFrame.destroy();
 ### Copying and resizing
 
 #### gd.Image#copy(dest, dx, dy, sx, sy, width, height)
+Copy an image onto a destination image: `dest`. You'll have to save the destination image to see the resulting image. This method returns _the image on which it is called_ in order to be able to chain methods.
+
+```javascript
+var gd = require('node-gd');
+var output = '../output/image-watermark.png';
+
+var watermark = gd.createFromPng('../input/watermark.png');
+var input = gd.createFromPng('../input/input.png');
+
+watermark.alphaBlending(1);
+watermark.saveAlpha(1);
+
+// copy watermark onto input, i.e. onto the destination
+watermark.copy(input, 0, 0, 0, 0, 100, 100);
+
+// save the destination
+input.savePng(output, 0, function(error) {
+  if (error) throw error;
+});
+```
+
+Example using chaining:
+
+```javascript
+var gd = require('node-gd');
+var output = '../output/image-watermark.png';
+var output2 = '../output/image-watermark2.png';
+
+var watermark = gd.createFromPng('../input/watermark.png');
+var input = gd.createFromPng('../input/input.png');
+var input2 = gd.createFromPng('../input/input2.png');
+
+watermark.alphaBlending(1)
+.saveAlpha(1)
+.copy(input, 0, 0, 0, 0, 100, 100)
+.contrast(-900)
+.copy(input2, 0, 0, 0, 0, 100, 100)
+
+input.savePng(output, 0, function(error) {
+  if (error) throw error;
+});
+
+input2.savePng(output2, 0, function(error) {
+  if (error) throw error;
+});
+```
+
 
 #### gd.Image#copyResized(dest, dx, dy, sx, sy, dw, dh, sw, sh)
 
