@@ -10,6 +10,9 @@ GD graphics library, [libgd](http://www.libgd.org/), C++ bindings for Node.js. T
 
 ## Installation
 
+### Preconditions
+Have environment-specific build tools available.
+
 ### On Debian/Ubuntu
 
 ```bash
