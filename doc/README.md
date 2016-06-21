@@ -272,8 +272,103 @@ img.saveFile('./test.png');
 ```
 
 #### gd.Image#alphaBlending(blending)
+Turn on (`1`) or off (`0`) alphablending for what is being drawn next. This switch can be switched on or off during a drawing process in order to let some layer or drawn form blend or not with former drawn elements.
+
+A newly created truecolor image for example has a black background. If you want to start out with a transparent canvas, you will first need to draw a non-blending fully transparent rectangle the size of that image. For example:
+
+```javascript
+var gd = require('node-gd');
+var img = gd.createTrueColor(100, 100);
+
+// turn off alpha blending
+// you don't want your first filled rectangle to blend
+// with the basic black background!
+img.alphaBlending(0);
+
+// you *do* want to save the full alpha channel
+// i.e. I assume you want your image to be really transparent
+img.saveAlpha(1);
+
+// allocate any color as long as it's transparent!
+// i.e. an alpha value of 127
+var color = gd.trueColorAlpha(255, 255, 255, 127);
+img.filledRectangle(0, 0, 100, 100, color);
+
+// from here on you can add forms, texts or new images
+// turn alpha blending on or off if you want the drawn
+// elements to blend with other layers.
+// img.alphaBlending(1);
+
+img.savePng('output.png', 0, function(err) {
+  if(err) {
+    throw err;
+  }
+});
+
+img.destroy();
+```
 
 #### gd.Image#saveAlpha(saveFlag)
+When set to `1`, the alpha information will be saved as a separate channel within the image. If turned off (`0`), all transparency will be handled within the image. Compare these two examples to see the difference:
+```javascript
+var gd = require('node-gd');
+var img = gd.createTrueColorSync(100, 100);
+// save the full alpha channel
+// the image will be transparent to e.g. a browser's background color
+img.saveAlpha(1);
+img.alphaBlending(0);
+
+var color = gd.trueColorAlpha(255, 255, 255, 127);
+img.filledRectangle(0, 0, 100, 100, color);
+
+img.alphaBlending(1);
+
+var red = gd.trueColorAlpha(255, 0, 0, 64);
+var blue = gd.trueColorAlpha(0, 0, 255, 64);
+
+img.filledRectangle(0, 0, 80, 80, red);
+img.filledRectangle(20, 20, 100, 100, blue);
+
+img.savePng('output.png', 0, function(err) {
+  if(err) {
+    throw err;
+  }
+});
+
+img.destroy();
+```
+
+And with `saveAlpha` turned off
+
+```javascript
+var gd = require('node-gd');
+var img = gd.createTrueColorSync(100, 100);
+// the image will have a white background
+// but the red and blue squares will blend
+// with each other and the white background
+img.saveAlpha(0);
+img.alphaBlending(0);
+
+var color = gd.trueColor(255, 255, 255);
+img.filledRectangle(0, 0, 100, 100, color);
+
+img.alphaBlending(1);
+
+var red = gd.trueColorAlpha(255, 0, 0, 64);
+var blue = gd.trueColorAlpha(0, 0, 255, 64);
+
+img.filledRectangle(0, 0, 80, 80, red);
+img.filledRectangle(20, 20, 100, 100, blue);
+
+img.savePng('output2.png', 0, function(err) {
+  if(err) {
+    throw err;
+  }
+});
+
+img.destroy();
+```
+
 
 #### gd.Image#setClip(x1, y1, x2, y2)
 Set the clipping area.
