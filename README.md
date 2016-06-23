@@ -86,6 +86,9 @@ img.savePng('output.png', 1, function(err) {
     throw err;
   }
 });
+
+// Destroy image to clean memory
+img.destroy();
 ```
 
 __Asynchronous__ example of drawing a red lined hexagon on a black background:
@@ -110,6 +113,7 @@ gd.createTrueColor(200,200, function(error, img) {
   img.setThickness(4);
   img.polygon(points, 0xff0000);
   img.bmp('test1.bmp', 0);
+  img.destroy();
 });
 ```
 
@@ -125,6 +129,7 @@ gd.openFile('/path/to/file.jpg', function(err, img) {
   img.emboss();
   img.brightness(75);
   img.saveFile('/path/to/newFile.bmp', function(err) {
+    img.destroy();
     if (err) {
       throw err;
     }
