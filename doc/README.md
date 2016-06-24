@@ -710,7 +710,7 @@ gd.openPng('/path/to/input.png', function(err, img) {
 The above example shows how to create a JPEG and GIF file from a PNG file.
 
 #### gd.Image#savePng(path, level[, callback])
-Save image data as a PNG file. The callback will receive an error object as a parameter, only if an error occurred. When a callback is supplied, the image will be written asynchronously by `fs.writeFile()`, using `gd.Image#pngPtr()` to first write it to memory in the given format.
+Save image data as a PNG file. The callback will receive an error object as a parameter, only if an error occurred. When a callback is supplied, the image will be written asynchronously by `fs.writeFile()`, using `gd.Image#pngPtr()` to first write it to memory in the given format. `level` can be value between `0` and `9` and refers to a zlib compression level. A level of `-1` will let libpng12 decide what the default is.
 
 #### gd.Image#saveJpeg(path, quality[, callback])
 Save image data as a JPEG file. The callback will receive an error object as a parameter. Quality can be a `Number` between `0` and `100`.

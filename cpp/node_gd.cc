@@ -138,12 +138,11 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
   if (!IMG) {                                                           \
     info.GetReturnValue().SetNull();                                    \
   } else {                                                              \
-    Local<Value> _arg_ = Nan::New<External>(IMG);                       \
+    const int argc = 1;                                                 \
+    Local<Value> argv = Nan::New<External>(IMG);                        \
     Local<FunctionTemplate> func = Nan::New(Image::constructor);        \
-    Local<Object> _image_ = func->GetFunction()->NewInstance(1, &_arg_);\
-    Nan::Persistent<v8::Object> persistent;                             \
-    persistent.Reset(_image_);                                          \
-    info.GetReturnValue().Set(_image_);                                 \
+    Local<Object> instance = func->GetFunction()->NewInstance(argc, &argv);\
+    info.GetReturnValue().Set(instance);                                \
   }
 
 #define DECLARE_CREATE_FROM(TYPE)                                       \
