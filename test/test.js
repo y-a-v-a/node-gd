@@ -796,17 +796,19 @@ describe('Node.js GD Graphics Library', function() {
       var s;
       var oldMem;
       var newMem;
-      var iterations = 50;
+      var iterations = 150;
       s = source + 'input.jpg';
       if(global.gc) {
         // iterate image loading to memory and destroying it, GC and new stats
         for (var i = 0; i < iterations; i++) {
           var img = gd.openJpeg(s);
           img.destroy();
-          global.gc();
+          global.gc(1); // GC scavenge mode
         };
-        // run gc multiple times to ensure deep clean
-        for(var i = 0; i < 10; i++) {
+        for (var i = 0; i < 10; i++) {
+          global.gc(1); // GC scavenge mode
+        }
+        for (var i = 0; i < 10; i++) {
           global.gc();
         }
         oldMem = process.memoryUsage();
@@ -814,10 +816,12 @@ describe('Node.js GD Graphics Library', function() {
         for (var i = 0; i < iterations; i++) {
           var img = gd.openJpeg(s);
           img.destroy();
-          global.gc();
+          global.gc(1); // GC scavenge mode
         };
-        // run gc multiple times to ensure deep clean
-        for(var i = 0; i < 10; i++) {
+        for (var i = 0; i < 10; i++) {
+          global.gc(1); // GC scavenge mode
+        }
+        for (var i = 0; i < 10; i++) {
           global.gc();
         }
         newMem = process.memoryUsage();
