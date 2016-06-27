@@ -805,7 +805,12 @@ describe('Node.js GD Graphics Library', function() {
           img.destroy();
           global.gc(1); // GC scavenge mode
         };
-        global.gc(1); // GC scavenge mode
+        for (var i = 0; i < 10; i++) {
+          global.gc(1); // GC scavenge mode
+        }
+        for (var i = 0; i < 10; i++) {
+          global.gc();
+        }
         oldMem = process.memoryUsage();
         // iterate image loading to memory and destroying it, GC and new stats
         for (var i = 0; i < iterations; i++) {
@@ -813,7 +818,12 @@ describe('Node.js GD Graphics Library', function() {
           img.destroy();
           global.gc(1); // GC scavenge mode
         };
-        global.gc(1); // GC scavenge mode
+        for (var i = 0; i < 10; i++) {
+          global.gc(1); // GC scavenge mode
+        }
+        for (var i = 0; i < 10; i++) {
+          global.gc();
+        }
         newMem = process.memoryUsage();
         if((newMem.heapUsed > (oldMem.heapUsed + 100*1024)) || (newMem.rss > (oldMem.rss + 100*1024)) || (newMem.heapTotal > (oldMem.heapTotal + 100*1024))){ // consider quadruple the image in the memory size be ok
             var error = new Error("Memory leaks.\nrss delta: " + (newMem.rss - oldMem.rss) + "\nheapTotal delta: " + (newMem.heapTotal - oldMem.heapTotal) + "\nheapUsed delta: " + (newMem.heapUsed - oldMem.heapUsed));
