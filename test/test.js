@@ -796,7 +796,7 @@ describe('Node.js GD Graphics Library', function() {
       var s;
       var oldMem;
       var newMem;
-      var iterations = 1250;
+      var iterations = 150;
       s = source + 'input.jpg';
       if(global.gc) {
         // iterate image loading to memory and destroying it, GC and new stats
