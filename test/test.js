@@ -29,9 +29,11 @@ describe('Node.js GD Graphics Library', function() {
     });
   });
 
-
   /**
    * gd.create and gd.createSync
+   * ╦┌┬┐┌─┐┌─┐┌─┐  ┌─┐┬─┐┌─┐┌─┐┌┬┐┬┌─┐┌┐┌
+   * ║│││├─┤│ ┬├┤   │  ├┬┘├┤ ├─┤ │ ││ ││││
+   * ╩┴ ┴┴ ┴└─┘└─┘  └─┘┴└─└─┘┴ ┴ ┴ ┴└─┘┘└┘
    */
   describe('Creating a paletted image', function() {
     it('can be done synchronously.', function(done) {
@@ -372,6 +374,9 @@ describe('Node.js GD Graphics Library', function() {
 
   /**
    * Text / fonts in images
+   * ╔═╗┌─┐┌┐┌┌┬┐┌─┐  ┬┌┐┌  ┬┌┬┐┌─┐┌─┐┌─┐┌─┐
+   * ╠╣ │ ││││ │ └─┐  ││││  ││││├─┤│ ┬├┤ └─┐
+   * ╚  └─┘┘└┘ ┴ └─┘  ┴┘└┘  ┴┴ ┴┴ ┴└─┘└─┘└─┘
    */
   it('can create an image with text', function(done) {
     var f, img, t, txtColor;
@@ -429,8 +434,218 @@ describe('Node.js GD Graphics Library', function() {
     assert.deepEqual(boundingBox, [ 18, 21, 85, 130, 101, 120, 34, 11 ], 'BoundingBox size changed?');
     return done();
   });
-  // end fonts
 
+  it('can consume an object with font extras', function(done) {
+    var f = source + 'FreeSans.ttf';
+    var t = target + 'output-truecolor-string-3.png';
+
+    gd.createTrueColor(300, 300, function(error, image) {
+      if (error) {
+        throw error;
+      }
+      var extras = {
+        linespacing: 1.5,
+        hdpi: 300,
+        vdpi: 300,
+        charmap: 'unicode',
+        disable_kerning: false,
+        xshow: true,
+        return_fontpathname: true,
+        use_fontconfig: false,
+        fontpath: ''
+      };
+      var txtColor = image.colorAllocate(255, 255, 0);
+      image.stringFTEx(txtColor, f, 24, 0, 10, 60, "Hello world\nYes we're here", extras);
+
+      assert.equal(extras.fontpath, process.cwd() + '/test/fixtures/FreeSans.ttf');
+      assert.equal(extras.xshow, '72 53 21 21 53 25 72 53 33 21 -424 68 53 49 25 72 53 20 33 53 25 54 53 33 53');
+
+      image.savePng(t, 0, function(error) {
+        if (error) {
+          throw error;
+        }
+        image.destroy();
+        done();
+      });
+    });
+  });
+
+  it('can set the dpi of an image using a font extras object', function(done) {
+    var f = source + 'FreeSans.ttf';
+    var t = target + 'output-truecolor-string-300dpi.png';
+
+    gd.createTrueColor(300, 300, function(error, image) {
+      if (error) {
+        throw error;
+      }
+      var extras = {
+        hdpi: 300,
+        vdpi: 150
+      };
+      var txtColor = image.colorAllocate(255, 0, 255);
+      image.stringFTEx(txtColor, f, 24, 0, 10, 60, "Font extras\ndpi test", extras);
+
+      image.savePng(t, 0, function(error) {
+        if (error) {
+          throw error;
+        }
+        image.destroy();
+        done();
+      });
+    });
+  });
+
+  it('can set the linespacing of text in an image using a font extras object', function(done) {
+    var f = source + 'FreeSans.ttf';
+    var t = target + 'output-truecolor-string-linespacing.png';
+
+    gd.createTrueColor(300, 300, function(error, image) {
+      if (error) {
+        throw error;
+      }
+      var extras = {
+        linespacing: 2.1
+      };
+
+      var txtColor = image.colorAllocate(0, 255, 255);
+      image.stringFTEx(txtColor, f, 24, 0, 10, 60, "Font extras\nlinespacing", extras);
+
+      image.savePng(t, 0, function(error) {
+        if (error) {
+          throw error;
+        }
+        image.destroy();
+        done();
+      });
+    });
+  });
+
+  it('can request the kerning table of text in an image using a font extras object', function(done) {
+    var f = source + 'FreeSans.ttf';
+    var t = target + 'output-truecolor-string-xshow.png';
+
+    gd.createTrueColor(300, 300, function(error, image) {
+      if (error) {
+        throw error;
+      }
+      var extras = {
+        xshow: true
+      };
+
+      var txtColor = image.colorAllocate(0, 255, 255);
+      image.stringFTEx(txtColor, f, 24, 0, 10, 60, "Font extras\nxshow", extras);
+
+      assert.equal(extras.xshow, '19.2 16.96 17.28 8.96 8 16.96 15.36 8.96 10.56 17.28 -139.52 15.36 15.68 17.28 16.96 23.04')
+
+      image.savePng(t, 0, function(error) {
+        if (error) {
+          throw error;
+        }
+        image.destroy();
+        done();
+      });
+    });
+  });
+
+  it('can disable the use of kerning of text in an image using a font extras object', function(done) {
+    var f = source + 'FreeSans.ttf';
+    var t = target + 'output-truecolor-string-disable-kerning.png';
+
+    gd.createTrueColor(300, 300, function(error, image) {
+      if (error) {
+        throw error;
+      }
+      var extras = {
+        disable_kerning: true
+      };
+
+      var txtColor = image.colorAllocate(255, 255, 0);
+      image.stringFTEx(txtColor, f, 24, 0, 10, 60, "Font extras\nKerning disabled", extras);
+
+      image.savePng(t, 0, function(error) {
+        if (error) {
+          throw error;
+        }
+        image.destroy();
+        done();
+      });
+    });
+  });
+
+  it('can return the font path using font extras', function(done) {
+    var f = source + 'FreeSans.ttf';
+    var t = target + 'output-truecolor-string-3.png';
+
+    gd.createTrueColor(300, 300, function(error, image) {
+      if (error) {
+        throw error;
+      }
+      var extras = {
+        return_fontpathname: true
+      };
+
+      var txtColor = image.colorAllocate(127, 255, 0);
+      image.stringFTEx(txtColor, f, 24, 0, 10, 60, "Font extras\nreturn font path", extras);
+
+      assert.equal(extras.fontpath, process.cwd() + '/test/fixtures/FreeSans.ttf');
+
+      image.savePng(t, 0, function(error) {
+        if (error) {
+          throw error;
+        }
+        image.destroy();
+        done();
+      });
+    });
+  });
+
+  it('can use a specified charmap to render a font with font extras', function(done) {
+    var f = source + 'FreeSans.ttf';
+    var t = target + 'output-truecolor-string-charmap.png';
+
+    gd.createTrueColor(300, 300, function(error, image) {
+      if (error) {
+        throw error;
+      }
+      var extras = {
+        charmap: 'unicode'
+      };
+
+      var txtColor = image.colorAllocate(255, 255, 0);
+      image.stringFTEx(txtColor, f, 24, 0, 10, 60, "Hello world\nUse unicode!", extras);
+
+      image.savePng(t, 0, function(error) {
+        if (error) {
+          throw error;
+        }
+        image.destroy();
+        done();
+      });
+    });
+  });
+
+  it('can put text on a circle', function(done) {
+    var f = source + 'FreeSans.ttf';
+    var t = target + 'output-truecolor-string-circle.png';
+
+    gd.createTrueColor(300, 300, function(error, image) {
+      if (error) {
+        throw error;
+      }
+
+      var txtColor = image.colorAllocate(255, 255, 0);
+      image.stringFTCircle(150, 150, 100, 32, 1, f, 24, 'Hello', 'world!', txtColor);
+
+      image.savePng(t, 0, function(error) {
+        if (error) {
+          throw error;
+        }
+        image.destroy();
+        done();
+      });
+    });
+  });
+  // end fonts
 
   it('can add gaussian blur to an image', function(done) {
     var s, t;
@@ -791,6 +1006,12 @@ describe('Node.js GD Graphics Library', function() {
     });
   });
 
+
+  /*
+   * ┌┬┐┌─┐┌┬┐┌─┐┬─┐┬ ┬  ┬  ┌─┐┌─┐┬┌─┌─┐
+   * │││├┤ ││││ │├┬┘└┬┘  │  ├┤ ├─┤├┴┐└─┐
+   * ┴ ┴└─┘┴ ┴└─┘┴└─ ┴   ┴─┘└─┘┴ ┴┴ ┴└─┘
+   */
   describe('section Memory leaks', function() {
     it('sync openJpeg and then destroy doesn\'t leak', function(done) {
       var s;

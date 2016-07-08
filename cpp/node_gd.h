@@ -183,6 +183,8 @@ public:
      */
     static NAN_METHOD(StringFTBBox);
     static NAN_METHOD(StringFT);
+    static NAN_METHOD(StringFTEx);
+    static NAN_METHOD(StringFTCircle);
     /**
      * Color Handling Functions
      */

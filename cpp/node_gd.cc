@@ -533,6 +533,8 @@ void Gd::Image::Init(v8::Local<Object> exports) {
    */
   Nan::SetPrototypeMethod(t, "stringFTBBox", StringFTBBox);
   Nan::SetPrototypeMethod(t, "stringFT", StringFT);
+  Nan::SetPrototypeMethod(t, "stringFTEx", StringFTEx);
+  Nan::SetPrototypeMethod(t, "stringFTCircle", StringFTCircle);
 
   /**
    * Color Handling Functions
@@ -1424,7 +1426,6 @@ NAN_METHOD(Gd::Image::StringFTBBox) {
   int brect[8];
   char *err;
 
-
   err = gdImageStringFT(NULL, &brect[0], color, *font, size, angle, x, y, *str);
   if (err) return Nan::ThrowError(err);
 
@@ -1456,7 +1457,6 @@ NAN_METHOD(Gd::Image::StringFT) {
   int brect[8];
   char *err;
 
-
   if (return_rectangle) {
     err = gdImageStringFT(NULL, &brect[0], color, *font, size, angle, x, y, *str);
     if (err) return Nan::ThrowError(err);
@@ -1474,6 +1474,171 @@ NAN_METHOD(Gd::Image::StringFT) {
 
   err = gdImageStringFT(*im, &brect[0], color, *font, size, angle, x, y, *str);
   if (err) return Nan::ThrowError(err);
+
+  info.GetReturnValue().Set(info.This());
+}
+
+NAN_METHOD(Gd::Image::StringFTEx) {
+  REQ_ARGS(8);
+  REQ_INT_ARG(0, color);
+  REQ_STR_ARG(1, font);
+  REQ_DOUBLE_ARG(2, size);
+  REQ_DOUBLE_ARG(3, angle);
+  REQ_INT_ARG(4, x);
+  REQ_INT_ARG(5, y);
+  REQ_STR_ARG(6, str);
+
+  if (!info[7]->IsObject()) {
+    return Nan::ThrowTypeError("Argument 8 must be an object");
+  }
+
+  Local<Object> stringExtraParameter = Local<Object>::Cast(info[7]);
+
+  Local<String> linespacing = Nan::New("linespacing").ToLocalChecked();
+  Local<String> hdpi = Nan::New("hdpi").ToLocalChecked();
+  Local<String> vdpi = Nan::New("vdpi").ToLocalChecked();
+  Local<String> charmap = Nan::New("charmap").ToLocalChecked();
+  Local<String> disable_kerning = Nan::New("disable_kerning").ToLocalChecked();
+  Local<String> xshow = Nan::New("xshow").ToLocalChecked();
+  Local<String> return_fontpathname = Nan::New("return_fontpathname").ToLocalChecked();
+  Local<String> use_fontconfig = Nan::New("use_fontconfig").ToLocalChecked();
+  Local<String> fontpath = Nan::New("fontpath").ToLocalChecked();
+
+  gdFTStringExtra stringExtra;
+  stringExtra.flags = 0;
+
+  // linespacing
+  if (stringExtraParameter->Has(linespacing)) {
+    stringExtra.flags |= gdFTEX_LINESPACE;
+    stringExtra.linespacing = stringExtraParameter->Get(linespacing)->NumberValue();
+  }
+
+  // charmap
+  if (stringExtraParameter->Has(charmap)) {
+    Local<String> localCharmap = stringExtraParameter->Get(charmap)->ToString();
+    stringExtra.charmap = 0;
+
+    // gdFTEX_Unicode, gdFTEX_Shift_JIS, gdFTEX_Big5, gdFTEX_Adobe_Custom
+    // unicode, shift_jis, big5, adobe_custom
+    if (!std::strcmp(*v8::String::Utf8Value(localCharmap), "unicode")) {
+      stringExtra.charmap = gdFTEX_Unicode;
+    } else if (!std::strcmp(*v8::String::Utf8Value(localCharmap), "shift_jis")) {
+      stringExtra.charmap = gdFTEX_Shift_JIS;
+    } else if (!std::strcmp(*v8::String::Utf8Value(localCharmap), "big5")) {
+      stringExtra.charmap = gdFTEX_Big5;
+    } else if (!std::strcmp(*v8::String::Utf8Value(localCharmap), "adobe_custom")) {
+      stringExtra.charmap = gdFTEX_Adobe_Custom;
+    } else {
+      Nan::ThrowError("Unknown value for charmap. Should be one of: unicode, shift_jis, big5, adobe_custom");
+    }
+    stringExtra.flags |= gdFTEX_CHARMAP;
+  }
+
+  // resolution
+  // horizontal dpi
+  if (stringExtraParameter->Has(hdpi)) {
+    stringExtra.flags |= gdFTEX_RESOLUTION;
+    stringExtra.hdpi = stringExtraParameter->Get(hdpi)->Int32Value();
+    if (!stringExtraParameter->Has(vdpi)) {
+      stringExtra.vdpi = stringExtra.hdpi;
+    }
+  }
+  // vertical dpi
+  if (stringExtraParameter->Has(vdpi)) {
+    stringExtra.flags |= gdFTEX_RESOLUTION;
+    stringExtra.vdpi = stringExtraParameter->Get(vdpi)->Int32Value();
+    if (!stringExtraParameter->Has(hdpi)) {
+      stringExtra.hdpi = stringExtra.vdpi;
+    }
+  }
+
+  // disable kerning
+  if (stringExtraParameter->Has(disable_kerning)) {
+    bool is_disable_kerning = stringExtraParameter->Get(disable_kerning)->BooleanValue();
+    if (is_disable_kerning) {
+      stringExtra.flags |= gdFTEX_DISABLE_KERNING;
+    }
+  }
+
+  // xshow
+  bool is_xshow = false;
+  if (stringExtraParameter->Has(xshow)) {
+    is_xshow = stringExtraParameter->Get(xshow)->BooleanValue();
+    if (is_xshow) {
+      stringExtra.flags |= gdFTEX_XSHOW;
+    }
+  }
+
+  // fontpathname
+  if (stringExtraParameter->Has(fontpath)) {
+    v8::String::Utf8Value localFontpathname(stringExtraParameter->Get(fontpath)->ToString());
+    stringExtra.flags |= gdFTEX_FONTPATHNAME;
+    stringExtra.fontpath = *localFontpathname;
+  }
+
+  // use_fontconfig
+  if (stringExtraParameter->Has(use_fontconfig)) {
+    bool is_use_fontconfig = stringExtraParameter->Get(use_fontconfig)->BooleanValue();
+    if (is_use_fontconfig) {
+      stringExtra.flags |= gdFTEX_FONTCONFIG;
+    }
+  }
+
+  // return_fontpathname
+  bool is_use_fontpathname = false;
+  if (stringExtraParameter->Has(return_fontpathname)) {
+    is_use_fontpathname = stringExtraParameter->Get(return_fontpathname)->BooleanValue();
+    if (is_use_fontpathname) {
+      stringExtra.flags |= gdFTEX_RETURNFONTPATHNAME;
+      stringExtra.fontpath = NULL;
+    }
+  }
+
+  const char *error;
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  // TODO brect
+
+  // error = gdImageStringFTEx(*im, brect, color, *font, size, angle, x, y, *str, extra);
+  error = gdImageStringFTEx(*im, 0, color, *font, size, angle, x, y, *str, &stringExtra);
+
+  if (error) {
+    std::string prefix("GD Error: ");
+    std::string errormsg(error);
+    const char *errorMessage = (prefix + error).c_str();
+    return Nan::ThrowError(errorMessage);
+  }
+
+  if (is_use_fontpathname && stringExtra.fontpath != NULL) {
+    stringExtraParameter->Set(fontpath, Nan::New<String>(stringExtra.fontpath).ToLocalChecked());
+  }
+
+  if (is_xshow && stringExtra.xshow != NULL) {
+    stringExtraParameter->Set(xshow, Nan::New<String>(stringExtra.xshow).ToLocalChecked());
+  }
+
+  info.GetReturnValue().Set(stringExtraParameter);
+}
+
+NAN_METHOD(Gd::Image::StringFTCircle) {
+  REQ_ARGS(9);
+  REQ_INT_ARG(0, cx);
+  REQ_INT_ARG(1, cy);
+  REQ_DOUBLE_ARG(2, radius);
+  REQ_DOUBLE_ARG(3, textRadius);
+  REQ_DOUBLE_ARG(4, fillPortion);
+  REQ_STR_ARG(5, font);
+  REQ_DOUBLE_ARG(6, size);
+  REQ_STR_ARG(7, top);
+  REQ_STR_ARG(8, bottom);
+  REQ_INT_ARG(9, color);
+
+  char *error;
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
+
+  error = gdImageStringFTCircle(*im, cx, cy, radius, textRadius, fillPortion, *font, size, *top, *bottom, color);
+  if (error) {
+    return Nan::ThrowError(error);
+  }
 
   info.GetReturnValue().Set(info.This());
 }
@@ -2099,7 +2264,7 @@ NAN_METHOD(Gd::Image::Compare) {
 
   REQ_ARGS(1);
   if (!info[0]->IsObject())
-    return Nan::ThrowTypeError("Argument 0  must be an image");
+    return Nan::ThrowTypeError("Argument 0 must be an image");
 
   Local<Object> obj = Local<Object>::Cast(info[0]);
   Image *im2 = ObjectWrap::Unwrap<Image>(obj);

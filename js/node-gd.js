@@ -1,39 +1,39 @@
 var util = require('util');
 var fs = require('fs');
 
-var gdBindings;
+var bindings;
 
-function openFormatFunction(format) {
-  return function () {
+function openFormatFn(fmt) {
+  return function() {
     var args = [];
     for (var i = 0; i < arguments.length; i++) {
       args[i] = (arguments[i]);
     }
 
-    var filename = args.shift();
-    var callback = args.pop();
+    var file = args.shift();
+    var cb = args.pop();
 
-    if (typeof callback !== "function") {
-      return gdBindings["createFrom" + format].apply(this, arguments);
+    if (typeof cb !== "function") {
+      return bindings["createFrom" + fmt].apply(this, arguments);
     }
 
-    return fs.readFile(filename, function (err, data) {
-      var image;
+    return fs.readFile(file, function (err, data) {
+      var img;
       if (err) {
-        return callback(err);
+        return cb(err);
       } else {
         try {
-          image = gdBindings["createFrom" + format + "Ptr"](data);
+          img = bindings["createFrom" + fmt + "Ptr"](data);
         } catch(e) {
-          return callback(e);
+          return cb(e);
         }
-        return callback(null, image);
+        return cb(null, img);
       }
     });
   };
 }
 
-function saveFormatFunction(format) {
+function saveFormatFn(format) {
   format = format.toLowerCase();
 
   return function () {
@@ -56,9 +56,7 @@ function saveFormatFunction(format) {
 }
 
 function exportFormats() {
-  var format;
-  var formats;
-  var valid;
+  var format, formats, valid, version = bindings.getGDVersion();
 
   formats = {
     Jpeg: [1, 1],
@@ -70,61 +68,26 @@ function exportFormats() {
     WBMP: [1, 1]
   };
 
-  if (gdBindings.getGDVersion() >= '2.1.0') {
+  if (version >= '2.1.0') {
     formats.Bmp = [1, 1];
   }
 
-  if (gdBindings.GD_TIFF && gdBindings.getGDVersion() >= '2.1.0') {
+  if (bindings.GD_TIFF && version >= '2.1.0') {
     formats.Tiff = [0, 1];
   }
 
-  if (gdBindings.GD_WEBP && gdBindings.getGDVersion() >= '2.1.0') {
+  if (bindings.GD_WEBP && version >= '2.1.0') {
     formats.Webp = [1, 1];
   }
 
   for (format in formats) {
     valid = formats[format];
     if (!!valid[0]) {
-      gdBindings["open" + format] = openFormatFunction(format);
+      bindings["open" + format] = openFormatFn(format);
     }
     if (!!valid[1]) {
-      gdBindings.Image.prototype["save" + format] = saveFormatFunction(format);
+      bindings.Image.prototype["save" + format] = saveFormatFn(format);
     }
-  }
-
-  if (gdBindings.getGDVersion() >= '2.1.1') {
-    gdBindings.Image.prototype["saveFile"] = function() {
-      var args = [];
-      for (var i = 0; i < arguments.length; i++) {
-        args[i] = (arguments[i]);
-      }
-
-      var callback = args[args.length - 1];
-      if (typeof callback !== "function") {
-        return this.file.apply(this, args);
-      }
-      return this.fileCallback.apply(this, args);
-    };
-
-    gdBindings.openFile = function() {
-      var args = [];
-      var image;
-      for (var i = 0; i < arguments.length; i++) {
-        args[i] = (arguments[i]);
-      }
-
-      var callback = args[args.length - 1];
-      if (typeof callback !== "function") {
-        return this.createFromFile.apply(this, args);
-      }
-
-      try {
-        image = this.createFromFile.apply(this, args);
-      } catch(e) {
-        return callback(e);
-      }
-      return callback(null, image);
-    };
   }
 }
 
@@ -134,10 +97,10 @@ var libPaths = [
 ];
 
 try {
-  gdBindings = require(libPaths.shift());
+  bindings = require(libPaths.shift());
 } catch (e) {
   try {
-    gdBindings = require(libPaths.shift());
+    bindings = require(libPaths.shift());
   } catch (e) {
     console.log('Unable to find addon node_gd.node in build directory.');
     process.exit(1);
@@ -146,5 +109,39 @@ try {
 
 exportFormats();
 
-module.exports = gdBindings;
+if (bindings.getGDVersion() >= '2.1.1') {
+  bindings.Image.prototype.saveFile = function() {
+    var args = [];
+    for (var i = 0; i < arguments.length; i++) {
+      args[i] = (arguments[i]);
+    }
 
+    var callback = args[args.length - 1];
+    if (typeof callback !== "function") {
+      return this.file.apply(this, args);
+    }
+    return this.fileCallback.apply(this, args);
+  };
+
+  bindings.openFile = function() {
+    var args = [];
+    var image;
+    for (var i = 0; i < arguments.length; i++) {
+      args[i] = (arguments[i]);
+    }
+
+    var callback = args[args.length - 1];
+    if (typeof callback !== "function") {
+      return this.createFromFile.apply(this, args);
+    }
+
+    try {
+      image = this.createFromFile.apply(this, args);
+    } catch(e) {
+      return callback(e);
+    }
+    return callback(null, image);
+  };
+}
+
+module.exports = bindings;
