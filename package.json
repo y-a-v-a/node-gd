@@ -14,7 +14,8 @@
   "scripts": {
     "pretest": "node-gyp rebuild",
     "test": "mocha --expose-gc --reporter spec --bail --ui bdd --colors",
-    "install": "node-gyp rebuild"
+    "install": "node-gyp rebuild",
+    "update-contributors": "git shortlog -s -e -n>CONTRIBUTORS.md"
   },
   "repository": {
     "type": "git",
