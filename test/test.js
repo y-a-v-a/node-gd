@@ -26,6 +26,14 @@ before(function() {
 });
 
 describe('Node.js GD Graphics Library', function() {
+  describe('Version information', function() {
+    it('will return a version number of format x.y.z', function(done) {
+      var version = gd.getGDVersion();
+      assert.ok(/[0-9]\.[0-9]\.[0-9]+/.test(version));
+      return done();
+    });
+  });
+
   /**
    * gd.create and gd.createSync
    * ╦┌┬┐┌─┐┌─┐┌─┐  ┌─┐┬─┐┌─┐┌─┐┌┬┐┬┌─┐┌┐┌
@@ -99,11 +107,33 @@ describe('Node.js GD Graphics Library', function() {
       }
     });
 
+    it('throws a Error when the height parameter is 0 async', function(done) {
+      var img;
+      try {
+        gd.create(100, 0, function(error, img) { });
+      } catch (e) {
+        assert.ok(e instanceof RangeError);
+        done();
+      }
+    });
+
     it('returns an object containing basic information about the created image', function(done) {
       var img = gd.createSync(100, 100);
       assert.ok(img.width === 100 && img.height === 100 && img.trueColor === 0);
       img.destroy();
       return done();
+    });
+
+    it('returns an object containing basic information about the created image async', function(done) {
+      gd.create(100, 100, function(error, image) {
+        if (error) {
+          throw error;
+        }
+
+        assert.equal(image.width, 100);
+        assert.equal(image.height, 100);
+        return done();
+      });
     });
   });
 
@@ -581,202 +611,4 @@ describe('Node.js GD Graphics Library', function() {
       return done();
     });
   });
-
-
-  describe('section Handling file types', function() {
-    it('can copy a png into a jpeg', function(done) {
-      var s, t;
-      s = source + 'input.png';
-      t = target + 'output.jpg';
-      return gd.openPng(s, function(err, img) {
-        var canvas;
-        if (err) {
-          throw err;
-        }
-        canvas = gd.createTrueColorSync(100, 100);
-        img.copyResampled(canvas, 0, 0, 0, 0, 100, 100, img.width, img.height);
-        return canvas.saveJpeg(t, 10, function(err) {
-          if (err) {
-            throw err;
-          }
-          assert.ok(fs.existsSync(t));
-          img.destroy();
-          canvas.destroy();
-          return done();
-        });
-      });
-    });
-    it('can copy a png into gif', function(done) {
-      var s, t;
-      s = source + 'input.png';
-      t = target + 'output.gif';
-      return gd.openPng(s, function(err, img) {
-        var canvas;
-        if (err) {
-          throw err;
-        }
-        canvas = gd.createTrueColorSync(img.width, img.height);
-        img.copyResampled(canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height);
-        return canvas.saveGif(t, function(err) {
-          if (err) {
-            throw err;
-          }
-          assert.ok(fs.existsSync(t));
-          img.destroy();
-          canvas.destroy();
-          return done();
-        });
-      });
-    });
-    it('can copy a png into gd', function(done) {
-      var s, t;
-      s = source + 'input.png';
-      t = target + 'output.gd';
-      return gd.openPng(s, function(err, img) {
-        var canvas;
-        if (err) {
-          throw err;
-        }
-        canvas = gd.createTrueColorSync(img.width, img.height);
-        img.copyResampled(canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height);
-        return canvas.saveGd(t, function(err) {
-          if (err) {
-            throw err;
-          }
-          assert.ok(fs.existsSync(t));
-          img.destroy();
-          canvas.destroy();
-          return done();
-        });
-      });
-    });
-    it('can copy a png into WBMP', function(done) {
-      var s, t;
-      if (gd.getGDVersion() < '2.1.1') {
-        done();
-        return;
-      }
-      s = source + 'input.png';
-      t = target + 'output.wbmp';
-      gd.openPng(s, function(err, img) {
-        var canvas, fg;
-        if (err) {
-          throw err;
-        }
-        canvas = gd.createTrueColorSync(img.width, img.height);
-        img.copyResampled(canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height);
-        fg = img.getPixel(5, 5);
-        return canvas.saveWBMP(t, fg, function(err) {
-          if (err) {
-            throw err;
-          }
-          assert.ok(fs.existsSync(t));
-          img.destroy();
-          canvas.destroy();
-          return done();
-        });
-      });
-    });
-    it('can open a jpeg file and save it as png', function(done) {
-      var s, t;
-      s = source + 'input.jpg';
-      t = target + 'output-from-jpeg.png';
-      return gd.openJpeg(s, function(err, img) {
-        if (err) {
-          throw err;
-        }
-        return img.savePng(t, -1, function(err) {
-          if (err) {
-            throw err;
-          }
-          assert.ok(fs.existsSync(t));
-          img.destroy();
-          return done();
-        });
-      });
-    });
-    it('throws an Error when creating an image without width and height', function(done) {
-      try {
-        gd.create();
-      } catch (exception) {
-        assert.ok(exception instanceof Error);
-        return done();
-      }
-    });
-    return it('can open a bmp and save it as png', function(done) {
-      var s, t;
-      if (gd.getGDVersion() < '2.1.1') {
-        done();
-        return;
-      }
-      s = source + 'input.bmp';
-      t = target + 'output-from-bmp.png';
-      return gd.openBmp(s, function(err, img) {
-        if (err) {
-          throw err;
-        }
-        return img.savePng(t, -1, function(err) {
-          if (err) {
-            throw err;
-          }
-          assert.ok(fs.existsSync(t));
-          img.destroy();
-          return done();
-        });
-      });
-    });
-  });
-
-
-  /*
-   * ┌┬┐┌─┐┌┬┐┌─┐┬─┐┬ ┬  ┬  ┌─┐┌─┐┬┌─┌─┐
-   * │││├┤ ││││ │├┬┘└┬┘  │  ├┤ ├─┤├┴┐└─┐
-   * ┴ ┴└─┘┴ ┴└─┘┴└─ ┴   ┴─┘└─┘┴ ┴┴ ┴└─┘
-   */
-  describe('section Memory leaks', function() {
-    it('sync openJpeg and then destroy doesn\'t leak', function(done) {
-      var s;
-      var oldMem;
-      var newMem;
-      var iterations = 150;
-      s = source + 'input.jpg';
-      if(global.gc) {
-        // iterate image loading to memory and destroying it, GC and new stats
-        for (var i = 0; i < iterations; i++) {
-          var img = gd.openJpeg(s);
-          img.destroy();
-          global.gc(1); // GC scavenge mode
-        };
-        for (var i = 0; i < 10; i++) {
-          global.gc(1); // GC scavenge mode
-        }
-        for (var i = 0; i < 10; i++) {
-          global.gc();
-        }
-        oldMem = process.memoryUsage();
-        // iterate image loading to memory and destroying it, GC and new stats
-        for (var i = 0; i < iterations; i++) {
-          var img = gd.openJpeg(s);
-          img.destroy();
-          global.gc(1); // GC scavenge mode
-        };
-        for (var i = 0; i < 10; i++) {
-          global.gc(1); // GC scavenge mode
-        }
-        for (var i = 0; i < 10; i++) {
-          global.gc();
-        }
-        newMem = process.memoryUsage();
-        if((newMem.heapUsed > (oldMem.heapUsed + 100*1024)) || (newMem.rss > (oldMem.rss + 100*1024)) || (newMem.heapTotal > (oldMem.heapTotal + 100*1024))){ // consider quadruple the image in the memory size be ok
-            var error = new Error("Memory leaks.\nrss delta: " + (newMem.rss - oldMem.rss) + "\nheapTotal delta: " + (newMem.heapTotal - oldMem.heapTotal) + "\nheapUsed delta: " + (newMem.heapUsed - oldMem.heapUsed));
-            done(error);
-        }else{
-          done();
-        }
-      }else{
-        done();
-      }
-    });
-  });
-
 });
