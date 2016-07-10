@@ -123,15 +123,6 @@ describe('Section Handling file types', function() {
     });
   });
 
-  it('throws an Error when creating an image without width and height - gd.create()', function(done) {
-    try {
-      gd.create();
-    } catch (exception) {
-      assert.ok(exception instanceof Error);
-      return done();
-    }
-  });
-
   it('can open a bmp and save it as png - gd.Image#savePng()', function(done) {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {

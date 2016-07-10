@@ -107,6 +107,15 @@ describe('Node.js GD Graphics Library', function() {
       }
     });
 
+    it('throws an Error when creating an image without width and height - gd.create()', function(done) {
+      try {
+        gd.create();
+      } catch (exception) {
+        assert.ok(exception instanceof Error);
+        return done();
+      }
+    });
+
     it('throws a Error when the height parameter is 0 async', function(done) {
       var img;
       try {
@@ -119,7 +128,11 @@ describe('Node.js GD Graphics Library', function() {
 
     it('returns an object containing basic information about the created image', function(done) {
       var img = gd.createSync(100, 100);
-      assert.ok(img.width === 100 && img.height === 100 && img.trueColor === 0);
+
+      assert.equal(img.width, 100);
+      assert.equal(img.height, 100);
+      assert.equal(img.trueColor, 0);
+
       img.destroy();
       return done();
     });
@@ -132,6 +145,9 @@ describe('Node.js GD Graphics Library', function() {
 
         assert.equal(image.width, 100);
         assert.equal(image.height, 100);
+        assert.equal(image.trueColor, 0);
+
+        image.destroy();
         return done();
       });
     });

@@ -381,9 +381,6 @@ Unsigned integers should be used for `res_x` and `res_y`.
 
 ### Query image information
 
-#### gd.Image#Alpha(color)
-Get the alpha value of a color.
-
 #### gd.Image#getPixel(x, y)
 For paletted images, this will return the palette index of the color for that pixel.
 
@@ -458,6 +455,9 @@ Allocate a color in the color table with transparency value.
 #### gd.Image#green(g)
 
 #### gd.Image#blue(b)
+
+#### gd.Image#alpha(color)
+Get the alpha value of a color. *Note* after version node-gd@1.3.1 this method has ben renamed to *lower case* `alpha` to reflect its function in comparison with the `gd.Image#red()`, `gd.Image#green()` and `gd.Image#blue()` methods.
 
 #### gd.Image#getTransparent()
 

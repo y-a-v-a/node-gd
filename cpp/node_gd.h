@@ -169,7 +169,6 @@ public:
     /**
      * Query Functions
      */
-    static NAN_METHOD(Alpha);
     static NAN_METHOD(GetPixel);
     static NAN_METHOD(GetTrueColorPixel);
     // This is implementation of the PHP-GD specific method imagecolorat
@@ -200,6 +199,7 @@ public:
     static NAN_METHOD(Red);
     static NAN_METHOD(Blue);
     static NAN_METHOD(Green);
+    static NAN_METHOD(Alpha);
     static NAN_PROPERTY_GETTER(InterlaceGetter);
     static NAN_SETTER(InterlaceSetter);
     static NAN_METHOD(GetTransparent);

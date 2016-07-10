@@ -505,7 +505,6 @@ void Gd::Image::Init(v8::Local<Object> exports) {
   /**
    * Query Functions
    */
-  Nan::SetPrototypeMethod(t, "Alpha", Alpha);
   Nan::SetPrototypeMethod(t, "getPixel", GetPixel);
   Nan::SetPrototypeMethod(t, "getTrueColorPixel", GetTrueColorPixel);
   Nan::SetPrototypeMethod(t, "imageColorAt", ImageColorAt);
@@ -550,6 +549,7 @@ void Gd::Image::Init(v8::Local<Object> exports) {
   Nan::SetPrototypeMethod(t, "red", Red);
   Nan::SetPrototypeMethod(t, "green", Green);
   Nan::SetPrototypeMethod(t, "blue", Blue);
+  Nan::SetPrototypeMethod(t, "alpha", Alpha);
   Nan::SetPrototypeMethod(t, "getTransparent", GetTransparent);
   Nan::SetPrototypeMethod(t, "colorDeallocate", ColorDeallocate);
 
@@ -1321,15 +1321,6 @@ NAN_METHOD(Gd::Image::SetResolution) {
 /**
  * Query Functions
  */
-NAN_METHOD(Gd::Image::Alpha) {
-  Image *im = ObjectWrap::Unwrap<Image>(info.This());
-
-  REQ_INT_ARG(0, color);
-
-  Local<Number> result = Nan::New<Integer>(gdImageAlpha(im->operator gdImagePtr(), color));
-  info.GetReturnValue().Set(result);
-}
-
 NAN_METHOD(Gd::Image::GetPixel) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
@@ -1769,6 +1760,15 @@ NAN_METHOD(Gd::Image::Green) {
   REQ_INT_ARG(0, color);
 
   Local<Number> result = Nan::New<Integer>(gdImageGreen(im->operator gdImagePtr(), color));
+  info.GetReturnValue().Set(result);
+}
+
+NAN_METHOD(Gd::Image::Alpha) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
+
+  REQ_INT_ARG(0, color);
+
+  Local<Number> result = Nan::New<Integer>(gdImageAlpha(im->operator gdImagePtr(), color));
   info.GetReturnValue().Set(result);
 }
 
