@@ -2,6 +2,8 @@ var util = require('util');
 var fs = require('fs');
 
 var bindings;
+var versionMessage = 'Node-gd: method __METHOD__ only available from libgd2 version 2.1.1. '
+    + 'Current installed is ';
 
 function openFormatFn(fmt) {
   return function() {
@@ -107,6 +109,8 @@ try {
   }
 }
 
+versionMessage += bindings.getGDVersion();
+
 exportFormats();
 
 if (bindings.getGDVersion() >= '2.1.1') {
@@ -142,6 +146,14 @@ if (bindings.getGDVersion() >= '2.1.1') {
     }
     return callback(null, image);
   };
+} else {
+  bindings.Image.prototype.saveFile = function() {
+    throw new Error(versionMessage.replace('__METHOD__', 'gd.Image#saveFile()'));
+  }
+
+  bindings.openFile = function() {
+    throw new Error(versionMessage.replace('__METHOD__', 'gd.openFile()'));
+  }
 }
 
 module.exports = bindings;
