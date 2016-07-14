@@ -12,10 +12,12 @@ Synchronous version of the above, returns an object of type `gd.Image`.
 ```javascript
 var gd = require('node-gd');
 var img = gd.createSync(100, 100);
+
 img.saveJpeg('./test.jpg', 100, function(error) {
   if (error) {
     throw error;
   }
+  img.destroy();
 });
 ```
 
@@ -27,8 +29,10 @@ var gd = require('node-gd');
 
 gd.createTrueColor(100, 100, function(error, img) {
   if (error) throw error;
+
   img.saveJpeg('./test.jpg', 100, function(error) {
     if (error) throw error;
+    img.destroy();
   });
 });
 ```
@@ -54,6 +58,7 @@ gd.openJpeg('/path/to/file.jpg', function(error, image) {
     if (error) {
       throw error;
     }
+    img.destroy();
   });
 });
 ```
@@ -63,7 +68,11 @@ Synchronous version of `gd.openJpeg()`.
 
 ```javascript
 var gd = require('node-gd');
-var img = gd.createFromJpeg('./path/to.jpg');
+var img = gd.createFromJpeg('./path/to/image.jpg');
+
+// do something with img
+
+img.destroy();
 ```
 
 #### gd.createFromJpegPtr(data)
@@ -122,7 +131,10 @@ var file = './image-with-some-extension';
 
 gd.openFile(file, function(error, img) {
   if (error) throw error;
+
   // do something with img
+
+  img.destroy();
 })
 ```
 
@@ -170,7 +182,10 @@ var gd = requide('node-gd');
 if (gd.getGDVersion() >= '2.1.1') {
   gd.openFile('./test.png', function(error, img) {
     if (error) throw error;
+
     // do something with img
+
+    img.destroy();
   });
 }
 ```
@@ -195,6 +210,7 @@ gd.createTrueColor(101, 101, function(error, image) {
 
   image.savePng('./test.png', 0, function(error) {
     if (error) throw error;
+    img.destroy();
   })
 });
 ```
@@ -221,6 +237,7 @@ var points = [
 
 img.polygon(points, 0xff0000);
 img.bmp('test.bmp', 0);
+img.destroy();
 ```
 
 #### gd.Image#openPolygon(array, color)
@@ -237,8 +254,11 @@ var gd = require('node-gd');
 var img = gd.createSync(300, 200);
 var color0 = img.colorAllocate(255,255,255);
 var color1 = img.colorAllocate(255,0,255);
+
 img.rectangle(20, 20, 280, 180, color1);
 img.saveFile('./test.png');
+
+img.destroy();
 ```
 
 #### gd.Image#filledRectangle(x1, y1, x2, y2, color)
@@ -247,10 +267,14 @@ Create a filled rectangle i.e. a solid bar.
 ```javascript
 var gd = require('node-gd');
 var img = gd.createSync(300, 200);
+
 var color0 = img.colorAllocate(255,255,255);
 var color1 = img.colorAllocate(255,0,255);
+
 img.filledRectangle(20, 20, 280, 180, color1);
+
 img.saveFile('./test.png');
+img.destroy();
 ```
 
 #### gd.Image#arc(cx, cy, width, height, begin, end, color)
@@ -267,6 +291,7 @@ img.arc(150, 100, 200, 160, 0, 270, color1);
 img.arc(150, 100, 120, 120, 90, 0, color2);
 
 img.saveFile('./test.png');
+img.destroy();
 ```
 
 #### gd.Image#filledArc(cx, cy, width, height, begin, end, color)
@@ -292,9 +317,20 @@ img.ellipse(150, 100, 160, 160, color2);
 img.fillToBorder(150,100, 2, color1);
 
 img.saveFile('./test.png');
+img.destroy();
 ```
 
 #### gd.Image#fill(x, y, color)
+
+Create a white true color image
+
+```javascript
+var gd = requide('node-gd');
+var img = gd.createTrueColorSync(100, 100);
+img.fill(0, 0, 0xffffff);
+img.saveFile('./test.jpg');
+img.destroy();
+```
 
 #### gd.Image#setAntiAliased(color)
 
@@ -320,6 +356,7 @@ img.line(0, 0, 300, 200, color1);
 img.line(0, 200, 300, 0, color1);
 
 img.saveFile('./test.png');
+img.destroy();
 ```
 
 #### gd.Image#alphaBlending(blending)
@@ -433,7 +470,21 @@ Unsigned integers should be used for `res_x` and `res_y`.
 ### Query image information
 
 #### gd.Image#getPixel(x, y)
-For paletted images, this will return the palette index of the color for that pixel.
+For paletted images, this will return the palette index of the color for that pixel. For true color images, it will return the color value as `Number`.
+
+```javascript
+var gd = requide('node-gd');
+var trueColorImage = gd.openFile('./input.jpg');
+console.log(trueColorImage.getPixel(20, 20));
+// outputs something like 12205619
+
+var paletteImage = gd.openFile('./input.gif');
+console.log(paletteImage.getPixel(20, 20));
+// outputs something like 240
+
+trueColorImage.destroy();
+paletteImage.destroy();
+```
 
 #### gd.Image#getTrueColorPixel(x, y)
 This will return the color integer representation.
@@ -451,13 +502,14 @@ img.line(0, 200, 300, 0, color);
 console.log(img.getTrueColorPixel(50, 50).toString(16));
 
 img.saveFile('./test.png');
+img.destroy();
 ```
 
 #### gd.Image#imageColorAt(x, y)
 This is the implementation of the PHP-GD specific method imagecolorat.
 
 #### gd.Image#getBoundsSafe(x, y)
-Returns `0` if either x or y are out of the bounds of the image canvas, or `1` when within the bounds.
+Returns `0` if either x or y are out of the bounds of the image canvas, or `1` when within the bounds. Note that the pixel range starts at `0` for both x-axis and y-axis.
 
 ### Font and text
 
@@ -599,6 +651,7 @@ gd.openFile('/path/to/image.jpg', function(err, trueColor) {
     if (err) {
       throw err;
     }
+    palette.destroy();
   });
 });
 ```
@@ -607,7 +660,7 @@ gd.openFile('/path/to/image.jpg', function(err, trueColor) {
 Create an animated GIF.
 
 * `anim` is a `String` referencing a filename to be created, like `./anim.gif`
-*  `useGlobalColorMap` a value being `-1`, `0` or `1` which determines if the colorMap of the current image will be used as the global colorMap for the whole animation. `-1` indicates `do default`.
+* `useGlobalColorMap` a value being `-1`, `0` or `1` which determines if the colorMap of the current image will be used as the global colorMap for the whole animation. `-1` indicates `do default`.
 * The value for `loops` can be `-1` for no looping, `0` means infinite looping, any other value the amount of loops the animation should run.
 
 
@@ -680,6 +733,8 @@ watermark.copy(input, 0, 0, 0, 0, 100, 100);
 // save the destination
 input.savePng(output, 0, function(error) {
   if (error) throw error;
+  input.destroy();
+  watermark.destroy();
 });
 ```
 
@@ -794,6 +849,7 @@ Any instance of `gd.Image()` has a basic set of instance properties accessible a
 var gd = require('node-gd');
 var img = gd.creatTrueColor(100,100);
 console.log(img);
+img.destroy();
 ```
 
 Will yield to something like:
@@ -822,6 +878,7 @@ img.interlace = true; // set interlace to true
 // will save jpeg as progressive jpeg image.
 img.saveJpeg('/path/to/output.jpg', 100, function(err) {
   if (err) throw err;
+  img.destroy();
 });
 ```
 
