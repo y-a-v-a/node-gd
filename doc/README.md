@@ -332,6 +332,17 @@ img.saveFile('./test.jpg');
 img.destroy();
 ```
 
+Create a transparent true color PNG
+
+```javascript
+var gd = requide('node-gd');
+var img = gd.createTrueColorSync(100, 100);
+img.fill(0, 0, 0x7fffffff);
+img.saveAlpha(1);
+img.saveFile('./result.png');
+img.destroy();
+```
+
 #### gd.Image#setAntiAliased(color)
 
 #### gd.Image#setAntiAliasedDontBlend(color, dontblend)
