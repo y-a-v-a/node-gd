@@ -9,6 +9,16 @@ Create a new image in memory of specified size and calls a callback that can hav
 #### gd.createSync(width, height)
 Synchronous version of the above, returns an object of type `gd.Image`.
 
+```javascript
+var gd = require('node-gd');
+var img = gd.createSync(100, 100);
+img.saveJpeg('./test.jpg', 100, function(error) {
+  if (error) {
+    throw error;
+  }
+});
+```
+
 #### gd.createTrueColor(width, height, callback)
 This is a true color image, and thus has a black background and a palette of millions of colors.
 
@@ -50,6 +60,11 @@ gd.openJpeg('/path/to/file.jpg', function(error, image) {
 
 #### gd.createFromJpeg(path)
 Synchronous version of `gd.openJpeg()`.
+
+```javascript
+var gd = require('node-gd');
+var img = gd.createFromJpeg('./path/to.jpg');
+```
 
 #### gd.createFromJpegPtr(data)
 Load an image from a resource which is either a `String` or a `Buffer`.
@@ -98,7 +113,18 @@ Open a BMP bitmap image file.
 #### gd.createFromBmpPtr(data)
 
 #### gd.openFile(path[, callback])
-GD will try to find out of what type the supplied image is, and will open it likewise. This is a quite new convenience method for if you don't exactly know what the type is that you will try to open.
+GD will try to find out of what type the supplied image is, and will open it likewise. This is a quite new convenience method for if you don't exactly know what the type is that you will try to open. The callback will get two parameters at max.
+
+```javascript
+var gd = require('node-gd');
+
+var file = './image-with-some-extension';
+
+gd.openFile(file, function(error, img) {
+  if (error) throw error;
+  // do something with img
+})
+```
 
 #### gd.createFromFile(path)
 A synchronous version of the above.
@@ -138,6 +164,17 @@ var transparentRed = gd.trueColorAlpha(255, 0, 0, 63); // 1073676288
 #### gd.getGDVersion()
 Will return a string representing the version of your currently installed GD version. Outputs something like `2.1.1`
 
+```javascript
+var gd = requide('node-gd');
+
+if (gd.getGDVersion() >= '2.1.1') {
+  gd.openFile('./test.png', function(error, img) {
+    if (error) throw error;
+    // do something with img
+  });
+}
+```
+
 ## Manipulating graphic images
 
 #### gd.Image#destroy()
@@ -147,6 +184,20 @@ Free up allocated memory for image data.
 
 #### gd.Image#setPixel(x, y, color)
 Set the color of a certain pixel. Use for color either `0xff00ff` or `gd.trueColor(255, 0, 255)`.
+
+```javascript
+var gd = require('node-gd');
+
+gd.createTrueColor(101, 101, function(error, image) {
+  if (error) throw error;
+
+  image.setPixel(51, 51, 0xff00ff);
+
+  image.savePng('./test.png', 0, function(error) {
+    if (error) throw error;
+  })
+});
+```
 
 #### gd.Image#line(x1, y1, x2, y2, color)
 Draw a line from a certain point to a next point.
