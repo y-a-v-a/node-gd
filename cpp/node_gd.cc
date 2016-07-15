@@ -1527,6 +1527,7 @@ NAN_METHOD(Gd::Image::StringFTEx) {
 
   // resolution
   // horizontal dpi
+  // The JavaScript value of NaN will be cast to a 0 by v8?
   if (stringExtraParameter->Has(hdpi)) {
     stringExtra.flags |= gdFTEX_RESOLUTION;
     stringExtra.hdpi = stringExtraParameter->Get(hdpi)->Int32Value();

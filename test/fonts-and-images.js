@@ -295,7 +295,26 @@ describe('Creating images containing text', function() {
         image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, "Hello world\nUse unicode!", extras);
       } catch(e) {
         assert.ok(e instanceof Error);
+        done();
       }
+    });
+  });
+
+  it('throws an error when a value of wrong type is given with font extras', function(done) {
+    var t = target + 'bogus.png';
+    gd.createTrueColor(300, 300, function(error, image) {
+      if (error) {
+        throw error;
+      }
+      var extras = {
+        fontpath: true
+      };
+
+      var txtColor = image.colorAllocate(255, 255, 0);
+
+      image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, "Hello world\nxshow string!", extras);
+
+      assert.equal(extras.fontpath, true);
       done();
     });
   });
