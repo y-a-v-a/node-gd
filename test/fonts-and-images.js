@@ -280,6 +280,26 @@ describe('Creating images containing text', function() {
     });
   });
 
+  it('throws an error when an unknown charmap is given with font extras', function(done) {
+    var t = target + 'bogus.png';
+    gd.createTrueColor(300, 300, function(error, image) {
+      if (error) {
+        throw error;
+      }
+      var extras = {
+        charmap: 'bogus'
+      };
+
+      var txtColor = image.colorAllocate(255, 255, 0);
+      try {
+        image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, "Hello world\nUse unicode!", extras);
+      } catch(e) {
+        assert.ok(e instanceof Error);
+      }
+      done();
+    });
+  });
+
   it('can put text on a circle', function(done) {
     var t = target + 'output-truecolor-string-circle.png';
 

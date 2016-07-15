@@ -78,7 +78,7 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
 
 #define REQ_INT_ARG(I, VAR)                                             \
   int VAR;                                                              \
-  if (info.Length() <= (I) || !info[I]->IsInt32()) {                    \
+  if (info.Length() <= (I) || !info[I]->IsNumber() || !info[I]->IsInt32()) { \
     return Nan::ThrowTypeError("Argument " #I " must be an integer");   \
   }                                                                     \
   VAR = info[I]->Int32Value();
@@ -121,7 +121,7 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
   } else if (info[I]->IsInt32()) {                                      \
     VAR = info[I]->Int32Value();                                        \
   } else {                                                              \
-    return Nan::ThrowTypeError("Argument " #I " must be an integer");   \
+    return Nan::ThrowTypeError("Optional argument " #I " must be an integer");   \
   }
 
 #define OPT_BOOL_ARG(I, VAR, DEFAULT)                                   \
@@ -131,7 +131,7 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
   } else if (info[I]->IsBoolean()) {                                    \
     VAR = info[I]->BooleanValue();                                      \
   } else {                                                              \
-    return Nan::ThrowTypeError("Argument " #I " must be a boolean");    \
+    return Nan::ThrowTypeError("Optional argument " #I " must be a boolean");    \
   }
 
 #define RETURN_IMAGE(IMG)                                               \

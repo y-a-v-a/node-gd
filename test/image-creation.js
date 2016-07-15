@@ -14,7 +14,7 @@ var target = __dirname + '/output/';
  */
 describe('Creating a paletted image', function() {
   it('can be done synchronously', function(done) {
-    var img = gd.createSync(100,100);
+    var img = gd.createSync(100, 100);
 
     assert.ok(img instanceof gd.Image);
     img.destroy();
@@ -25,6 +25,26 @@ describe('Creating a paletted image', function() {
     var img;
     try {
       img = gd.createSync(100);
+    } catch (e) {
+      assert.ok(e instanceof Error);
+      return done();
+    }
+  });
+
+  it('throws an Error when argument is not a Number - NaN', function(done) {
+    var img;
+    try {
+      img = gd.createSync(NaN, 100);
+    } catch (e) {
+      assert.ok(e instanceof Error);
+      return done();
+    }
+  });
+
+  it('throws an Error when argument is not a Number - Infinity', function(done) {
+    var img;
+    try {
+      img = gd.createSync(Infinity, 100);
     } catch (e) {
       assert.ok(e instanceof Error);
       return done();
