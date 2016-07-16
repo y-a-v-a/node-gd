@@ -1438,23 +1438,20 @@ NAN_METHOD(Gd::Image::StringFT) {
   REQ_INT_ARG(4, x);
   REQ_INT_ARG(5, y);
   REQ_STR_ARG(6, str);
-
-  /* return rectangle? */
-  bool return_rectangle = false;
-  if (info.Length() > 7 && info[7]->IsBoolean()) {
-    return_rectangle = info[7]->BooleanValue();
-  }
+  OPT_BOOL_ARG(7, return_rectangle, false);
 
   int brect[8];
-  char *err;
+  char *error;
 
   if (return_rectangle) {
-    err = gdImageStringFT(NULL, &brect[0], color, *font, size, angle, x, y, *str);
-    if (err) return Nan::ThrowError(err);
+    error = gdImageStringFT(NULL, &brect[0], color, *font, size, angle, x, y, *str);
+    if (error) {
+      return Nan::ThrowError(error);
+    }
 
     Local<Array> result = Nan::New<Array>();
-    for(int i=0; i < 8; i++) {
-      result->Set( Nan::New<Integer>(i), Nan::New<Number>(brect[i]) );
+    for(int i = 0; i < 8; i++) {
+      result->Set( Nan::New<Integer>(i), Nan::New<Number>(brect[i]));
     }
 
     info.GetReturnValue().Set(result);
@@ -1463,8 +1460,10 @@ NAN_METHOD(Gd::Image::StringFT) {
 
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-  err = gdImageStringFT(*im, &brect[0], color, *font, size, angle, x, y, *str);
-  if (err) return Nan::ThrowError(err);
+  error = gdImageStringFT(*im, &brect[0], color, *font, size, angle, x, y, *str);
+  if (error) {
+    return Nan::ThrowError(error);
+  }
 
   info.GetReturnValue().Set(info.This());
 }
@@ -1482,6 +1481,9 @@ NAN_METHOD(Gd::Image::StringFTEx) {
   if (!info[7]->IsObject()) {
     return Nan::ThrowTypeError("Argument 8 must be an object");
   }
+
+  OPT_BOOL_ARG(8, return_rectangle, false);
+  int brect[8];
 
   Local<Object> stringExtraParameter = Local<Object>::Cast(info[7]);
 
@@ -1587,11 +1589,27 @@ NAN_METHOD(Gd::Image::StringFTEx) {
   }
 
   const char *error;
-  Image *im = ObjectWrap::Unwrap<Image>(info.This());
-  // TODO brect
 
-  // error = gdImageStringFTEx(*im, brect, color, *font, size, angle, x, y, *str, extra);
-  error = gdImageStringFTEx(*im, 0, color, *font, size, angle, x, y, *str, &stringExtra);
+  if (return_rectangle) {
+    error = gdImageStringFTEx(NULL, &brect[0], color, *font, size, angle, x, y, *str, &stringExtra);
+    if (error) {
+      std::string prefix("GD Error: ");
+      std::string errormsg(error);
+      const char *errorMessage = (prefix + error).c_str();
+      return Nan::ThrowError(errorMessage);
+    }
+
+    Local<Array> result = Nan::New<Array>();
+    for(int i = 0; i < 8; i++) {
+      result->Set( Nan::New<Integer>(i), Nan::New<Number>(brect[i]));
+    }
+
+    info.GetReturnValue().Set(result);
+    return;
+  }
+
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
+  error = gdImageStringFTEx(*im, &brect[0], color, *font, size, angle, x, y, *str, &stringExtra);
 
   if (error) {
     std::string prefix("GD Error: ");

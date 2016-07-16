@@ -72,11 +72,11 @@ describe('Creating a paletted image', function() {
   });
 
   it('can be done asynchronously.', function(done) {
-    return gd.create(10, 10, function(error, img) {
+    gd.create(10, 10, function(error, img) {
       assert.ok(img instanceof gd.Image);
       img.destroy();
 
-      return done();
+      done();
     });
   });
 

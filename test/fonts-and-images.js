@@ -65,6 +65,7 @@ describe('Creating images containing text', function() {
     assert.equal(boundingBox.length, 8, 'BoundingBox not eight coordinates?');
     assert.deepEqual(boundingBox, [ 8, 20, 136, 20, 136, 0, 8, 0 ], 'BoundingBox size changed?');
 
+    img.destroy();
     return done();
   });
 
@@ -76,6 +77,8 @@ describe('Creating images containing text', function() {
     var boundingBox = img.stringFTBBox(txtColor, fontFile, 16, -45, 20, 20, "Hello World2!", true);
     assert.equal(boundingBox.length, 8, 'BoundingBox not eight coordinates?');
     assert.deepEqual(boundingBox, [ 18, 21, 85, 130, 101, 120, 34, 11 ], 'BoundingBox size changed?');
+
+    img.destroy();
     return done();
   });
 
@@ -92,7 +95,7 @@ describe('Creating images containing text', function() {
         image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, "Lorem ipsum", extras);
       } catch(e) {
         assert.ok(e instanceof Error);
-
+        image.destroy();
         return done();
       }
     });
@@ -295,26 +298,30 @@ describe('Creating images containing text', function() {
         image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, "Hello world\nUse unicode!", extras);
       } catch(e) {
         assert.ok(e instanceof Error);
+        image.destroy();
         done();
       }
     });
   });
 
-  it('throws an error when a value of wrong type is given with font extras', function(done) {
+  it('returns an array of coordinates of the bounding box when an 8th boolean parameter is given to gd.Image#stringFTEx', function(done) {
     var t = target + 'bogus.png';
     gd.createTrueColor(300, 300, function(error, image) {
       if (error) {
         throw error;
       }
       var extras = {
-        fontpath: true
+        hdpi: 120,
+        vdpi: 120
       };
 
       var txtColor = image.colorAllocate(255, 255, 0);
 
-      image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, "Hello world\nxshow string!", extras);
+      var boundingBox = image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, "Hello world\nxshow string!", extras, true);
 
-      assert.equal(extras.fontpath, true);
+      assert.equal(boundingBox.length, 8);
+      assert.deepEqual(boundingBox, [ 8, 112, 241, 112, 241, 28, 8, 28 ], 'BoundingBox size changed?');
+      image.destroy();
       done();
     });
   });
