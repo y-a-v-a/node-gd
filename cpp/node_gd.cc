@@ -1511,15 +1511,17 @@ NAN_METHOD(Gd::Image::StringFTEx) {
     Local<String> localCharmap = stringExtraParameter->Get(charmap)->ToString();
     stringExtra.charmap = 0;
 
+    v8::String::Utf8Value chmap(localCharmap);
+
     // gdFTEX_Unicode, gdFTEX_Shift_JIS, gdFTEX_Big5, gdFTEX_Adobe_Custom
     // unicode, shift_jis, big5, adobe_custom
-    if (!std::strcmp(*v8::String::Utf8Value(localCharmap), "unicode")) {
+    if (!std::strcmp(*chmap, "unicode")) {
       stringExtra.charmap = gdFTEX_Unicode;
-    } else if (!std::strcmp(*v8::String::Utf8Value(localCharmap), "shift_jis")) {
+    } else if (!std::strcmp(*chmap, "shift_jis")) {
       stringExtra.charmap = gdFTEX_Shift_JIS;
-    } else if (!std::strcmp(*v8::String::Utf8Value(localCharmap), "big5")) {
+    } else if (!std::strcmp(*chmap, "big5")) {
       stringExtra.charmap = gdFTEX_Big5;
-    } else if (!std::strcmp(*v8::String::Utf8Value(localCharmap), "adobe_custom")) {
+    } else if (!std::strcmp(*chmap, "adobe_custom")) {
       stringExtra.charmap = gdFTEX_Adobe_Custom;
     } else {
       Nan::ThrowError("Unknown value for charmap. Should be one of: unicode, shift_jis, big5, adobe_custom");
@@ -1593,8 +1595,8 @@ NAN_METHOD(Gd::Image::StringFTEx) {
   if (return_rectangle) {
     error = gdImageStringFTEx(NULL, &brect[0], color, *font, size, angle, x, y, *str, &stringExtra);
     if (error) {
-      std::string prefix("GD Error: ");
-      std::string errormsg(error);
+      std::string prefix ("GD Error: ");
+      std::string errormsg (error);
       const char *errorMessage = (prefix + error).c_str();
       return Nan::ThrowError(errorMessage);
     }
