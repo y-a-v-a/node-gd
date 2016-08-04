@@ -2160,9 +2160,9 @@ NAN_METHOD(Gd::Image::SquareToCircle) {
 
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-  gdImageSquareToCircle(*im, radius);
+  gdImagePtr newImage = gdImageSquareToCircle(*im, radius);
 
-  info.GetReturnValue().Set(info.This());
+  RETURN_IMAGE(newImage);
 }
 
 NAN_METHOD(Gd::Image::Sharpen) {
