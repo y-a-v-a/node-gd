@@ -181,6 +181,7 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
 #define RETURN_DATA(asBuffer)                                           \
   if (asBuffer) {                                                       \
     Nan::MaybeLocal<Object> result = Nan::NewBuffer(data, size);        \
+    delete[] data;                                                      \
     info.GetReturnValue().Set(result.ToLocalChecked());                 \
   } else {                                                              \
     Local<Value> result = Nan::Encode(data, size, Nan::BINARY);         \
@@ -242,6 +243,7 @@ void Gd::Init(Local<Object> exports) {
   NODE_DEFINE_CONSTANT(exports, GD_GIFANIM);
   NODE_DEFINE_CONSTANT(exports, GD_OPENPOLYGON);
 
+  // Image creation, loading and saving
   Nan::SetMethod(exports, "create", ImageCreate);
   Nan::SetMethod(exports, "createSync", ImageCreateSync);
   Nan::SetMethod(exports, "createTrueColor", ImageCreateTrueColor);
@@ -964,10 +966,10 @@ NAN_METHOD(Gd::Image::Polygon) {
   Local<String> y = Nan::New("y").ToLocalChecked();
 
   Local<Array> array = Local<Array>::Cast(info[0]);
-  int len = array->Length(), _len = 0;
+  unsigned int len = array->Length(), _len = 0;
   gdPoint *points =  new gdPoint[len];
 
-  for(int i=0; i < len; i++) {
+  for(unsigned int i = 0; i < len; i++) {
     Local<Value> v = array->Get(Nan::New<Integer>(i));
     if (!v->IsObject()) continue;
 
@@ -1000,10 +1002,10 @@ NAN_METHOD(Gd::Image::OpenPolygon) {
   Local<String> y = Nan::New("y").ToLocalChecked();
 
   Local<Array> array = Local<Array>::Cast(info[0]);
-  int len = array->Length(), _len = 0;
+  unsigned int len = array->Length(), _len = 0;
   gdPoint *points =  new gdPoint[len];
 
-  for(int i=0; i < len; i++) {
+  for(unsigned int i = 0; i < len; i++) {
     Local<Value> v = array->Get(Nan::New<Integer>(i));
     if (!v->IsObject()) continue;
 
@@ -1036,10 +1038,10 @@ NAN_METHOD(Gd::Image::FilledPolygon) {
   Local<String> y = Nan::New("y").ToLocalChecked();
 
   Local<Array> array = Local<Array>::Cast(info[0]);
-  int len = array->Length(), _len = 0;
+  unsigned int len = array->Length(), _len = 0;
   gdPoint *points =  new gdPoint[len];
 
-  for(int i=0; i < len; i++) {
+  for(unsigned int i = 0; i < len; i++) {
     Local<Value> v = array->Get(Nan::New<Integer>(i));
     if (!v->IsObject()) continue;
 
@@ -1229,10 +1231,10 @@ NAN_METHOD(Gd::Image::SetStyle) {
     return Nan::ThrowTypeError("Arguments 0 must be an array");
 
   Local<Array> array = Local<Array>::Cast(info[0]);
-  int len  = array->Length(), _len = 0;
+  unsigned int len = array->Length(), _len = 0;
   int *sty =  new int[len];
 
-  for(int i=0; i < len; i++) {
+  for(unsigned int i = 0; i < len; i++) {
     Local<Value> v = array->Get(Nan::New<Integer>(i));
     if (!v->IsNumber()) continue;
 
@@ -1422,7 +1424,7 @@ NAN_METHOD(Gd::Image::StringFTBBox) {
 
   Local<Array> result = Nan::New<Array>();
 
-  for (int i = 0; i < 8; i++) {
+  for (unsigned int i = 0; i < 8; i++) {
     result->Set(Nan::New<Integer>(i), Nan::New<Number>(brect[i]));
   }
 
@@ -1450,7 +1452,7 @@ NAN_METHOD(Gd::Image::StringFT) {
     }
 
     Local<Array> result = Nan::New<Array>();
-    for(int i = 0; i < 8; i++) {
+    for(unsigned int i = 0; i < 8; i++) {
       result->Set( Nan::New<Integer>(i), Nan::New<Number>(brect[i]));
     }
 
@@ -1600,7 +1602,7 @@ NAN_METHOD(Gd::Image::StringFTEx) {
     }
 
     Local<Array> result = Nan::New<Array>();
-    for(int i = 0; i < 8; i++) {
+    for(unsigned int i = 0; i < 8; i++) {
       result->Set( Nan::New<Integer>(i), Nan::New<Number>(brect[i]));
     }
 
@@ -1811,7 +1813,7 @@ NAN_SETTER(Gd::Image::InterlaceSetter) {
   if (value->IsBoolean()) {
     bool interlace = value->BooleanValue();
 
-    gdImageInterlace(*im, interlace?1:0);
+    gdImageInterlace(*im, interlace ? 1 : 0);
   }
 }
 
@@ -1873,20 +1875,20 @@ NAN_METHOD(Gd::Image::ColorReplaceArray) {
   REQ_ARGS(2);
 
   Local<Array> fromArray = Local<Array>::Cast(info[0]);
-  int flen = fromArray->Length(), _flen = 0;
+  unsigned int flen = fromArray->Length(), _flen = 0;
   int *fromColors =  new int[flen];
 
-  for(int i = 0; i < flen; i++) {
+  for(unsigned int i = 0; i < flen; i++) {
     Local<Value> v = fromArray->Get(Nan::New<Integer>(i));
     fromColors[i] = v->Int32Value();
     _flen++;
   }
 
   Local<Array> toArray = Local<Array>::Cast(info[1]);
-  int tlen = toArray->Length(), _tlen = 0;
+  unsigned int tlen = toArray->Length(), _tlen = 0;
   int *toColors =  new int[tlen];
 
-  for(int j = 0; j < tlen; j++) {
+  for(unsigned int j = 0; j < tlen; j++) {
     Local<Value> v = toArray->Get(Nan::New<Integer>(j));
     toColors[j] = v->Int32Value();
     _tlen++;
