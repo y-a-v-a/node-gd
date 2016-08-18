@@ -180,9 +180,9 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
 
 #define RETURN_DATA(asBuffer)                                           \
   if (asBuffer) {                                                       \
-    Nan::MaybeLocal<Object> result = Nan::NewBuffer(data, size);        \
-    delete[] data;                                                      \
+    Nan::MaybeLocal<Object> result = Nan::CopyBuffer(data, size);       \
     info.GetReturnValue().Set(result.ToLocalChecked());                 \
+    delete[] data;                                                      \
   } else {                                                              \
     Local<Value> result = Nan::Encode(data, size, Nan::BINARY);         \
     delete[] data;                                                      \
@@ -618,7 +618,7 @@ void Gd::Image::Init(v8::Local<Object> exports) {
 NAN_METHOD(Gd::Image::New) {
   REQ_EXT_ARG(0, image);
 
-  gdImagePtr imgPtr = (gdImagePtr)image->Value();
+  gdImagePtr imgPtr = (gdImagePtr) image->Value();
   (new Image(imgPtr))->Wrap(info.This());
 
   info.GetReturnValue().Set(info.This());
@@ -637,6 +637,7 @@ NAN_METHOD(Gd::Image::Destroy) {
     im->_image = NULL;
   }
 
+  im = NULL;
   info.GetReturnValue().SetUndefined();
 }
 

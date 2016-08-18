@@ -46,49 +46,12 @@ class Gd : public Nan::ObjectWrap {
 public:
   static void Init(v8::Local<v8::Object> exports);
 
-  static NAN_METHOD(ImageCreate);
-  static NAN_METHOD(ImageCreateSync);
-  static NAN_METHOD(ImageCreateTrueColor);
-  static NAN_METHOD(ImageCreateTrueColorSync);
-
-  static NAN_METHOD(CreateFromJpeg);
-  static NAN_METHOD(CreateFromJpegPtr);
-  static NAN_METHOD(CreateFromPng);
-  static NAN_METHOD(CreateFromPngPtr);
-  static NAN_METHOD(CreateFromGif);
-  static NAN_METHOD(CreateFromGifPtr);
-  static NAN_METHOD(CreateFromGd2);
-  static NAN_METHOD(CreateFromGd2Ptr);
-  static NAN_METHOD(CreateFromWBMP);
-  static NAN_METHOD(CreateFromWBMPPtr);
-#if HAS_LIBWEBP
-  static NAN_METHOD(CreateFromWebp);
-  static NAN_METHOD(CreateFromWebpPtr);
-#endif
-
-#if SUPPORTS_GD_2_1_0
-  static NAN_METHOD(CreateFromBmp);
-  static NAN_METHOD(CreateFromBmpPtr);
-#endif
-  // libgd appears to open tiff's buggy...
-  // static NAN_METHOD(Tiff);
-  // static NAN_METHOD(TiffPtr);
-
-#if SUPPORTS_GD_2_1_1
-  static NAN_METHOD(CreateFromFile);
-#endif
-
-  static NAN_METHOD(CreateFromGd2Part);
-  static NAN_METHOD(CreateFromGd2PartPtr);
-  static NAN_METHOD(TrueColor);
-  static NAN_METHOD(TrueColorAlpha);
-  static NAN_METHOD(GdVersionGetter);
-
   class Image : public Nan::ObjectWrap {
   public:
     static Nan::Persistent<v8::FunctionTemplate> constructor;
 
     static void Init(v8::Local<v8::Object> exports);
+  private:
     static NAN_METHOD(New);
 
     Image(gdImagePtr image);
@@ -255,6 +218,45 @@ public:
      */
     static NAN_METHOD(Compare);
   };
+
+private:
+  static NAN_METHOD(ImageCreate);
+  static NAN_METHOD(ImageCreateSync);
+  static NAN_METHOD(ImageCreateTrueColor);
+  static NAN_METHOD(ImageCreateTrueColorSync);
+
+  static NAN_METHOD(CreateFromJpeg);
+  static NAN_METHOD(CreateFromJpegPtr);
+  static NAN_METHOD(CreateFromPng);
+  static NAN_METHOD(CreateFromPngPtr);
+  static NAN_METHOD(CreateFromGif);
+  static NAN_METHOD(CreateFromGifPtr);
+  static NAN_METHOD(CreateFromGd2);
+  static NAN_METHOD(CreateFromGd2Ptr);
+  static NAN_METHOD(CreateFromWBMP);
+  static NAN_METHOD(CreateFromWBMPPtr);
+#if HAS_LIBWEBP
+  static NAN_METHOD(CreateFromWebp);
+  static NAN_METHOD(CreateFromWebpPtr);
+#endif
+
+#if SUPPORTS_GD_2_1_0
+  static NAN_METHOD(CreateFromBmp);
+  static NAN_METHOD(CreateFromBmpPtr);
+#endif
+  // libgd appears to open tiff's buggy...
+  // static NAN_METHOD(Tiff);
+  // static NAN_METHOD(TiffPtr);
+
+#if SUPPORTS_GD_2_1_1
+  static NAN_METHOD(CreateFromFile);
+#endif
+
+  static NAN_METHOD(CreateFromGd2Part);
+  static NAN_METHOD(CreateFromGd2PartPtr);
+  static NAN_METHOD(TrueColor);
+  static NAN_METHOD(TrueColorAlpha);
+  static NAN_METHOD(GdVersionGetter);
 };
 
 #endif
