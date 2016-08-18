@@ -1,4 +1,5 @@
-test/
+test/fixtures/output.png
+test/dev/*
 node_modules/
 node-debug.log
 .git/
