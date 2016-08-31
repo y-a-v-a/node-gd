@@ -52,7 +52,7 @@ Sorry, will not build on Windows.
 There are different flavours of images, of which the main ones are palette-based (up to 256 colors) and true color images (millions of colors). GIFs are always palette-based, PNGs can be both palette-based or true color. JPEGs are always true color images. `gd.create()` will create a palette-based base image while `gd.createTrueColor()` will create a true color image.
 
 ### API
-Full API documentation and more examples can be found in the [doc](https://github.com/y-a-v-a/node-gd/blob/stable/doc/README.md) directory.
+Full API documentation and more examples can be found in the [docs](https://github.com/y-a-v-a/node-gd/blob/stable/docs/index.md) directory.
 
 ### Note
 Since node-gd@1.0.0, `gd.create` and `gd.createTrueColor` are async. *You will have to modify your code.* This means that you should either change all `gd.create` calls to `gd.createSync` and `gd.createTrueColor` to `gd.createTrueColorSync` or rewrite those call and wrap further calls in a callback.
