@@ -1,3 +1,8 @@
+---
+layout: default
+title: Node-gd Documentation
+---
+
 ## API
 
 ### Opening and creating graphic images
