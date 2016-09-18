@@ -215,7 +215,7 @@ gd.createTrueColor(101, 101, function(error, image) {
 
   image.savePng('./test.png', 0, function(error) {
     if (error) throw error;
-    img.destroy();
+    image.destroy();
   })
 });
 ```
