@@ -139,10 +139,10 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
     info.GetReturnValue().SetNull();                                    \
   } else {                                                              \
     const int argc = 1;                                                 \
-    Local<Value> argv = Nan::New<External>(IMG);                        \
+    Local<Value> argv[argc] = {Nan::New<External>(IMG)};                \
     Local<FunctionTemplate> func = Nan::New(Image::constructor);        \
-    Local<Object> instance = func->GetFunction()->NewInstance(argc, &argv);\
-    info.GetReturnValue().Set(instance);                                \
+    MaybeLocal<Object> instance = Nan::NewInstance(func->GetFunction(), argc, argv);\
+    info.GetReturnValue().Set(instance.ToLocalChecked());               \
   }
 
 #define DECLARE_CREATE_FROM(TYPE)                                       \
