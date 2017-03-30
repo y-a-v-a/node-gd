@@ -20,8 +20,12 @@
 #include <nan.h>
 #include <gd.h>
 
-#define SUPPORTS_GD_2_2_0 (GD_MINOR_VERSION == 2                        \
-                  && GD_RELEASE_VERSION >= 0)
+#define SUPPORTS_GD_2_2_4 (GD_MINOR_VERSION == 2                        \
+                  && GD_RELEASE_VERSION >= 4)
+
+#define SUPPORTS_GD_2_2_0 (SUPPORTS_GD_2_2_4                            \
+                  || (GD_MINOR_VERSION == 2                             \
+                  && GD_RELEASE_VERSION >= 0))
 
 #define SUPPORTS_GD_2_1_1 (SUPPORTS_GD_2_2_0                            \
                   || (GD_MINOR_VERSION == 1                             \
@@ -36,7 +40,7 @@
                   || (GD_MINOR_VERSION == 0                             \
                   && GD_RELEASE_VERSION <= 36))
 
-#define SUPPORTS_UNTIL_GD_2_0_36 (GD_MINOR_VERSION == 0                  \
+#define SUPPORTS_UNTIL_GD_2_0_36 (GD_MINOR_VERSION == 0                 \
                   && GD_RELEASE_VERSION <= 36)
 
 #define HAS_LIBTIFF (HAVE_LIBTIFF && SUPPORTS_GD_2_1_0)
@@ -244,9 +248,10 @@ private:
   static NAN_METHOD(CreateFromBmp);
   static NAN_METHOD(CreateFromBmpPtr);
 #endif
-  // libgd appears to open tiff's buggy...
-  // static NAN_METHOD(Tiff);
-  // static NAN_METHOD(TiffPtr);
+#if SUPPORTS_GD_2_2_4
+  static NAN_METHOD(CreateFromTiff);
+  static NAN_METHOD(CreateFromTiffPtr);
+#endif
 
 #if SUPPORTS_GD_2_1_1
   static NAN_METHOD(CreateFromFile);

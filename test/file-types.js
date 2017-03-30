@@ -145,4 +145,46 @@ describe('Section Handling file types', function() {
       });
     });
   });
+
+  it('can open a tiff and save it as a jpg', function(done) {
+    var s;
+    var t;
+    s = source + 'input.tif';
+    t = target + 'output-from-tiff.jpg';
+
+    return gd.openTiff(s, function(error, img) {
+      if (error) {
+        throw error;
+      }
+      return img.saveJpeg(t, 100, function(error) {
+        if (error) {
+          throw error;
+        }
+        assert.ok(fs.existsSync(t));
+        img.destroy();
+        return done();
+      })
+    });
+  });
+
+  it('can open a jpg file and save it as a tiff', function(done) {
+    var s;
+    var t;
+    s = source + 'input.jpg';
+    t = target + 'output-from-jpg.tiff';
+
+    return gd.openJpeg(s, function(error, img) {
+      if (error) {
+        throw error;
+      }
+      return img.saveTiff(t, function(error) {
+        if (error) {
+          throw error;
+        }
+        assert.ok(fs.existsSync(t));
+        img.destroy();
+        return done();
+      });
+    });
+  });
 });

@@ -75,7 +75,7 @@ function exportFormats() {
   }
 
   if (bindings.GD_TIFF && version >= '2.1.0') {
-    formats.Tiff = [0, 1];
+    formats.Tiff = [1, 1];
   }
 
   if (bindings.GD_WEBP && version >= '2.1.0') {

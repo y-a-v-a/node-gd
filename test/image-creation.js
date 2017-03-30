@@ -161,7 +161,7 @@ describe('Creating a paletted image', function() {
  */
 describe('Create a true color image', function() {
   it('can be done synchronously.', function(done) {
-    var img = gd.createTrueColorSync(100,100);
+    var img = gd.createTrueColorSync(100, 100);
     assert.ok(img instanceof gd.Image);
     img.destroy();
     return done();
