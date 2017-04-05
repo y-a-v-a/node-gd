@@ -104,7 +104,8 @@ try {
   try {
     bindings = require(libPaths.shift());
   } catch (e) {
-    console.log('Unable to find addon node_gd.node in build directory.');
+    console.error('Unable to load addon node_gd.node in build directory.');
+    console.error(e.stack || e);
     process.exit(1);
   }
 }
