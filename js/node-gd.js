@@ -101,9 +101,11 @@ var libPaths = [
 try {
   bindings = require(libPaths.shift());
 } catch (e) {
+  console.log(e.message);
   try {
     bindings = require(libPaths.shift());
   } catch (e) {
+    console.log(e.message);
     console.log('Unable to find addon node_gd.node in build directory.');
     process.exit(1);
   }
