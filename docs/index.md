@@ -126,6 +126,12 @@ Open a BMP bitmap image file.
 
 #### gd.createFromBmpPtr(data)
 
+#### gd.openTiff(path[, callback])
+
+#### gd.createFromTiff(path)
+
+#### gd.createFromTiffPtr(data)
+
 #### gd.openFile(path[, callback])
 GD will try to find out of what type the supplied image is, and will open it likewise. This is a quite new convenience method for if you don't exactly know what the type is that you will try to open. The callback will get two parameters at max.
 
@@ -868,7 +874,7 @@ Save image as a 2 color WBMP file. `foreground` is an integer value or `0x000000
 Only available from GD version 2.1.1. The compression parameter is eiterh `0` for no compression and `1` for compression. This value only affects paletted images.
 
 #### gd.Image#saveTiff(path[, callback])
-Currently, opening TIFF files with GD has some errors, but saving image data as TIFF works fine. Therefore, there is no `gd.openTiff()` at this moment. Only available from GD version 2.1.1.
+As per libgd 2.2.4, opening TIFF files appears to be fixed, and saving image data as TIFF worked already fine. Therefore, `gd.openTiff()` is available again. Only available from GD version 2.1.1.
 
 #### gd.Image#saveFile(path[, callback])
 Lets GD decide in which format the image should be stored to disk, based on the supplied file name extension. Only available from GD version 2.1.1. This is not really asynchronous, since it uses a GD implementation of writing to disk, instead of a node / libuv based one.
