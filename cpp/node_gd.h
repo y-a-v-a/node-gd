@@ -43,7 +43,7 @@
 #define SUPPORTS_UNTIL_GD_2_0_36 (GD_MINOR_VERSION == 0                 \
                   && GD_RELEASE_VERSION <= 36)
 
-#define HAS_LIBTIFF (HAVE_LIBTIFF && SUPPORTS_GD_2_1_0)
+#define HAS_LIBTIFF (HAVE_LIBTIFF && SUPPORTS_GD_2_2_4)
 #define HAS_LIBWEBP (HAVE_LIBWEBP && SUPPORTS_GD_2_1_0)
 
 class Gd : public Nan::ObjectWrap {
@@ -248,7 +248,7 @@ private:
   static NAN_METHOD(CreateFromBmp);
   static NAN_METHOD(CreateFromBmpPtr);
 #endif
-#if SUPPORTS_GD_2_2_4
+#if HAS_LIBTIFF
   static NAN_METHOD(CreateFromTiff);
   static NAN_METHOD(CreateFromTiffPtr);
 #endif

@@ -269,11 +269,9 @@ void Gd::Init(Local<Object> exports) {
   Nan::SetMethod(exports, "createFromBmp", CreateFromBmp);
   Nan::SetMethod(exports, "createFromBmpPtr", CreateFromBmpPtr);
 #endif
-#if SUPPORTS_GD_2_2_4
-  #if HAS_LIBTIFF
-    Nan::SetMethod(exports, "createFromTiff", CreateFromTiff);
-    Nan::SetMethod(exports, "createFromTiffPtr", CreateFromTiffPtr);
-  #endif
+#if HAS_LIBTIFF
+  Nan::SetMethod(exports, "createFromTiff", CreateFromTiff);
+  Nan::SetMethod(exports, "createFromTiffPtr", CreateFromTiffPtr);
 #endif
 
 #if SUPPORTS_GD_2_1_1
@@ -356,10 +354,8 @@ DECLARE_CREATE_FROM(Webp)
 #if SUPPORTS_GD_2_1_0
 DECLARE_CREATE_FROM(Bmp);
 #endif
-#if SUPPORTS_GD_2_2_4
-  #if HAS_LIBTIFF
-  DECLARE_CREATE_FROM(Tiff)
-  #endif
+#if HAS_LIBTIFF
+DECLARE_CREATE_FROM(Tiff)
 #endif
 
 #if SUPPORTS_GD_2_1_1
@@ -851,31 +847,29 @@ NAN_METHOD(Gd::Image::BmpPtr) {
 }
 #endif
 
-#if SUPPORTS_GD_2_2_4
-  #if HAS_LIBTIFF
-  NAN_METHOD(Gd::Image::Tiff) {
-    Image *im = ObjectWrap::Unwrap<Image>(info.This());
+#if HAS_LIBTIFF
+NAN_METHOD(Gd::Image::Tiff) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    REQ_STR_ARG(0, path);
+  REQ_STR_ARG(0, path);
 
-    FILE *out = fopen(*path, "wb");
-    gdImageTiff(*im, out);
-    fclose(out);
+  FILE *out = fopen(*path, "wb");
+  gdImageTiff(*im, out);
+  fclose(out);
 
-    info.GetReturnValue().Set(info.This());
-  }
+  info.GetReturnValue().Set(info.This());
+}
 
-  NAN_METHOD(Gd::Image::TiffPtr) {
-    Image *im = ObjectWrap::Unwrap<Image>(info.This());
+NAN_METHOD(Gd::Image::TiffPtr) {
+  Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
-    OPT_BOOL_ARG(0, asBuffer, false);
+  OPT_BOOL_ARG(0, asBuffer, false);
 
-    int size;
-    char *data = (char*)gdImageTiffPtr(*im, &size);
+  int size;
+  char *data = (char*)gdImageTiffPtr(*im, &size);
 
-    RETURN_DATA(asBuffer)
-  }
-  #endif
+  RETURN_DATA(asBuffer)
+}
 #endif
 
 #if SUPPORTS_GD_2_1_1

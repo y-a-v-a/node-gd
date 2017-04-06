@@ -10,6 +10,10 @@ describe('Section Handling TIFF files', function() {
   it('can open a tiff and save it as a jpg', function(done) {
     var s;
     var t;
+    if (gd.getGDVersion() < '2.2.4') {
+      done();
+      return;
+    }
     s = source + 'input.tif';
     t = target + 'output-from-tiff.jpg';
 
@@ -31,6 +35,10 @@ describe('Section Handling TIFF files', function() {
   it('can open a jpg file and save it as a tiff', function(done) {
     var s;
     var t;
+    if (gd.getGDVersion() < '2.2.4') {
+      done();
+      return;
+    }
     s = source + 'input.jpg';
     t = target + 'output-from-jpg.tiff';
 
@@ -52,6 +60,10 @@ describe('Section Handling TIFF files', function() {
   it('can open a tiff and save it as a tiff', function(done) {
     var s;
     var t;
+    if (gd.getGDVersion() < '2.2.4') {
+      done();
+      return;
+    }
     s = source + 'input.tif';
     t = target + 'output-from-tiff.tif';
 
@@ -67,6 +79,10 @@ describe('Section Handling TIFF files', function() {
   });
 
   it('can open a tif and store it in a pointer and save a tiff from the pointer', function(done) {
+    if (gd.getGDVersion() < '2.2.4') {
+      done();
+      return;
+    }
     var s = source + 'input.tif';
     var t = target + 'output-from-tiff-ptr.tif';
 
