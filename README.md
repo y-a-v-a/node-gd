@@ -11,7 +11,7 @@ GD graphics library, [libgd](http://www.libgd.org/), C++ bindings for Node.js. T
 ## Installation
 
 ### Preconditions
-Have environment-specific build tools available. Next to that: to take full advantage of node-gd, best is to ensure you install the latest version of libgd2, which can be found at the (libgd github repository)[https://github.com/libgd/libgd/releases].
+Have environment-specific build tools available. Next to that: to take full advantage of node-gd, best is to ensure you install the latest version of libgd2, which can be found at the [libgd github repository](https://github.com/libgd/libgd/releases).
 
 ### On Debian/Ubuntu
 
@@ -52,7 +52,7 @@ Sorry, will not build on Windows.
 There are different flavours of images, of which the main ones are palette-based (up to 256 colors) and true color images (millions of colors). GIFs are always palette-based, PNGs can be both palette-based or true color. JPEGs are always true color images. `gd.create()` will create a palette-based base image while `gd.createTrueColor()` will create a true color image.
 
 ### API
-Full API documentation and more examples can be found in the [docs](https://github.com/y-a-v-a/node-gd/blob/stable/docs/index.md) directory or at [the dedicated github page](https://y-a-v-a.github.io/node-gd/)
+Full API documentation and more examples can be found in the [docs](https://github.com/y-a-v-a/node-gd/blob/stable/docs/index.md) directory or at [the dedicated github page](https://y-a-v-a.github.io/node-gd/).
 
 ### Note
 Since node-gd@1.0.0, `gd.create` and `gd.createTrueColor` are async. *You will have to modify your code.* This means that you should either change all `gd.create` calls to `gd.createSync` and `gd.createTrueColor` to `gd.createTrueColorSync` or rewrite those call and wrap further calls in a callback.
