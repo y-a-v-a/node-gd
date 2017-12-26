@@ -3,7 +3,7 @@
  * Uses Nan v2
  * https://github.com/nodejs/nan
  *
- * Copyright (c) 2015, Vincent Bruijn <vebruijn@gmail.com>
+ * Copyright (c) 2015-2018, Vincent Bruijn <vebruijn@gmail.com>
  */
 #include <nan.h>
 #include "node_gd.h"

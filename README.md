@@ -52,7 +52,7 @@ Sorry, will not build on Windows.
 There are different flavours of images, of which the main ones are palette-based (up to 256 colors) and true color images (millions of colors). GIFs are always palette-based, PNGs can be both palette-based or true color. JPEGs are always true color images. `gd.create()` will create a palette-based base image while `gd.createTrueColor()` will create a true color image.
 
 ### API
-Full API documentation and more examples can be found in the [docs](https://github.com/y-a-v-a/node-gd/blob/stable/docs/index.md) directory or at [the dedicated github page](https://y-a-v-a.github.io/node-gd/).
+Full API documentation and more examples can be found in the [docs](https://github.com/y-a-v-a/node-gd/blob/master/docs/index.md) directory or at [the dedicated github page](https://y-a-v-a.github.io/node-gd/).
 
 ### Note
 Since node-gd@1.0.0, `gd.create` and `gd.createTrueColor` are async. *You will have to modify your code.* This means that you should either change all `gd.create` calls to `gd.createSync` and `gd.createTrueColor` to `gd.createTrueColorSync` or rewrite those call and wrap further calls in a callback.
@@ -144,7 +144,7 @@ Some output functions are synchronous because they are handled by libgd. An exam
 Since [December 27th 2012](https://github.com/andris9/node-gd/commit/ad2a80897efc1926ca505b511ffdf0cc1236135a), node-gd is licensed under an MIT license.
 
 The MIT License (MIT)
-Copyright (c) 2010-2016 the contributors.
+Copyright (c) 2010-2018 the contributors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -153,4 +153,4 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ## Contributors
-The current version is based on code created by taggon, [here the original author's repo](https://github.com/taggon/node-gd), and on the additions by [mikesmullin](https://github.com/mikesmullin). Porting node-gd to [nan](https://github.com/nodejs/nan) and extending the API is done by [y-a-v-a](https://github.com/y-a-v-a), on Twitter as [@\_y\_a\_v\_a\_](https://twitter.com/_y_a_v_a_).
+The current version is based on code created by taggon, [here the original author's repo](https://github.com/taggon/node-gd), and on the additions by [mikesmullin](https://github.com/mikesmullin). Porting node-gd to [nan](https://github.com/nodejs/nan) and extending the API is done by [y-a-v-a](https://github.com/y-a-v-a), on Twitter as [@\_y\_a\_v\_a\_](https://twitter.com/_y_a_v_a_). See the `CONTRIBUTORS.md` [file](https://github.com/y-a-v-a/node-gd/blob/master/CONTRIBUTORS.md) for a list of all contributors.

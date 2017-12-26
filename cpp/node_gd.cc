@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2009-2011, Taegon Kim <gonom9@gmail.com>
- * Copyright (c) 2014-2015, Vincent Bruijn <vebruijn@gmail.com>
+ * Copyright (c) 2014-2018, Vincent Bruijn <vebruijn@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
