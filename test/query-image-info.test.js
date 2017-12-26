@@ -1,3 +1,5 @@
+'use strict';
+
 var gd = require('../js/node-gd.js');
 var assert = require('chai').assert;
 

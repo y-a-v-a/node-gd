@@ -1,3 +1,5 @@
+'use strict';
+
 var fs = require('fs');
 
 var gd = require('../js/node-gd.js');

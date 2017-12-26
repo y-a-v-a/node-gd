@@ -1,3 +1,5 @@
+'use strict';
+
 var fs = require('fs');
 var path = require('path');
 var util = require('util');
@@ -58,8 +60,8 @@ describe('Creating images containing text', function() {
   it('can return the coordinates of the bounding box of a string', function(done) {
     var t = target + 'output-truecolor-string-2.png';
 
-    img = gd.createTrueColorSync(300, 300);
-    txtColor = img.colorAllocate(127, 90, 90);
+    var img = gd.createTrueColorSync(300, 300);
+    var txtColor = img.colorAllocate(127, 90, 90);
     var boundingBox = img.stringFT(txtColor, fontFile, 16, 0, 8, 18, "Hello World2!", true);
 
     assert.equal(boundingBox.length, 8, 'BoundingBox not eight coordinates?');
@@ -72,8 +74,8 @@ describe('Creating images containing text', function() {
   it('can return the coordinates of the bounding box of a string using a specific function', function(done) {
     var t = target + 'output-truecolor-string-2.png';
 
-    img = gd.createTrueColorSync(300, 300);
-    txtColor = img.colorAllocate(127, 90, 90);
+    var img = gd.createTrueColorSync(300, 300);
+    var txtColor = img.colorAllocate(127, 90, 90);
     var boundingBox = img.stringFTBBox(txtColor, fontFile, 16, -45, 20, 20, "Hello World2!", true);
     assert.equal(boundingBox.length, 8, 'BoundingBox not eight coordinates?');
     assert.deepEqual(boundingBox, [ 18, 21, 85, 130, 101, 120, 34, 11 ], 'BoundingBox size changed?');

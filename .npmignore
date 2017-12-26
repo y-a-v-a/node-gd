@@ -2,9 +2,9 @@ test/fixtures/output.png
 test/dev/*
 node_modules
 node-debug.log
-.git/
+.git
 .travis.yml
-build/
+build
 travis-linux-deps.sh
 travis-osx-deps.sh
 .gitignore
