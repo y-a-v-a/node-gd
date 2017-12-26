@@ -15,7 +15,7 @@
     "pretest": "node-gyp rebuild",
     "test": "mocha --expose-gc --reporter spec --bail --ui bdd --colors",
     "install": "node-gyp rebuild",
-    "update-contributors": "git shortlog -s -e -n>CONTRIBUTORS.md"
+    "update-contributors": "git shortlog -sen | sed 's/^  /*/' > CONTRIBUTORS.md"
   },
   "repository": {
     "type": "git",
@@ -70,10 +70,10 @@
   "readmeFilename": "README.md",
   "devDependencies": {
     "chai": "4.1.2",
-    "mocha": "3.5.3"
+    "mocha": "4.0.1"
   },
   "dependencies": {
     "node-gyp": "3.6.2",
-    "nan": "2.7.0"
+    "nan": "2.8.0"
   }
 }
