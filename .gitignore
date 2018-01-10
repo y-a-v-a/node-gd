@@ -1,4 +1,5 @@
-node_modules/
-build/
+node_modules
+build
 test/fixtures/output.png
 test/dev/*
+.DS_Store

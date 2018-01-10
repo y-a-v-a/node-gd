@@ -12,8 +12,8 @@
   "homepage": "https://github.com/y-a-v-a/node-gd",
   "bugs": "https://github.com/y-a-v-a/node-gd/issues",
   "scripts": {
-    "pretest": "node-gyp rebuild",
-    "test": "mocha --expose-gc --reporter spec --bail --ui bdd --colors",
+    "pretest": "node-gyp build",
+    "test": "mocha --expose-gc --reporter spec --bail --ui bdd --colors -- test/*.test.js",
     "install": "node-gyp rebuild",
     "update-contributors": "git shortlog -sen | sed 's/^  /*/' > CONTRIBUTORS.md"
   },

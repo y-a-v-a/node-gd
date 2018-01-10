@@ -1334,7 +1334,19 @@ NAN_METHOD(Gd::Image::GetPixel) {
   REQ_INT_ARG(0, x);
   REQ_INT_ARG(1, y);
 
-  Local<Number> result = Nan::New<Integer>(gdImageGetPixel(*im, x, y));
+  INT_ARG_RANGE(x, "x offset");
+  INT_ARG_RANGE(y, "y offset");
+
+  int imageX = gdImageSX(im->operator gdImagePtr());
+  int imageY = gdImageSY(im->operator gdImagePtr());
+
+  Local<Number> result;
+  if (x > imageX || y > imageY) {
+    result = Nan::New<Integer>(0);
+  } else {
+    result = Nan::New<Integer>(gdImageGetPixel(*im, x, y));
+  }
+
   info.GetReturnValue().Set(result);
 }
 
@@ -1345,7 +1357,21 @@ NAN_METHOD(Gd::Image::GetTrueColorPixel) {
   REQ_INT_ARG(0, x);
   REQ_INT_ARG(1, y);
 
-  Local<Number> result = Nan::New<Integer>(gdImageGetTrueColorPixel(*im, x, y));
+  INT_ARG_RANGE(x, "x offset");
+  INT_ARG_RANGE(y, "y offset");
+
+  int imageX = gdImageSX(im->operator gdImagePtr());
+  int imageY = gdImageSY(im->operator gdImagePtr());
+
+
+  Local<Number> result;
+  if (x > imageX || y > imageY) {
+    result = Nan::New<Integer>(0);
+  } else {
+    result = Nan::New<Integer>(gdImageGetPixel(*im, x, y));
+  }
+
+  result = Nan::New<Integer>(gdImageGetTrueColorPixel(*im, x, y));
   info.GetReturnValue().Set(result);
 }
 
