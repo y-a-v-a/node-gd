@@ -1,10 +1,10 @@
-test/fixtures/output.png
-test/dev/*
-node_modules
-node-debug.log
 .git
 .travis.yml
+.gitignore
 build
+node_modules
+node-debug.log
+test
 travis-linux-deps.sh
 travis-osx-deps.sh
-.gitignore
+util.sh

@@ -44,7 +44,7 @@ describe('Section Memory leaks', function() {
         global.gc();
       }
       newMem = process.memoryUsage();
-      if ((newMem.heapUsed > (oldMem.heapUsed + 100 * 1024)) || (newMem.rss > (oldMem.rss + 100 * 1024)) || (newMem.heapTotal > (oldMem.heapTotal + 100 * 1024))){ // consider quadruple the image in the memory size be ok
+      if ((newMem.heapUsed > (oldMem.heapUsed + 200 * 1024)) || (newMem.rss > (oldMem.rss + 200 * 1024)) || (newMem.heapTotal > (oldMem.heapTotal + 100 * 1024))){ // consider quadruple the image in the memory size be ok
           var error = new Error("Memory leaks.\nrss delta: " + (newMem.rss - oldMem.rss) + "\nheapTotal delta: " + (newMem.heapTotal - oldMem.heapTotal) + "\nheapUsed delta: " + (newMem.heapUsed - oldMem.heapUsed));
           done(error);
       } else {
