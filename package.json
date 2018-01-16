@@ -12,9 +12,9 @@
   "homepage": "https://github.com/y-a-v-a/node-gd",
   "bugs": "https://github.com/y-a-v-a/node-gd/issues",
   "scripts": {
-    "pretest": "node-gyp build",
+    "pretest": "cmake-js rebuild",
     "test": "mocha --expose-gc --reporter spec --bail --ui bdd --colors -- test/*.test.js",
-    "install": "node-gyp rebuild",
+    "install": "cmake-js compile",
     "update-contributors": "git shortlog -sen | sed 's/^  /*/' > CONTRIBUTORS.md"
   },
   "repository": {
@@ -73,7 +73,8 @@
     "mocha": "4.0.1"
   },
   "dependencies": {
-    "node-gyp": "3.6.2",
-    "nan": "2.8.0"
+    "cmake-js": "^3.6.1",
+    "nan": "2.8.0",
+    "node-gyp": "3.6.2"
   }
 }
