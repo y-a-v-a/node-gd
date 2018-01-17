@@ -13,12 +13,13 @@ sudo: required
 
 dist: trusty
 
-env:
- - TRAVIS_OS_UNAME=$(uname -s)
+#env:
+# - TRAVIS_OS_UNAME=$(uname -s)
 
 install:
- - if [[ $TRAVIS_OS_UNAME = 'Ubuntu' ]]; then bash travis-linux-deps.sh; fi
- - if [[ $TRAVIS_OS_UNAME = 'Darwin' ]]; then bash travis-osx-deps.sh; fi
+ - uname -s && bash travis-linux-deps.sh
+ #- uname -s && if [[ $TRAVIS_OS_UNAME = 'Ubuntu' ]]; then bash travis-linux-deps.sh; fi
+ #- if [[ $TRAVIS_OS_UNAME = 'Darwin' ]]; then bash travis-osx-deps.sh; fi
 
 notifications:
   email:
