@@ -6,5 +6,4 @@ build
 node_modules
 node-debug.log
 test
-util.sh
 docs
