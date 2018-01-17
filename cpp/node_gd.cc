@@ -627,8 +627,16 @@ NAN_METHOD(Gd::Image::New) {
   info.GetReturnValue().Set(info.This());
 }
 
-Gd::Image::Image(gdImagePtr image) : _image(image) {}
-Gd::Image::~Image() { if(_image) gdImageDestroy(_image);  }
+Gd::Image::Image(gdImagePtr image) {
+  _image = image;
+}
+
+Gd::Image::~Image() {
+  if(_image) {
+    gdImageDestroy(_image);
+    _image = NULL;
+  }
+}
 
 /**
  * Destruction, Loading and Saving Functions

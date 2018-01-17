@@ -13,7 +13,12 @@ class CreateWorker : public Nan::AsyncWorker {
   public:
     CreateWorker(Nan::Callback *callback, int width, int height, int trueColor)
       : Nan::AsyncWorker(callback), _width(width), _height(height), _trueColor(trueColor) {}
-    ~CreateWorker() {}
+    ~CreateWorker() {
+      image = NULL;
+      _width = 0;
+      _height = 0;
+      _trueColor = 0;
+    }
 
     void Execute() {
       if (_trueColor == 0) {
@@ -39,6 +44,7 @@ class CreateWorker : public Nan::AsyncWorker {
         Nan::Null(),
         _image.ToLocalChecked()
       };
+
       callback->Call(argc, argv);
     }
 
