@@ -1342,8 +1342,9 @@ NAN_METHOD(Gd::Image::GetPixel) {
   REQ_INT_ARG(0, x);
   REQ_INT_ARG(1, y);
 
-  INT_ARG_RANGE(x, "x offset");
-  INT_ARG_RANGE(y, "y offset");
+  if (x < 0 || y < 0) {
+    return Nan::ThrowRangeError("Value for x and y must be greater than 0");
+  }
 
   int imageX = gdImageSX(im->operator gdImagePtr());
   int imageY = gdImageSY(im->operator gdImagePtr());
@@ -1365,8 +1366,9 @@ NAN_METHOD(Gd::Image::GetTrueColorPixel) {
   REQ_INT_ARG(0, x);
   REQ_INT_ARG(1, y);
 
-  INT_ARG_RANGE(x, "x offset");
-  INT_ARG_RANGE(y, "y offset");
+  if (x < 0 || y < 0) {
+    return Nan::ThrowRangeError("Value for x and y must be greater than 0");
+  }
 
   int imageX = gdImageSX(im->operator gdImagePtr());
   int imageY = gdImageSY(im->operator gdImagePtr());
