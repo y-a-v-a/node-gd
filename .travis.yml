@@ -4,21 +4,17 @@ os:
   - linux
 
 node_js:
-  - "4.3"
-  - "5.6"
+  - "4"
   - "6"
-  - "7.8"
+  - "7"
+  - "8"
 
 sudo: required
 
 dist: trusty
 
-env:
- - TRAVIS_OS_UNAME=$(uname -s)
-
 install:
- - if [[ $TRAVIS_OS_UNAME = 'Linux' ]]; then bash travis-linux-deps.sh; fi
- - if [[ $TRAVIS_OS_UNAME = 'Darwin' ]]; then bash travis-osx-deps.sh; fi
+ - npm install
 
 notifications:
   email:
@@ -34,3 +30,4 @@ addons:
     - gcc-5
     - g++-5
     - clang
+    - libgd2-dev

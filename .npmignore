@@ -1,10 +1,9 @@
 .git
 .travis.yml
 .gitignore
+.DS_Store
 build
 node_modules
 node-debug.log
 test
-travis-linux-deps.sh
-travis-osx-deps.sh
-util.sh
+docs

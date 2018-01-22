@@ -1,6 +1,6 @@
 {
   "name": "node-gd",
-  "version": "1.5.0",
+  "version": "1.5.3",
   "description": "GD graphics library (libgd) C++ bindings for Node.js",
   "main": "js/node-gd.js",
   "directories": {
@@ -13,7 +13,7 @@
   "bugs": "https://github.com/y-a-v-a/node-gd/issues",
   "scripts": {
     "pretest": "cmake-js rebuild",
-    "test": "mocha --expose-gc --reporter spec --bail --ui bdd --colors -- test/*.test.js",
+    "test": "mocha --reporter spec --bail --ui bdd --colors -- test/*.test.js",
     "install": "cmake-js compile",
     "update-contributors": "git shortlog -sen | sed 's/^  /*/' > CONTRIBUTORS.md"
   },
