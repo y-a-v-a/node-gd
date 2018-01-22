@@ -30,4 +30,5 @@ addons:
     - gcc-5
     - g++-5
     - clang
+    - cmake
     - libgd2-dev
