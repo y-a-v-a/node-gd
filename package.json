@@ -66,7 +66,6 @@
       "email": "vebruijn@gmail.com"
     }
   ],
-  "gypfile": true,
   "readmeFilename": "README.md",
   "devDependencies": {
     "chai": "4.1.2",
@@ -74,7 +73,6 @@
   },
   "dependencies": {
     "cmake-js": "^3.6.1",
-    "nan": "2.8.0",
-    "node-gyp": "3.6.2"
+    "nan": "2.8.0"
   }
 }
