@@ -17,8 +17,8 @@ describe('Creating image from String or Buffer', function() {
         throw error;
       }
 
-      const imgAsBuffer = Buffer.from(data, 'latin1');
-      const img = gd.createFromJpegPtr(imgAsBuffer.toString('latin1'));
+      const imgAsBuffer = Buffer.from(data, 'binary');
+      const img = gd.createFromJpegPtr(imgAsBuffer.toString('binary'));
 
       assert.ok(img instanceof gd.Image);
       img.destroy();
@@ -33,7 +33,7 @@ describe('Creating image from String or Buffer', function() {
         throw error;
       }
 
-      const imageAsBuffer = Buffer.from(data, 'latin1');
+      const imageAsBuffer = Buffer.from(data, 'binary');
       const img = gd.createFromJpegPtr(imageAsBuffer);
 
       assert.ok(img instanceof gd.Image);
