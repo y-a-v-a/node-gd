@@ -8,6 +8,8 @@ if(NOT CMAKE_BUILD_TYPE)
    message(STATUS "Build type not specified: default is Release")
 endif()
 
+set(CMAKE_CXX_FLAGS -std=c++11)
+
 message(STATUS "CMAKE_VERSION=${CMAKE_VERSION}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
