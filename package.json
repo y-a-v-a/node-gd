@@ -1,6 +1,6 @@
 {
   "name": "node-gd",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "GD graphics library (libgd) C++ bindings for Node.js",
   "main": "js/node-gd.js",
   "directories": {
@@ -68,11 +68,11 @@
   ],
   "readmeFilename": "README.md",
   "devDependencies": {
-    "chai": "4.1.2",
-    "mocha": "4.0.1"
+    "chai": "4.2.0",
+    "mocha": "6.0.2"
   },
   "dependencies": {
     "cmake-js": "^3.6.1",
-    "nan": "2.8.0"
+    "nan": "2.13.2"
   }
 }

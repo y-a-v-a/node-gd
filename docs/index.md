@@ -648,7 +648,7 @@ Flip the image on the canvas over the horizontal axis, the oposite of the above.
 Flip the image on the canvas over both axes.
 
 #### gd.Image#crop(x, y, width, height)
-Crop the supplied image from a certain point to a certain size. Will return a new instance of `gd.Image`. Negative numbers, i.e. when going out of the image bounds, can result in images with black parts.
+Crop the supplied image from a certain point to a certain size. Will return a new instance of `gd.Image`. Negative numbers, i.e. when going out of the image bounds, can result in images with black parts. Cropping transparent images currently does not work due to a bug in libgd. An alternative is to create the destination image first with a transparent background and then copy a portion of the source image on top of it.
 
 #### gd.Image#cropAuto(mode)
 The mode parameter is a value from 0 to 4, so there are 5 modes: `0`: default: 4 corners or background, `1`: crop using the transparent color, `2`: crop black borders, `3`: crop white borders, `4`: crop using colors of the 4 corners.

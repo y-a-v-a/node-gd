@@ -157,14 +157,16 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
     REQ_ARGS(1);                                                        \
     ASSERT_IS_STRING_OR_BUFFER(info[0]);                                \
     gdImagePtr im;                                                      \
-    Local<Value> obj = info[0]->ToObject();                             \
+    Local<Value> obj;                                                   \
     if(Buffer::HasInstance(info[0])) {                                  \
+      obj = info[0]->ToObject();                                        \
       char *buffer_data = Buffer::Data(obj);                            \
       size_t buffer_length = Buffer::Length(obj);                       \
       im = gdImageCreateFrom##TYPE##Ptr(buffer_length, buffer_data);    \
     } else {                                                            \
+      obj = info[0]->ToString();                                        \
       ssize_t len = Nan::DecodeBytes(obj, Nan::Encoding(BINARY));       \
-      char* buf = new char[len];                                        \
+      char *buf = new char[len];                                        \
       ssize_t written = Nan::DecodeWrite(buf, len, obj);                \
       assert(written == len);                                           \
       im = gdImageCreateFrom##TYPE##Ptr(len, buf);                      \
