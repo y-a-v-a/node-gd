@@ -74,14 +74,14 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
   if (info.Length() <= (I) || !info[I]->IsString()) {                   \
     return Nan::ThrowTypeError("Argument " #I " must be a string");     \
   }                                                                     \
-  v8::String::Utf8Value VAR(info[I]->ToString());
+  Nan::Utf8String VAR(info[I]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()));
 
 #define REQ_INT_ARG(I, VAR)                                             \
   int VAR;                                                              \
   if (info.Length() <= (I) || !info[I]->IsNumber() || !info[I]->IsInt32()) { \
     return Nan::ThrowTypeError("Argument " #I " must be an integer");   \
   }                                                                     \
-  VAR = info[I]->Int32Value();
+  VAR = info[I]->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
 
 #define INT_ARG_RANGE(I, PROP)                                          \
   if ((I) < 1) {                                                        \
@@ -119,7 +119,7 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
   if (info.Length() <= (I)) {                                           \
     VAR = (DEFAULT);                                                    \
   } else if (info[I]->IsInt32()) {                                      \
-    VAR = info[I]->Int32Value();                                        \
+    VAR = info[I]->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();\
   } else {                                                              \
     return Nan::ThrowTypeError("Optional argument " #I " must be an integer");   \
   }
@@ -990,8 +990,8 @@ NAN_METHOD(Gd::Image::Polygon) {
     Local<Object> o = v->ToObject();
     if ( !o->Has(x) || !o->Has(y)) continue;
 
-    points[i].x = o->Get(x)->Int32Value();
-    points[i].y = o->Get(y)->Int32Value();
+    points[i].x = o->Get(x)->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
+    points[i].y = o->Get(y)->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
     _len++;
   }
 
@@ -1026,8 +1026,8 @@ NAN_METHOD(Gd::Image::OpenPolygon) {
     Local<Object> o = v->ToObject();
     if ( !o->Has(x) || !o->Has(y)) continue;
 
-    points[i].x = o->Get(x)->Int32Value();
-    points[i].y = o->Get(y)->Int32Value();
+    points[i].x = o->Get(x)->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
+    points[i].y = o->Get(y)->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
     _len++;
   }
 
@@ -1062,8 +1062,8 @@ NAN_METHOD(Gd::Image::FilledPolygon) {
     Local<Object> o = v->ToObject();
     if ( !o->Has(x) || !o->Has(y)) continue;
 
-    points[i].x = o->Get(x)->Int32Value();
-    points[i].y = o->Get(y)->Int32Value();
+    points[i].x = o->Get(x)->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
+    points[i].y = o->Get(y)->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
     _len++;
   }
 
@@ -1252,7 +1252,7 @@ NAN_METHOD(Gd::Image::SetStyle) {
     Local<Value> v = array->Get(Nan::New<Integer>(i));
     if (!v->IsNumber()) continue;
 
-    sty[i] = v->Int32Value();
+    sty[i] = v->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
     _len++;
   }
 
@@ -1555,7 +1555,7 @@ NAN_METHOD(Gd::Image::StringFTEx) {
     Local<String> localCharmap = stringExtraParameter->Get(charmap)->ToString();
     stringExtra.charmap = 0;
 
-    v8::String::Utf8Value chmap(localCharmap);
+    Nan::Utf8String chmap(localCharmap);
 
     // gdFTEX_Unicode, gdFTEX_Shift_JIS, gdFTEX_Big5, gdFTEX_Adobe_Custom
     // unicode, shift_jis, big5, adobe_custom
@@ -1578,7 +1578,7 @@ NAN_METHOD(Gd::Image::StringFTEx) {
   // The JavaScript value of NaN will be cast to a 0 by v8?
   if (stringExtraParameter->Has(hdpi)) {
     stringExtra.flags |= gdFTEX_RESOLUTION;
-    stringExtra.hdpi = stringExtraParameter->Get(hdpi)->Int32Value();
+    stringExtra.hdpi = stringExtraParameter->Get(hdpi)->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
     if (!stringExtraParameter->Has(vdpi)) {
       stringExtra.vdpi = stringExtra.hdpi;
     }
@@ -1586,7 +1586,7 @@ NAN_METHOD(Gd::Image::StringFTEx) {
   // vertical dpi
   if (stringExtraParameter->Has(vdpi)) {
     stringExtra.flags |= gdFTEX_RESOLUTION;
-    stringExtra.vdpi = stringExtraParameter->Get(vdpi)->Int32Value();
+    stringExtra.vdpi = stringExtraParameter->Get(vdpi)->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
     if (!stringExtraParameter->Has(hdpi)) {
       stringExtra.hdpi = stringExtra.vdpi;
     }
@@ -1611,7 +1611,7 @@ NAN_METHOD(Gd::Image::StringFTEx) {
 
   // fontpathname
   if (stringExtraParameter->Has(fontpath)) {
-    v8::String::Utf8Value localFontpathname(stringExtraParameter->Get(fontpath)->ToString());
+    Nan::Utf8String localFontpathname(stringExtraParameter->Get(fontpath)->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()));
     stringExtra.flags |= gdFTEX_FONTPATHNAME;
     stringExtra.fontpath = *localFontpathname;
   }
@@ -1924,7 +1924,7 @@ NAN_METHOD(Gd::Image::ColorReplaceArray) {
 
   for(unsigned int i = 0; i < flen; i++) {
     Local<Value> v = fromArray->Get(Nan::New<Integer>(i));
-    fromColors[i] = v->Int32Value();
+    fromColors[i] = v->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
     _flen++;
   }
 
@@ -1934,7 +1934,7 @@ NAN_METHOD(Gd::Image::ColorReplaceArray) {
 
   for(unsigned int j = 0; j < tlen; j++) {
     Local<Value> v = toArray->Get(Nan::New<Integer>(j));
-    toColors[j] = v->Int32Value();
+    toColors[j] = v->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
     _tlen++;
   }
 
