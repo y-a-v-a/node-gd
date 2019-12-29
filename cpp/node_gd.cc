@@ -74,18 +74,18 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
   if (info.Length() <= (I) || !info[I]->IsString()) {                   \
     return Nan::ThrowTypeError("Argument " #I " must be a string");     \
   }                                                                     \
-  Nan::Utf8String VAR(info[I]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()));
+  Nan::Utf8String VAR(info[I])
 
 #define REQ_INT_ARG(I, VAR)                                             \
   int VAR;                                                              \
   if (info.Length() <= (I) || !info[I]->IsNumber() || !info[I]->IsInt32()) { \
     return Nan::ThrowTypeError("Argument " #I " must be an integer");   \
   }                                                                     \
-  VAR = info[I]->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
+  VAR = Nan::To<int>(info[I]).FromJust();
 
 #define INT_ARG_RANGE(I, PROP)                                          \
   if ((I) < 1) {                                                        \
-    return Nan::ThrowRangeError("Value for " #PROP  " must be greater than 0");\
+    return Nan::ThrowRangeError("Value for " #PROP  " must be greater than 0"); \
   }
 
 #define REQ_FN_ARG(I, VAR)                                              \
@@ -99,7 +99,7 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
   if (info.Length() <= (I) || !info[I]->IsNumber()) {                   \
     return Nan::ThrowTypeError("Argument " #I " must be a number");     \
   }                                                                     \
-  VAR = info[I]->NumberValue(Nan::GetCurrentContext()).FromJust();
+  VAR = Nan::To<double>(info[I]).FromJust();
 
 #define REQ_EXT_ARG(I, VAR)                                             \
   if (info.Length() <= (I) || !info[I]->IsExternal()) {                 \
@@ -119,9 +119,9 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
   if (info.Length() <= (I)) {                                           \
     VAR = (DEFAULT);                                                    \
   } else if (info[I]->IsInt32()) {                                      \
-    VAR = info[I]->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();\
+    VAR = Nan::To<int>(info[I]).FromJust();                             \
   } else {                                                              \
-    return Nan::ThrowTypeError("Optional argument " #I " must be an integer");   \
+    return Nan::ThrowTypeError("Optional argument " #I " must be an integer"); \
   }
 
 #define OPT_BOOL_ARG(I, VAR, DEFAULT)                                   \
@@ -129,9 +129,9 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
   if (info.Length() <= (I)) {                                           \
     VAR = (DEFAULT);                                                    \
   } else if (info[I]->IsBoolean()) {                                    \
-    VAR = info[I]->BooleanValue(Nan::GetCurrentContext()).FromJust();   \
+    VAR = Nan::To<bool>(info[I]).FromJust();                            \
   } else {                                                              \
-    return Nan::ThrowTypeError("Optional argument " #I " must be a boolean");    \
+    return Nan::ThrowTypeError("Optional argument " #I " must be a boolean"); \
   }
 
 #define RETURN_IMAGE(IMG)                                               \
@@ -141,7 +141,7 @@ void nodeGdErrorWrapper(int priority, const char *format, va_list args)
     const int argc = 1;                                                 \
     Local<Value> argv[argc] = {Nan::New<External>(IMG)};                \
     Local<FunctionTemplate> func = Nan::New(Image::constructor);        \
-MaybeLocal<Object> instance = Nan::NewInstance(func->GetFunction(Nan::GetCurrentContext()).ToLocalChecked(), argc, argv);\
+    MaybeLocal<Object> instance = Nan::NewInstance(Nan::GetFunction(func).ToLocalChecked(), argc, argv); \
     info.GetReturnValue().Set(instance.ToLocalChecked());               \
   }
 
@@ -157,17 +157,16 @@ MaybeLocal<Object> instance = Nan::NewInstance(func->GetFunction(Nan::GetCurrent
     REQ_ARGS(1);                                                        \
     ASSERT_IS_STRING_OR_BUFFER(info[0]);                                \
     gdImagePtr im;                                                      \
-    Local<Value> obj;                                                   \
     if(Buffer::HasInstance(info[0])) {                                  \
-      obj = info[0]->ToObject(Nan::GetCurrentContext()).ToLocalChecked();    \
+      Local<Object> obj = Nan::To<v8::Object>(info[0]).ToLocalChecked(); \
       char *buffer_data = Buffer::Data(obj);                            \
       size_t buffer_length = Buffer::Length(obj);                       \
       im = gdImageCreateFrom##TYPE##Ptr(buffer_length, buffer_data);    \
     } else {                                                            \
-      obj = info[0]->ToString(Nan::GetCurrentContext()).ToLocalChecked();    \
-      ssize_t len = Nan::DecodeBytes(obj, Nan::Encoding(BINARY));       \
+      Local<String> str = Nan::To<v8::String>(info[0]).ToLocalChecked(); \
+      ssize_t len = Nan::DecodeBytes(str, Nan::Encoding(BINARY));       \
       char *buf = new char[len];                                        \
-      ssize_t written = Nan::DecodeWrite(buf, len, obj);                \
+      ssize_t written = Nan::DecodeWrite(buf, len, str);                \
       assert(written == len);                                           \
       im = gdImageCreateFrom##TYPE##Ptr(len, buf);                      \
       delete[] buf;                                                     \
@@ -617,7 +616,7 @@ void Gd::Image::Init(v8::Local<Object> exports) {
   Nan::SetPrototypeMethod(t, "compare", Compare);
 
   constructor.Reset(t);
-    exports->Set(Nan::New<String>("Image").ToLocalChecked(), t->GetFunction(Nan::GetCurrentContext()).ToLocalChecked());
+  Nan::Set(exports, Nan::New<String>("Image").ToLocalChecked(), Nan::GetFunction(t).ToLocalChecked());
 }
 
 NAN_METHOD(Gd::Image::New) {
@@ -907,12 +906,12 @@ NAN_METHOD(Gd::Image::FileCallback) {
     Local<Value> argv[] = {
       Nan::Error(Nan::New<String>("Unable to write file.").ToLocalChecked())
     };
-    callback.Call(1, argv);
+    Nan::Call(callback, 1, argv);
   } else {
     Local<Value> argv[] = {
       Nan::Null()
     };
-    callback.Call(1, argv);
+    Nan::Call(callback, 1, argv);
   }
 
   // delete callback;
@@ -984,14 +983,14 @@ NAN_METHOD(Gd::Image::Polygon) {
   gdPoint *points =  new gdPoint[len];
 
   for(unsigned int i = 0; i < len; i++) {
-    Local<Value> v = array->Get(Nan::New<Integer>(i));
+    Local<Value> v = Nan::Get(array, i).ToLocalChecked();
     if (!v->IsObject()) continue;
 
-    Local<Object> o = v->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
-    if ( !o->Has(Nan::GetCurrentContext(), x).FromJust() || !o->Has(Nan::GetCurrentContext(), y).FromJust()) continue;
+    Local<Object> o = Nan::To<Object>(v).ToLocalChecked();
+    if ( !Nan::Has(o,x).FromJust() || !Nan::Has(o, y).FromJust()) continue;
 
-    points[i].x = o->Get(x)->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
-    points[i].y = o->Get(y)->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
+    points[i].x = Nan::To<int>(Nan::Get(o, x).ToLocalChecked()).FromJust();
+    points[i].y = Nan::To<int>(Nan::Get(o, y).ToLocalChecked()).FromJust();
     _len++;
   }
 
@@ -1020,14 +1019,14 @@ NAN_METHOD(Gd::Image::OpenPolygon) {
   gdPoint *points =  new gdPoint[len];
 
   for(unsigned int i = 0; i < len; i++) {
-    Local<Value> v = array->Get(Nan::New<Integer>(i));
+    Local<Value> v = Nan::Get(array, i).ToLocalChecked();
     if (!v->IsObject()) continue;
 
-    Local<Object> o = v->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
-    if ( !o->Has(Nan::GetCurrentContext(), x).FromJust() || !o->Has(Nan::GetCurrentContext(), y).FromJust()) continue;
+    Local<Object> o = Nan::To<Object>(v).ToLocalChecked();
+    if ( !Nan::Has(o,x).FromJust() || !Nan::Has(o, y).FromJust()) continue;
 
-    points[i].x = o->Get(x)->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
-    points[i].y = o->Get(y)->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
+    points[i].x = Nan::To<int>(Nan::Get(o, x).ToLocalChecked()).FromJust();
+    points[i].y = Nan::To<int>(Nan::Get(o, y).ToLocalChecked()).FromJust();
     _len++;
   }
 
@@ -1056,14 +1055,14 @@ NAN_METHOD(Gd::Image::FilledPolygon) {
   gdPoint *points =  new gdPoint[len];
 
   for(unsigned int i = 0; i < len; i++) {
-    Local<Value> v = array->Get(Nan::New<Integer>(i));
+    Local<Value> v = Nan::Get(array, i).ToLocalChecked();
     if (!v->IsObject()) continue;
 
-    Local<Object> o = v->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
-    if ( !o->Has(Nan::GetCurrentContext(), x).FromJust() || !o->Has(Nan::GetCurrentContext(), y).FromJust()) continue;
+    Local<Object> o = Nan::To<Object>(v).ToLocalChecked();
+    if ( !Nan::Has(o,x).FromJust() || !Nan::Has(o, y).FromJust()) continue;
 
-    points[i].x = o->Get(x)->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
-    points[i].y = o->Get(y)->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
+    points[i].x = Nan::To<int>(Nan::Get(o, x).ToLocalChecked()).FromJust();
+    points[i].y = Nan::To<int>(Nan::Get(o, y).ToLocalChecked()).FromJust();
     _len++;
   }
 
@@ -1249,10 +1248,10 @@ NAN_METHOD(Gd::Image::SetStyle) {
   int *sty =  new int[len];
 
   for(unsigned int i = 0; i < len; i++) {
-    Local<Value> v = array->Get(Nan::New<Integer>(i));
+    Local<Value> v = Nan::Get(array, i).ToLocalChecked();
     if (!v->IsNumber()) continue;
 
-    sty[i] = v->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
+    sty[i] = Nan::To<int>(v).FromJust();
     _len++;
   }
 
@@ -1312,10 +1311,10 @@ NAN_METHOD(Gd::Image::GetClip) {
   gdImageGetClip(*im, &x1, &y1, &x2, &y2);
 
   Local<Object> result = Nan::New<Object>();
-  result->Set(Nan::New<String>("x1").ToLocalChecked(), Nan::New<Integer>(x1));
-  result->Set(Nan::New<String>("y1").ToLocalChecked(), Nan::New<Integer>(y1));
-  result->Set(Nan::New<String>("x2").ToLocalChecked(), Nan::New<Integer>(x2));
-  result->Set(Nan::New<String>("y2").ToLocalChecked(), Nan::New<Integer>(y2));
+  Nan::Set(result, Nan::New<String>("x1").ToLocalChecked(), Nan::New<Integer>(x1));
+  Nan::Set(result, Nan::New<String>("y1").ToLocalChecked(), Nan::New<Integer>(y1));
+  Nan::Set(result, Nan::New<String>("x2").ToLocalChecked(), Nan::New<Integer>(x2));
+  Nan::Set(result, Nan::New<String>("y2").ToLocalChecked(), Nan::New<Integer>(y2));
 
   info.GetReturnValue().Set(result);
 }
@@ -1467,7 +1466,7 @@ NAN_METHOD(Gd::Image::StringFTBBox) {
   Local<Array> result = Nan::New<Array>();
 
   for (unsigned int i = 0; i < 8; i++) {
-    result->Set(Nan::New<Integer>(i), Nan::New<Number>(brect[i]));
+    Nan::Set(result, Nan::New<Integer>(i), Nan::New<Number>(brect[i]));
   }
 
   info.GetReturnValue().Set(result);
@@ -1495,7 +1494,7 @@ NAN_METHOD(Gd::Image::StringFT) {
 
     Local<Array> result = Nan::New<Array>();
     for(unsigned int i = 0; i < 8; i++) {
-      result->Set( Nan::New<Integer>(i), Nan::New<Number>(brect[i]));
+      Nan::Set(result, Nan::New<Integer>(i), Nan::New<Number>(brect[i]));
     }
 
     info.GetReturnValue().Set(result);
@@ -1545,27 +1544,28 @@ NAN_METHOD(Gd::Image::StringFTEx) {
   stringExtra.flags = 0;
 
   // linespacing
-  if (stringExtraParameter->Has(Nan::GetCurrentContext(), linespacing).FromJust()) {
+  if (Nan::Has(stringExtraParameter, linespacing).FromJust()) {
     stringExtra.flags |= gdFTEX_LINESPACE;
-      stringExtra.linespacing = stringExtraParameter->Get(linespacing)->NumberValue(Nan::GetCurrentContext()).FromJust();
+    stringExtra.linespacing = Nan::To<double>(Nan::Get(stringExtraParameter, linespacing).ToLocalChecked()).FromJust();
   }
 
   // charmap
-  if (stringExtraParameter->Has(Nan::GetCurrentContext(), charmap).FromJust()) {
-    Local<String> localCharmap = stringExtraParameter->Get(charmap)->ToString(Nan::GetCurrentContext()).ToLocalChecked();
+  if (Nan::Has(stringExtraParameter, charmap).FromJust()) {
+    // Local<String> localCharmap = Nan::Utf8String(Nan::Get(stringExtraParameter, charmap).ToLocalChecked());
     stringExtra.charmap = 0;
 
-    Nan::Utf8String chmap(localCharmap);
+    // v8::String::Utf8Value chmap(localCharmap);
+    char *chmap = *Nan::Utf8String(Nan::Get(stringExtraParameter, charmap).ToLocalChecked());
 
     // gdFTEX_Unicode, gdFTEX_Shift_JIS, gdFTEX_Big5, gdFTEX_Adobe_Custom
     // unicode, shift_jis, big5, adobe_custom
-    if (!std::strcmp(*chmap, "unicode")) {
+    if (!std::strcmp(chmap, "unicode")) {
       stringExtra.charmap = gdFTEX_Unicode;
-    } else if (!std::strcmp(*chmap, "shift_jis")) {
+    } else if (!std::strcmp(chmap, "shift_jis")) {
       stringExtra.charmap = gdFTEX_Shift_JIS;
-    } else if (!std::strcmp(*chmap, "big5")) {
+    } else if (!std::strcmp(chmap, "big5")) {
       stringExtra.charmap = gdFTEX_Big5;
-    } else if (!std::strcmp(*chmap, "adobe_custom")) {
+    } else if (!std::strcmp(chmap, "adobe_custom")) {
       stringExtra.charmap = gdFTEX_Adobe_Custom;
     } else {
       Nan::ThrowError("Unknown value for charmap. Should be one of: unicode, shift_jis, big5, adobe_custom");
@@ -1576,25 +1576,26 @@ NAN_METHOD(Gd::Image::StringFTEx) {
   // resolution
   // horizontal dpi
   // The JavaScript value of NaN will be cast to a 0 by v8?
-  if (stringExtraParameter->Has(Nan::GetCurrentContext(), hdpi).FromJust()) {
+  if (Nan::Has(stringExtraParameter, hdpi).FromJust()) {
     stringExtra.flags |= gdFTEX_RESOLUTION;
-    stringExtra.hdpi = stringExtraParameter->Get(hdpi)->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
-    if (!stringExtraParameter->Has(Nan::GetCurrentContext(), vdpi).FromJust()) {
+    stringExtra.hdpi = Nan::To<int>(Nan::Get(stringExtraParameter, hdpi).ToLocalChecked()).FromJust();
+    if (!Nan::Has(stringExtraParameter, vdpi).FromJust()) {
       stringExtra.vdpi = stringExtra.hdpi;
     }
   }
+
   // vertical dpi
-  if (stringExtraParameter->Has(Nan::GetCurrentContext(), vdpi).FromJust()) {
+  if (Nan::Has(stringExtraParameter, vdpi).FromJust()) {
     stringExtra.flags |= gdFTEX_RESOLUTION;
-    stringExtra.vdpi = stringExtraParameter->Get(vdpi)->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
-    if (!stringExtraParameter->Has(Nan::GetCurrentContext(), hdpi).FromJust()) {
+    stringExtra.vdpi = Nan::To<int>(Nan::Get(stringExtraParameter, vdpi).ToLocalChecked()).FromJust();
+    if (!Nan::Has(stringExtraParameter, hdpi).FromJust()) {
       stringExtra.hdpi = stringExtra.vdpi;
     }
   }
 
   // disable kerning
-  if (stringExtraParameter->Has(Nan::GetCurrentContext(), disable_kerning).FromJust()) {
-    bool is_disable_kerning = stringExtraParameter->Get(disable_kerning)->BooleanValue(Nan::GetCurrentContext()).FromJust();
+  if (Nan::Has(stringExtraParameter, disable_kerning).FromJust()) {
+    bool is_disable_kerning = Nan::To<bool>(Nan::Get(stringExtraParameter, disable_kerning).ToLocalChecked()).FromJust();
     if (is_disable_kerning) {
       stringExtra.flags |= gdFTEX_DISABLE_KERNING;
     }
@@ -1602,23 +1603,23 @@ NAN_METHOD(Gd::Image::StringFTEx) {
 
   // xshow
   bool is_xshow = false;
-  if (stringExtraParameter->Has(Nan::GetCurrentContext(), xshow).FromJust()) {
-    is_xshow = stringExtraParameter->Get(xshow)->BooleanValue(Nan::GetCurrentContext()).FromJust();
+  if (Nan::Has(stringExtraParameter, xshow).FromJust()) {
+    is_xshow = Nan::To<bool>(Nan::Get(stringExtraParameter, xshow).ToLocalChecked()).FromJust();
     if (is_xshow) {
       stringExtra.flags |= gdFTEX_XSHOW;
     }
   }
 
   // fontpathname
-  if (stringExtraParameter->Has(Nan::GetCurrentContext(), fontpath).FromJust()) {
-    Nan::Utf8String localFontpathname(stringExtraParameter->Get(fontpath)->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()));
+  if (Nan::Has(stringExtraParameter, fontpath).FromJust()) {
+    char *localFontpathname = *Nan::Utf8String(Nan::Get(stringExtraParameter, fontpath).ToLocalChecked());
     stringExtra.flags |= gdFTEX_FONTPATHNAME;
-    stringExtra.fontpath = *localFontpathname;
+    stringExtra.fontpath = localFontpathname;
   }
 
   // use_fontconfig
-  if (stringExtraParameter->Has(Nan::GetCurrentContext(), use_fontconfig).FromJust()) {
-    bool is_use_fontconfig = stringExtraParameter->Get(use_fontconfig)->BooleanValue(Nan::GetCurrentContext()).FromJust();
+  if (Nan::Has(stringExtraParameter, use_fontconfig).FromJust()) {
+    bool is_use_fontconfig = Nan::To<bool>(Nan::Get(stringExtraParameter, use_fontconfig).ToLocalChecked()).FromJust();
     if (is_use_fontconfig) {
       stringExtra.flags |= gdFTEX_FONTCONFIG;
     }
@@ -1626,8 +1627,8 @@ NAN_METHOD(Gd::Image::StringFTEx) {
 
   // return_fontpathname
   bool is_use_fontpathname = false;
-  if (stringExtraParameter->Has(Nan::GetCurrentContext(), return_fontpathname).FromJust()) {
-    is_use_fontpathname = stringExtraParameter->Get(return_fontpathname)->BooleanValue(Nan::GetCurrentContext()).FromJust();
+  if (Nan::Has(stringExtraParameter, return_fontpathname).FromJust()) {
+    is_use_fontpathname = Nan::To<bool>(Nan::Get(stringExtraParameter, return_fontpathname).ToLocalChecked()).FromJust();
     if (is_use_fontpathname) {
       stringExtra.flags |= gdFTEX_RETURNFONTPATHNAME;
       stringExtra.fontpath = NULL;
@@ -1647,7 +1648,7 @@ NAN_METHOD(Gd::Image::StringFTEx) {
 
     Local<Array> result = Nan::New<Array>();
     for(unsigned int i = 0; i < 8; i++) {
-      result->Set( Nan::New<Integer>(i), Nan::New<Number>(brect[i]));
+      Nan::Set(result, Nan::New<Integer>(i), Nan::New<Number>(brect[i]));
     }
 
     info.GetReturnValue().Set(result);
@@ -1665,11 +1666,11 @@ NAN_METHOD(Gd::Image::StringFTEx) {
   }
 
   if (is_use_fontpathname && stringExtra.fontpath != NULL) {
-    stringExtraParameter->Set(fontpath, Nan::New<String>(stringExtra.fontpath).ToLocalChecked());
+    Nan::Set(stringExtraParameter, fontpath, Nan::New<String>(stringExtra.fontpath).ToLocalChecked());
   }
 
   if (is_xshow && stringExtra.xshow != NULL) {
-    stringExtraParameter->Set(xshow, Nan::New<String>(stringExtra.xshow).ToLocalChecked());
+    Nan::Set(stringExtraParameter, xshow, Nan::New<String>(stringExtra.xshow).ToLocalChecked());
   }
 
   info.GetReturnValue().Set(stringExtraParameter);
@@ -1855,7 +1856,7 @@ NAN_SETTER(Gd::Image::InterlaceSetter) {
   Image *im = ObjectWrap::Unwrap<Image>(info.This());
 
   if (value->IsBoolean()) {
-    bool interlace = value->BooleanValue(Nan::GetCurrentContext()).FromJust();
+    bool interlace = Nan::To<bool>(value).FromJust();;
 
     gdImageInterlace(*im, interlace ? 1 : 0);
   }
@@ -1923,8 +1924,8 @@ NAN_METHOD(Gd::Image::ColorReplaceArray) {
   int *fromColors =  new int[flen];
 
   for(unsigned int i = 0; i < flen; i++) {
-    Local<Value> v = fromArray->Get(Nan::New<Integer>(i));
-    fromColors[i] = v->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
+    Local<Value> v = Nan::Get(fromArray, i).ToLocalChecked();
+    fromColors[i] = Nan::To<int>(v).FromJust();
     _flen++;
   }
 
@@ -1933,8 +1934,8 @@ NAN_METHOD(Gd::Image::ColorReplaceArray) {
   int *toColors =  new int[tlen];
 
   for(unsigned int j = 0; j < tlen; j++) {
-    Local<Value> v = toArray->Get(Nan::New<Integer>(j));
-    toColors[j] = v->ToInt32(Nan::GetCurrentContext()).ToLocalChecked()->Value();
+    Local<Value> v = Nan::Get(toArray, j).ToLocalChecked();
+    toColors[j] = Nan::To<int>(v).FromJust();
     _tlen++;
   }
 

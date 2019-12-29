@@ -37,7 +37,7 @@ class CreateWorker : public Nan::AsyncWorker {
       const int _argc = 1;
       v8::Local<v8::Value> _argv[_argc] = {Nan::New<v8::External>(image)};
       v8::Local<v8::FunctionTemplate> func = Nan::New(Gd::Image::constructor);
-      v8::MaybeLocal<v8::Object> _image = Nan::NewInstance(func->GetFunction(Nan::GetCurrentContext()).ToLocalChecked(), _argc, _argv);
+      v8::MaybeLocal<v8::Object> _image = Nan::NewInstance(Nan::GetFunction(func).ToLocalChecked(), _argc, _argv);
 
       const int argc = 2;
       v8::Local<v8::Value> argv[argc] = {
@@ -45,7 +45,7 @@ class CreateWorker : public Nan::AsyncWorker {
         _image.ToLocalChecked()
       };
 
-      callback->Call(argc, argv);
+      Nan::Call(*callback, argc, argv);
     }
 
   private:
