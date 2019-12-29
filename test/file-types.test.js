@@ -81,7 +81,7 @@ describe('Section Handling file types', function() {
   it('can copy a png into WBMP - gd.Image#saveWBMP()', function(done) {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
-      done();
+      this.skip();
       return;
     }
     s = source + 'input.png';
@@ -129,7 +129,7 @@ describe('Section Handling file types', function() {
     var s;
     var t;
     if (gd.getGDVersion() < '2.1.1') {
-      done();
+      this.skip();
       return;
     }
     s = source + 'input.bmp';

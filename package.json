@@ -73,7 +73,7 @@
     "mocha": "^6.1.4"
   },
   "dependencies": {
-    "node-gyp": "5.0.2",
+    "node-gyp": "5.0.7",
     "nan": "2.14.0"
   }
 }

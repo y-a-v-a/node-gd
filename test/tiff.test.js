@@ -13,7 +13,7 @@ describe('Section Handling TIFF files', function() {
     var s;
     var t;
     if (gd.getGDVersion() < '2.2.4') {
-      done();
+      this.skip();
       return;
     }
     s = source + 'input.tif';
@@ -38,7 +38,7 @@ describe('Section Handling TIFF files', function() {
     var s;
     var t;
     if (gd.getGDVersion() < '2.2.4') {
-      done();
+      this.skip();
       return;
     }
     s = source + 'input.jpg';
@@ -63,7 +63,7 @@ describe('Section Handling TIFF files', function() {
     var s;
     var t;
     if (gd.getGDVersion() < '2.2.4') {
-      done();
+      this.skip();
       return;
     }
     s = source + 'input.tif';
@@ -82,7 +82,7 @@ describe('Section Handling TIFF files', function() {
 
   it('can open a tif and store it in a pointer and save a tiff from the pointer', function(done) {
     if (gd.getGDVersion() < '2.2.4') {
-      done();
+      this.skip();
       return;
     }
     var s = source + 'input.tif';

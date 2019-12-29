@@ -1,8 +1,4 @@
-'use strict';
-
 var fs = require('fs');
-var path = require('path');
-var util = require('util');
 
 var gd = require('../js/node-gd.js');
 var assert = require('chai').assert;
@@ -11,7 +7,7 @@ var source = __dirname + '/fixtures/';
 var target = __dirname + '/output/';
 
 before(function() {
-   // declare version
+  // declare version
   console.log('Built on top of GD version: ' + gd.getGDVersion() + '\n\n');
 
   // clear test/output directory
@@ -36,6 +32,19 @@ describe('Node.js GD Graphics Library', function() {
       assert.ok(/[0-9]\.[0-9]\.[0-9]+/.test(version));
       return done();
     });
+
+    it('will have built in GIF support', function() {
+      assert.equal(gd.GD_GIF, 1, 'No GIF support for libgd is impossible!');
+    });
+
+    it('will have built in GIF animation support', function() {
+      assert.equal(gd.GD_GIFANIM, 1, 'No GIF animation support for libgd is impossible!');
+    });
+
+    it('will have built in open polygon support', function() {
+      assert.equal(gd.GD_OPENPOLYGON, 1, 'No open polygon support for libgd is impossible!');
+    });
+
   });
 
   describe('GD color functions', function() {
@@ -172,6 +181,7 @@ describe('Node.js GD Graphics Library', function() {
       });
     });
   });
+
   it('can rotate an image', function(done) {
     var s, t;
     s = source + 'input.png';
@@ -196,10 +206,11 @@ describe('Node.js GD Graphics Library', function() {
       });
     });
   });
+
   it('can convert to grayscale', function(done) {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
-      done();
+      this.skip();
       return;
     }
     s = source + 'input.png';
@@ -223,7 +234,7 @@ describe('Node.js GD Graphics Library', function() {
   it('can add gaussian blur to an image', function(done) {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
-      done();
+      this.skip();
       return;
     }
     s = source + 'input.png';
@@ -246,10 +257,11 @@ describe('Node.js GD Graphics Library', function() {
       });
     });
   });
+
   it('can negate an image', function(done) {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
-      done();
+      this.skip();
       return;
     }
     s = source + 'input.png';
@@ -269,10 +281,11 @@ describe('Node.js GD Graphics Library', function() {
       });
     });
   });
+
   it('can change brightness of an image', function(done) {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
-      done();
+      this.skip();
       return;
     }
     s = source + 'input.png';
@@ -294,10 +307,11 @@ describe('Node.js GD Graphics Library', function() {
       });
     });
   });
+
   it('can change contrast of an image', function(done) {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
-      done();
+      this.skip();
       return;
     }
     s = source + 'input.png';
@@ -319,10 +333,11 @@ describe('Node.js GD Graphics Library', function() {
       });
     });
   });
+
   it('can emboss an image', function(done) {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
-      done();
+      this.skip();
       return;
     }
     s = source + 'input.png';
@@ -342,10 +357,11 @@ describe('Node.js GD Graphics Library', function() {
       });
     });
   });
+
   it('can apply selective blur to an image', function(done) {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
-      done();
+      this.skip();
       return;
     }
     s = source + 'input.png';
@@ -365,6 +381,7 @@ describe('Node.js GD Graphics Library', function() {
       });
     });
   });
+
   it('can replace a color to another color', function(done) {
     var img, s, t;
     s = source + 'input.png';
@@ -395,10 +412,11 @@ describe('Node.js GD Graphics Library', function() {
       });
     });
   });
+
   it('can create a truecolor BMP image with text', function(done) {
     var f, img, t, txtColor;
     if (gd.getGDVersion() < '2.1.1') {
-      done();
+      this.skip();
       return;
     }
     f = source + 'FreeSans.ttf';
@@ -414,10 +432,11 @@ describe('Node.js GD Graphics Library', function() {
       return done();
     });
   });
+
   it('can create a truecolor Tiff image with text', function(done) {
     var f, img, t, txtColor;
     if (gd.getGDVersion() < '2.2.4') {
-      done();
+      this.skip();
       return;
     }
     f = source + 'FreeSans.ttf';
