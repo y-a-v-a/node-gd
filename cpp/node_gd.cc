@@ -659,8 +659,6 @@ Napi::Value Gd::Image::Gif(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::GifPtr(const Napi::CallbackInfo& info) {
-  OPT_BOOL_ARG(0, asBuffer, false);
-
   int size;
   char *data = (char*)gdImageGifPtr(this->_image, &size);
 
@@ -680,7 +678,6 @@ Napi::Value Gd::Image::Png(const Napi::CallbackInfo& info) {
 
 Napi::Value Gd::Image::PngPtr(const Napi::CallbackInfo& info) {
   OPT_INT_ARG(0, level, -1);
-  OPT_BOOL_ARG(1, asBuffer, false);
 
   int size;
   char *data = (char*)gdImagePngPtrEx(this->_image, &size, level);
@@ -701,7 +698,6 @@ Napi::Value Gd::Image::WBMP(const Napi::CallbackInfo& info) {
 
 Napi::Value Gd::Image::WBMPPtr(const Napi::CallbackInfo& info) {
   REQ_INT_ARG(0, foreground);
-  OPT_BOOL_ARG(1, asBuffer, false);
 
   int size;
   char *data = (char*)gdImageWBMPPtr(this->_image, &size, foreground);
@@ -723,7 +719,6 @@ Napi::Value Gd::Image::Webp(const Napi::CallbackInfo& info) {
 
 Napi::Value Gd::Image::WebpPtr(const Napi::CallbackInfo& info) {
   OPT_INT_ARG(0, level, -1);
-  OPT_BOOL_ARG(1, asBuffer, false);
 
   int size;
   char *data = (char*)gdImageWebpPtrEx(this->_image, &size, level);
@@ -743,8 +738,6 @@ Napi::Value Gd::Image::Gd(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::GdPtr(const Napi::CallbackInfo& info) {
-  OPT_BOOL_ARG(0, asBuffer, false);
-
   int size;
   char *data = (char*)gdImageGdPtr(this->_image, &size);
 
@@ -766,7 +759,6 @@ Napi::Value Gd::Image::Gd2(const Napi::CallbackInfo& info) {
 Napi::Value Gd::Image::Gd2Ptr(const Napi::CallbackInfo& info) {
   REQ_INT_ARG(0, chunkSize);
   OPT_INT_ARG(1, format, GD2_FMT_RAW);
-  OPT_BOOL_ARG(2, asBuffer, false);
 
   int size;
   char *data = (char*)gdImageGd2Ptr(this->_image, chunkSize, format, &size);
@@ -789,7 +781,6 @@ Napi::Value Gd::Image::Bmp(const Napi::CallbackInfo& info) {
 
 Napi::Value Gd::Image::BmpPtr(const Napi::CallbackInfo& info) {
   OPT_INT_ARG(0, compression, 0);
-  OPT_BOOL_ARG(1, asBuffer, false);
 
   int size;
   char *data = (char*)gdImageBmpPtr(this->_image, &size, compression);
@@ -810,8 +801,6 @@ Napi::Value Gd::Image::Tiff(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::TiffPtr(const Napi::CallbackInfo& info) {
-  OPT_BOOL_ARG(0, asBuffer, false);
-
   int size;
   char *data = (char*)gdImageTiffPtr(this->_image, &size);
 
