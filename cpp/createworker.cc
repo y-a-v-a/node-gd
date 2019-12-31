@@ -5,14 +5,14 @@
  *
  * Copyright (c) 2015-2018, Vincent Bruijn <vebruijn@gmail.com>
  */
-#include <nan.h>
-#include "node_gd.h"
+#include <napi.h>
 #include <gd.h>
+#include "node_gd.h"
 
-class CreateWorker : public Nan::AsyncWorker {
+class CreateWorker : public Napi::AsyncWorker {
   public:
-    CreateWorker(Nan::Callback *callback, int width, int height, int trueColor)
-      : Nan::AsyncWorker(callback), _width(width), _height(height), _trueColor(trueColor) {}
+    CreateWorker(Napi::Function callback, int width, int height, int trueColor)
+      : Napi::AsyncWorker(callback), _width(width), _height(height), _trueColor(trueColor) {}
     ~CreateWorker() {
       image = NULL;
       _width = 0;
@@ -27,25 +27,20 @@ class CreateWorker : public Nan::AsyncWorker {
         image = gdImageCreateTrueColor(_width, _height);
       }
       if (!image) {
-        SetErrorMessage("No image created!");
+        SetError("No image created!");
       }
     }
 
-    void HandleOKCallback() {
-      Nan::HandleScope scope;
+    void OnOK() {
+      Napi::HandleScope scope(Env());
 
-      const int _argc = 1;
-      v8::Local<v8::Value> _argv[_argc] = {Nan::New<v8::External>(image)};
-      v8::Local<v8::FunctionTemplate> func = Nan::New(Gd::Image::constructor);
-      v8::MaybeLocal<v8::Object> _image = Nan::NewInstance(Nan::GetFunction(func).ToLocalChecked(), _argc, _argv);
+      Napi::Value _argv = Napi::External<gdImagePtr>::New(Env(), &image);
+      Napi::Object _image = Gd::Image::constructor.New({_argv});
 
-      const int argc = 2;
-      v8::Local<v8::Value> argv[argc] = {
-        Nan::Null(),
-        _image.ToLocalChecked()
-      };
-
-      Nan::Call(*callback, argc, argv);
+      Callback().Call({
+        Env().Null(),
+        _image
+      });
     }
 
   private:

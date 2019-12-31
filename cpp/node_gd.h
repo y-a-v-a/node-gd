@@ -17,7 +17,7 @@
 #ifndef NODE_GD_H
 #define NODE_GD_H
 
-#include <nan.h>
+#include <napi.h>
 #include <gd.h>
 
 #define SUPPORTS_GD_2_2_5 (GD_MINOR_VERSION == 2                        \
@@ -49,20 +49,24 @@
 #define HAS_LIBTIFF (HAVE_LIBTIFF && SUPPORTS_GD_2_2_4)
 #define HAS_LIBWEBP (HAVE_LIBWEBP && SUPPORTS_GD_2_1_0)
 
-class Gd : public Nan::ObjectWrap {
+class Gd : public Napi::ObjectWrap<Gd> {
 public:
-  static void Init(v8::Local<v8::Object> exports);
+  static Napi::Object Init(Napi::Env env, Napi::Object exports);
 
-  class Image : public Nan::ObjectWrap {
+  class Image : public Napi::ObjectWrap<Image> {
   public:
-    static Nan::Persistent<v8::FunctionTemplate> constructor;
+    static Napi::Object Init(Napi::Env env, Napi::Object exports);
 
-    static void Init(v8::Local<v8::Object> exports);
-  private:
-    static NAN_METHOD(New);
-
-    Image(gdImagePtr image);
+    Image(const Napi::CallbackInfo &info);
     ~Image();
+
+    static Napi::FunctionReference constructor;
+
+    gdImagePtr getGdImagePtr() const { return _image; }
+  private:
+    // static Napi::Value New(const Napi::CallbackInfo& info);
+
+    // Image(gdImagePtr image);
 
     gdImagePtr _image;
 
@@ -71,200 +75,200 @@ public:
     /**
      * Destruction, Loading and Saving Functions
      */
-    static NAN_METHOD(Destroy);
-    static NAN_METHOD(Jpeg);
-    static NAN_METHOD(JpegPtr);
-    static NAN_METHOD(Gif);
-    static NAN_METHOD(GifPtr);
-    static NAN_METHOD(Png);
-    static NAN_METHOD(PngPtr);
-    static NAN_METHOD(WBMP);
-    static NAN_METHOD(WBMPPtr);
+    Napi::Value Destroy(const Napi::CallbackInfo& info);
+    Napi::Value Jpeg(const Napi::CallbackInfo& info);
+    Napi::Value JpegPtr(const Napi::CallbackInfo& info);
+    Napi::Value Gif(const Napi::CallbackInfo& info);
+    Napi::Value GifPtr(const Napi::CallbackInfo& info);
+    Napi::Value Png(const Napi::CallbackInfo& info);
+    Napi::Value PngPtr(const Napi::CallbackInfo& info);
+    Napi::Value WBMP(const Napi::CallbackInfo& info);
+    Napi::Value WBMPPtr(const Napi::CallbackInfo& info);
 #if HAS_LIBWEBP
-    static NAN_METHOD(Webp);
-    static NAN_METHOD(WebpPtr);
+    Napi::Value Webp(const Napi::CallbackInfo& info);
+    Napi::Value WebpPtr(const Napi::CallbackInfo& info);
 #endif
-    static NAN_METHOD(Gd);
-    static NAN_METHOD(GdPtr);
-    static NAN_METHOD(Gd2);
-    static NAN_METHOD(Gd2Ptr);
+    Napi::Value Gd(const Napi::CallbackInfo& info);
+    Napi::Value GdPtr(const Napi::CallbackInfo& info);
+    Napi::Value Gd2(const Napi::CallbackInfo& info);
+    Napi::Value Gd2Ptr(const Napi::CallbackInfo& info);
 #if SUPPORTS_GD_2_1_0
-    static NAN_METHOD(Bmp);
-    static NAN_METHOD(BmpPtr);
+    Napi::Value Bmp(const Napi::CallbackInfo& info);
+    Napi::Value BmpPtr(const Napi::CallbackInfo& info);
 #endif
 
 #if HAS_LIBTIFF
-    static NAN_METHOD(Tiff);
-    static NAN_METHOD(TiffPtr);
+    Napi::Value Tiff(const Napi::CallbackInfo& info);
+    Napi::Value TiffPtr(const Napi::CallbackInfo& info);
 #endif
 
 #if SUPPORTS_GD_2_1_1
-    static NAN_METHOD(File);
-    static NAN_METHOD(FileCallback);
+    Napi::Value File(const Napi::CallbackInfo& info);
+    Napi::Value FileCallback(const Napi::CallbackInfo& info);
 #endif
     /**
      * Drawing Functions
      */
-    static NAN_METHOD(SetPixel);
-    static NAN_METHOD(Line);
-    static NAN_METHOD(DashedLine);
-    static NAN_METHOD(Polygon);
-    static NAN_METHOD(OpenPolygon);
-    static NAN_METHOD(FilledPolygon);
-    static NAN_METHOD(Rectangle);
-    static NAN_METHOD(FilledRectangle);
-    static NAN_METHOD(Arc);
-    static NAN_METHOD(FilledArc);
+    Napi::Value SetPixel(const Napi::CallbackInfo& info);
+    Napi::Value Line(const Napi::CallbackInfo& info);
+    Napi::Value DashedLine(const Napi::CallbackInfo& info);
+    Napi::Value Polygon(const Napi::CallbackInfo& info);
+    Napi::Value OpenPolygon(const Napi::CallbackInfo& info);
+    Napi::Value FilledPolygon(const Napi::CallbackInfo& info);
+    Napi::Value Rectangle(const Napi::CallbackInfo& info);
+    Napi::Value FilledRectangle(const Napi::CallbackInfo& info);
+    Napi::Value Arc(const Napi::CallbackInfo& info);
+    Napi::Value FilledArc(const Napi::CallbackInfo& info);
 #if SUPPORTS_GD_2_1_0
-    static NAN_METHOD(Ellipse);
+    Napi::Value Ellipse(const Napi::CallbackInfo& info);
 #endif
 
-    static NAN_METHOD(FilledEllipse);
-    static NAN_METHOD(FillToBorder);
-    static NAN_METHOD(Fill);
-    static NAN_METHOD(SetAntiAliased);
-    static NAN_METHOD(SetAntiAliasedDontBlend);
-    static NAN_METHOD(SetBrush);
-    static NAN_METHOD(SetTile);
-    static NAN_METHOD(SetStyle);
-    static NAN_METHOD(SetThickness);
-    static NAN_METHOD(AlphaBlending);
-    static NAN_METHOD(SaveAlpha);
-    static NAN_METHOD(SetClip);
-    static NAN_METHOD(GetClip);
+    Napi::Value FilledEllipse(const Napi::CallbackInfo& info);
+    Napi::Value FillToBorder(const Napi::CallbackInfo& info);
+    Napi::Value Fill(const Napi::CallbackInfo& info);
+    Napi::Value SetAntiAliased(const Napi::CallbackInfo& info);
+    Napi::Value SetAntiAliasedDontBlend(const Napi::CallbackInfo& info);
+    Napi::Value SetBrush(const Napi::CallbackInfo& info);
+    Napi::Value SetTile(const Napi::CallbackInfo& info);
+    Napi::Value SetStyle(const Napi::CallbackInfo& info);
+    Napi::Value SetThickness(const Napi::CallbackInfo& info);
+    Napi::Value AlphaBlending(const Napi::CallbackInfo& info);
+    Napi::Value SaveAlpha(const Napi::CallbackInfo& info);
+    Napi::Value SetClip(const Napi::CallbackInfo& info);
+    Napi::Value GetClip(const Napi::CallbackInfo& info);
 #if SUPPORTS_GD_2_1_0
-    static NAN_METHOD(SetResolution);
+    Napi::Value SetResolution(const Napi::CallbackInfo& info);
 #endif
 
     /**
      * Query Functions
      */
-    static NAN_METHOD(GetPixel);
-    static NAN_METHOD(GetTrueColorPixel);
+    Napi::Value GetPixel(const Napi::CallbackInfo& info);
+    Napi::Value GetTrueColorPixel(const Napi::CallbackInfo& info);
     // This is implementation of the PHP-GD specific method imagecolorat
-    static NAN_METHOD(ImageColorAt);
-    static NAN_METHOD(GetBoundsSafe);
-    static NAN_PROPERTY_GETTER(WidthGetter);
-    static NAN_PROPERTY_GETTER(HeightGetter);
-    static NAN_PROPERTY_GETTER(TrueColorGetter);
+    Napi::Value ImageColorAt(const Napi::CallbackInfo& info);
+    Napi::Value GetBoundsSafe(const Napi::CallbackInfo& info);
+    Napi::Value WidthGetter(const Napi::CallbackInfo& info);
+    Napi::Value HeightGetter(const Napi::CallbackInfo& info);
+    Napi::Value TrueColorGetter(const Napi::CallbackInfo& info);
     /**
      * Font and Text Handling Funcitons
      */
-    static NAN_METHOD(StringFTBBox);
-    static NAN_METHOD(StringFT);
-    static NAN_METHOD(StringFTEx);
-    static NAN_METHOD(StringFTCircle);
+    Napi::Value StringFTBBox(const Napi::CallbackInfo& info);
+    Napi::Value StringFT(const Napi::CallbackInfo& info);
+    Napi::Value StringFTEx(const Napi::CallbackInfo& info);
+    Napi::Value StringFTCircle(const Napi::CallbackInfo& info);
     /**
      * Color Handling Functions
      */
-    static NAN_METHOD(ColorAllocate);
-    static NAN_METHOD(ColorAllocateAlpha);
-    static NAN_METHOD(ColorClosest);
-    static NAN_METHOD(ColorClosestAlpha);
-    static NAN_METHOD(ColorClosestHWB);
-    static NAN_METHOD(ColorExact);
-    static NAN_METHOD(ColorResolve);
-    static NAN_METHOD(ColorResolveAlpha);
-    static NAN_PROPERTY_GETTER(ColorsTotalGetter);
-    static NAN_METHOD(Red);
-    static NAN_METHOD(Blue);
-    static NAN_METHOD(Green);
-    static NAN_METHOD(Alpha);
-    static NAN_PROPERTY_GETTER(InterlaceGetter);
-    static NAN_SETTER(InterlaceSetter);
-    static NAN_METHOD(GetTransparent);
-    static NAN_METHOD(ColorDeallocate);
-    static NAN_METHOD(ColorTransparent);
+    Napi::Value ColorAllocate(const Napi::CallbackInfo& info);
+    Napi::Value ColorAllocateAlpha(const Napi::CallbackInfo& info);
+    Napi::Value ColorClosest(const Napi::CallbackInfo& info);
+    Napi::Value ColorClosestAlpha(const Napi::CallbackInfo& info);
+    Napi::Value ColorClosestHWB(const Napi::CallbackInfo& info);
+    Napi::Value ColorExact(const Napi::CallbackInfo& info);
+    Napi::Value ColorResolve(const Napi::CallbackInfo& info);
+    Napi::Value ColorResolveAlpha(const Napi::CallbackInfo& info);
+    Napi::Value ColorsTotalGetter(const Napi::CallbackInfo& info);
+    Napi::Value Red(const Napi::CallbackInfo& info);
+    Napi::Value Blue(const Napi::CallbackInfo& info);
+    Napi::Value Green(const Napi::CallbackInfo& info);
+    Napi::Value Alpha(const Napi::CallbackInfo& info);
+    Napi::Value InterlaceGetter(const Napi::CallbackInfo& info);
+    void InterlaceSetter(const Napi::CallbackInfo& info, const Napi::Value& value);
+    Napi::Value GetTransparent(const Napi::CallbackInfo& info);
+    Napi::Value ColorDeallocate(const Napi::CallbackInfo& info);
+    Napi::Value ColorTransparent(const Napi::CallbackInfo& info);
 #if SUPPORTS_GD_2_1_0
-    static NAN_METHOD(ColorReplace);
-    static NAN_METHOD(ColorReplaceThreshold);
-    static NAN_METHOD(ColorReplaceArray);
-    static NAN_METHOD(GrayScale);
-    static NAN_METHOD(GaussianBlur);
-    static NAN_METHOD(Negate);
-    static NAN_METHOD(Brightness);
-    static NAN_METHOD(Contrast);
-    static NAN_METHOD(SelectiveBlur);
-    static NAN_METHOD(FlipHorizontal);
-    static NAN_METHOD(FlipVertical);
-    static NAN_METHOD(FlipBoth);
-    static NAN_METHOD(Crop);
-    static NAN_METHOD(CropAuto);
-    static NAN_METHOD(CropThreshold);
+    Napi::Value ColorReplace(const Napi::CallbackInfo& info);
+    Napi::Value ColorReplaceThreshold(const Napi::CallbackInfo& info);
+    Napi::Value ColorReplaceArray(const Napi::CallbackInfo& info);
+    Napi::Value GrayScale(const Napi::CallbackInfo& info);
+    Napi::Value GaussianBlur(const Napi::CallbackInfo& info);
+    Napi::Value Negate(const Napi::CallbackInfo& info);
+    Napi::Value Brightness(const Napi::CallbackInfo& info);
+    Napi::Value Contrast(const Napi::CallbackInfo& info);
+    Napi::Value SelectiveBlur(const Napi::CallbackInfo& info);
+    Napi::Value FlipHorizontal(const Napi::CallbackInfo& info);
+    Napi::Value FlipVertical(const Napi::CallbackInfo& info);
+    Napi::Value FlipBoth(const Napi::CallbackInfo& info);
+    Napi::Value Crop(const Napi::CallbackInfo& info);
+    Napi::Value CropAuto(const Napi::CallbackInfo& info);
+    Napi::Value CropThreshold(const Napi::CallbackInfo& info);
 #endif
 
 #if SUPPORTS_GD_2_1_1
-    static NAN_METHOD(Emboss);
+    Napi::Value Emboss(const Napi::CallbackInfo& info);
 #endif
 
     /**
      * Copying and Resizing Functions
      */
-    static NAN_METHOD(Copy);
-    static NAN_METHOD(CopyResized);
-    static NAN_METHOD(CopyResampled);
-    static NAN_METHOD(CopyRotated);
-    static NAN_METHOD(CopyMerge);
-    static NAN_METHOD(CopyMergeGray);
-    static NAN_METHOD(PaletteCopy);
-    static NAN_METHOD(SquareToCircle);
-    static NAN_METHOD(Sharpen);
-    static NAN_METHOD(CreatePaletteFromTrueColor);
-    static NAN_METHOD(TrueColorToPalette);
+    Napi::Value Copy(const Napi::CallbackInfo& info);
+    Napi::Value CopyResized(const Napi::CallbackInfo& info);
+    Napi::Value CopyResampled(const Napi::CallbackInfo& info);
+    Napi::Value CopyRotated(const Napi::CallbackInfo& info);
+    Napi::Value CopyMerge(const Napi::CallbackInfo& info);
+    Napi::Value CopyMergeGray(const Napi::CallbackInfo& info);
+    Napi::Value PaletteCopy(const Napi::CallbackInfo& info);
+    Napi::Value SquareToCircle(const Napi::CallbackInfo& info);
+    Napi::Value Sharpen(const Napi::CallbackInfo& info);
+    Napi::Value CreatePaletteFromTrueColor(const Napi::CallbackInfo& info);
+    Napi::Value TrueColorToPalette(const Napi::CallbackInfo& info);
 
 #if SUPPORTS_GD_2_1_0
-    static NAN_METHOD(PaletteToTrueColor);
-    static NAN_METHOD(ColorMatch);
+    Napi::Value PaletteToTrueColor(const Napi::CallbackInfo& info);
+    Napi::Value ColorMatch(const Napi::CallbackInfo& info);
 #endif
 
-    static NAN_METHOD(GifAnimBegin);
-    static NAN_METHOD(GifAnimAdd);
-    static NAN_METHOD(GifAnimEnd);
+    Napi::Value GifAnimBegin(const Napi::CallbackInfo& info);
+    Napi::Value GifAnimAdd(const Napi::CallbackInfo& info);
+    Napi::Value GifAnimEnd(const Napi::CallbackInfo& info);
     /**
      * Miscellaneous Functions
      */
-    static NAN_METHOD(Compare);
+    Napi::Value Compare(const Napi::CallbackInfo& info);
   };
 
 private:
-  static NAN_METHOD(ImageCreate);
-  static NAN_METHOD(ImageCreateSync);
-  static NAN_METHOD(ImageCreateTrueColor);
-  static NAN_METHOD(ImageCreateTrueColorSync);
+  static Napi::Value ImageCreate(const Napi::CallbackInfo& info);
+  static Napi::Value ImageCreateSync(const Napi::CallbackInfo& info);
+  static Napi::Value ImageCreateTrueColor(const Napi::CallbackInfo& info);
+  static Napi::Value ImageCreateTrueColorSync(const Napi::CallbackInfo& info);
 
-  static NAN_METHOD(CreateFromJpeg);
-  static NAN_METHOD(CreateFromJpegPtr);
-  static NAN_METHOD(CreateFromPng);
-  static NAN_METHOD(CreateFromPngPtr);
-  static NAN_METHOD(CreateFromGif);
-  static NAN_METHOD(CreateFromGifPtr);
-  static NAN_METHOD(CreateFromGd2);
-  static NAN_METHOD(CreateFromGd2Ptr);
-  static NAN_METHOD(CreateFromWBMP);
-  static NAN_METHOD(CreateFromWBMPPtr);
+  static Napi::Value CreateFromJpeg(const Napi::CallbackInfo& info);
+  static Napi::Value CreateFromJpegPtr(const Napi::CallbackInfo& info);
+  static Napi::Value CreateFromPng(const Napi::CallbackInfo& info);
+  static Napi::Value CreateFromPngPtr(const Napi::CallbackInfo& info);
+  static Napi::Value CreateFromGif(const Napi::CallbackInfo& info);
+  static Napi::Value CreateFromGifPtr(const Napi::CallbackInfo& info);
+  static Napi::Value CreateFromGd2(const Napi::CallbackInfo& info);
+  static Napi::Value CreateFromGd2Ptr(const Napi::CallbackInfo& info);
+  static Napi::Value CreateFromWBMP(const Napi::CallbackInfo& info);
+  static Napi::Value CreateFromWBMPPtr(const Napi::CallbackInfo& info);
 #if HAS_LIBWEBP
-  static NAN_METHOD(CreateFromWebp);
-  static NAN_METHOD(CreateFromWebpPtr);
+  static Napi::Value CreateFromWebp(const Napi::CallbackInfo& info);
+  static Napi::Value CreateFromWebpPtr(const Napi::CallbackInfo& info);
 #endif
 
 #if SUPPORTS_GD_2_1_0
-  static NAN_METHOD(CreateFromBmp);
-  static NAN_METHOD(CreateFromBmpPtr);
+  static Napi::Value CreateFromBmp(const Napi::CallbackInfo& info);
+  static Napi::Value CreateFromBmpPtr(const Napi::CallbackInfo& info);
 #endif
 #if HAS_LIBTIFF
-  static NAN_METHOD(CreateFromTiff);
-  static NAN_METHOD(CreateFromTiffPtr);
+  static Napi::Value CreateFromTiff(const Napi::CallbackInfo& info);
+  static Napi::Value CreateFromTiffPtr(const Napi::CallbackInfo& info);
 #endif
 
 #if SUPPORTS_GD_2_1_1
-  static NAN_METHOD(CreateFromFile);
+  static Napi::Value CreateFromFile(const Napi::CallbackInfo& info);
 #endif
 
-  static NAN_METHOD(CreateFromGd2Part);
-  static NAN_METHOD(CreateFromGd2PartPtr);
-  static NAN_METHOD(TrueColor);
-  static NAN_METHOD(TrueColorAlpha);
-  static NAN_METHOD(GdVersionGetter);
+  static Napi::Value CreateFromGd2Part(const Napi::CallbackInfo& info);
+  static Napi::Value CreateFromGd2PartPtr(const Napi::CallbackInfo& info);
+  static Napi::Value TrueColor(const Napi::CallbackInfo& info);
+  static Napi::Value TrueColorAlpha(const Napi::CallbackInfo& info);
+  static Napi::Value GdVersionGetter(const Napi::CallbackInfo& info);
 };
 
 #endif
