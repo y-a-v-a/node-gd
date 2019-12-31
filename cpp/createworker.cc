@@ -1,9 +1,9 @@
 /**
  * Async worker to create a palette or true color image asynchronously
- * Uses Nan v2
- * https://github.com/nodejs/nan
+ * Uses node-addon-api, N-API from C++
+ * https://github.com/nodejs/node-addon-api
  *
- * Copyright (c) 2015-2018, Vincent Bruijn <vebruijn@gmail.com>
+ * Copyright (c) 2015-2020, Vincent Bruijn <vebruijn@gmail.com>
  */
 #include <napi.h>
 #include <gd.h>
