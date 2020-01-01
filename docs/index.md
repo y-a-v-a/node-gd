@@ -7,16 +7,13 @@ title: Node-gd Documentation
 
 ### Opening and creating graphic images
 
-#### gd.create(width, height, callback)
+#### gd.create(width, height)
 
-Create a new image in memory of specified size and calls a callback that can have an argument being instance of `gd.Image`. This is a paletted image, thus has a white background and a limited color range of at most 256 colors.
-
-#### gd.createSync(width, height)
-Synchronous version of the above, returns an object of type `gd.Image`.
+Create a new image in memory of specified size and returns a Promise for an instance of `gd.Image`. This is a paletted image, thus has a white background and a limited color range of at most 256 colors.
 
 ```javascript
-var gd = require('node-gd');
-var img = gd.createSync(100, 100);
+const gd = require('node-gd');
+const img = await gd.create(100, 100);
 
 img.saveJpeg('./test.jpg', 100, function(error) {
   if (error) {
@@ -26,31 +23,25 @@ img.saveJpeg('./test.jpg', 100, function(error) {
 });
 ```
 
-#### gd.createTrueColor(width, height, callback)
+#### gd.createTrueColor(width, height)
 This is a true color image, and thus has a black background and a palette of millions of colors.
 
 ```javascript
-var gd = require('node-gd');
+const gd = require('node-gd');
 
-gd.createTrueColor(100, 100, function(error, img) {
+const img = await gd.createTrueColor(100, 100);
+
+img.saveJpeg('./test.jpg', 100, function(error) {
   if (error) throw error;
-
-  img.saveJpeg('./test.jpg', 100, function(error) {
-    if (error) throw error;
-    img.destroy();
-  });
+  img.destroy();
 });
 ```
-
-#### gd.createTrueColorSync(width, height)
-
-Synchronous version of the above, returns an object of type `gd.Image`.
 
 #### gd.openJpeg(path[, callback])
 Open a JPG file. If no callback is supplied, it will return an instance of `gd.Image`. In case of a supplied callback, it will receive two parameters: `error` and an instance of `gd.Image`. Uses `fs.readFile()` and `gd.createFromJpegPtr()` to load the image asynchronously.
 
 ```javascript
-var gd = require('node-gd');
+const gd = require('node-gd');
 
 // open Jpeg image
 gd.openJpeg('/path/to/file.jpg', function(error, image) {
@@ -72,7 +63,7 @@ gd.openJpeg('/path/to/file.jpg', function(error, image) {
 Synchronous version of `gd.openJpeg()`.
 
 ```javascript
-var gd = require('node-gd');
+const gd = require('node-gd');
 var img = gd.createFromJpeg('./path/to/image.jpg');
 
 // do something with img
@@ -132,31 +123,30 @@ Open a BMP bitmap image file.
 
 #### gd.createFromTiffPtr(data)
 
-#### gd.openFile(path[, callback])
-GD will try to find out of what type the supplied image is, and will open it likewise. This is a quite new convenience method for if you don't exactly know what the type is that you will try to open. The callback will get two parameters at max.
+#### gd.openFile(path)
+GD will try to find out of what type the supplied image is, and will open it likewise. This is a quite new convenience method for if you don't exactly know what the type is that you will try to open. Returns a Promise.
 
 ```javascript
-var gd = require('node-gd');
+const gd = require('node-gd');
 
-var file = './image-with-some-extension';
+const file = './image-with-some-extension';
 
-gd.openFile(file, function(error, img) {
-  if (error) throw error;
+const img = await gd.openFile(file);
 
-  // do something with img
+// do something with img
 
-  img.destroy();
-})
+img.destroy();
 ```
 
 #### gd.createFromFile(path)
-A synchronous version of the above.
+
+Similar to `gd#openFile` but does not check if file exists. This may lead to unclear segmentation fault messages. Returns a Promise.
 
 #### gd.trueColor(red, green, blue)
 Returns an integer representation of the supplied color values.
 
 ```javascript
-var gd = require('node-gd');
+const gd = require('node-gd');
 
 var red = gd.trueColor(255, 0, 0); // 16711680
 ```
@@ -179,7 +169,7 @@ compatibility (...)
 Example:
 
 ```javascript
-var gd = require('node-gd');
+const gd = require('node-gd');
 
 var transparentRed = gd.trueColorAlpha(255, 0, 0, 63); // 1073676288
 ```
@@ -191,13 +181,11 @@ Will return a string representing the version of your currently installed GD ver
 var gd = requide('node-gd');
 
 if (gd.getGDVersion() >= '2.1.1') {
-  gd.openFile('./test.png', function(error, img) {
-    if (error) throw error;
+  const img = await gd.openFile('./test.png');
 
-    // do something with img
+  // do something with img
 
-    img.destroy();
-  });
+  img.destroy();
 }
 ```
 
@@ -212,17 +200,15 @@ Free up allocated memory for image data.
 Set the color of a certain pixel. Use for color either `0xff00ff` or `gd.trueColor(255, 0, 255)`.
 
 ```javascript
-var gd = require('node-gd');
+const gd = require('node-gd');
 
-gd.createTrueColor(101, 101, function(error, image) {
+const image = await gd.createTrueColor(101, 101);
+
+image.setPixel(51, 51, 0xff00ff);
+
+image.savePng('./test.png', 0, function(error) {
   if (error) throw error;
-
-  image.setPixel(51, 51, 0xff00ff);
-
-  image.savePng('./test.png', 0, function(error) {
-    if (error) throw error;
-    image.destroy();
-  })
+  image.destroy();
 });
 ```
 
@@ -237,8 +223,8 @@ Draw a closed polygon. The first parameter shoud be an `Array` of `Object`s cont
 
 ```javascript
 // draw a red triangle on a black background
-var gd = require('node-gd');
-var img = gd.createTrueColorSync(100, 100);
+const gd = require('node-gd');
+var img = await gd.createTrueColor(100, 100);
 
 var points = [
   { x: 10, y: 10 },
@@ -261,8 +247,8 @@ Same as the above but color value will be used to fill the polygon.
 Create a rectangle. The x and y values indicate upper left and lower right corner respectively.
 
 ```javascript
-var gd = require('node-gd');
-var img = gd.createSync(300, 200);
+const gd = require('node-gd');
+var img = await gd.create(300, 200);
 var color0 = img.colorAllocate(255,255,255);
 var color1 = img.colorAllocate(255,0,255);
 
@@ -276,8 +262,8 @@ img.destroy();
 Create a filled rectangle i.e. a solid bar.
 
 ```javascript
-var gd = require('node-gd');
-var img = gd.createSync(300, 200);
+const gd = require('node-gd');
+var img = await gd.create(300, 200);
 
 var color0 = img.colorAllocate(255,255,255);
 var color1 = img.colorAllocate(255,0,255);
@@ -292,8 +278,8 @@ img.destroy();
 Draw an arc. `cx` and `cy` denote the center of the arc. The `begin` and `end` parameters are in degrees, from 0 to 360.
 
 ```javascript
-var gd = require('node-gd');
-var img = gd.createSync(300, 200);
+const gd = require('node-gd');
+var img = await gd.create(300, 200);
 var color0 = img.colorAllocate(255, 255, 255);
 var color1 = img.colorAllocate(255, 0, 255);
 var color2 = img.colorAllocate(0, 255, 255);
@@ -309,17 +295,16 @@ img.destroy();
 Draw a filled arc. The `style` parameter can be an integer generated by a bitwise OR of values 0, 1, 2, 4. These values stand for `arc`, `chord`, `noFill` and `edged`. A combination is possible, but `arc` and `chord` are mutually exclusive (see also the libgd documentation).
 
 ```javascript
-gd.create(100, 100, function(error, image) {
-  var c1 = image.colorAllocate(200, 50, 0); // red
-  var c2 = image.colorAllocate(0, 200, 50); // green
-  var c3 = image.colorAllocate(0, 50, 200); // blue
+const image = await gd.create(100, 100);
+var c1 = image.colorAllocate(200, 50, 0); // red
+var c2 = image.colorAllocate(0, 200, 50); // green
+var c3 = image.colorAllocate(0, 50, 200); // blue
 
-  image.filledArc(50, 50, 80, 80, 0, 225, c2, 4);
-  image.arc(46, 46, 80, 80, 0, -90, c3);
+image.filledArc(50, 50, 80, 80, 0, 225, c2, 4);
+image.arc(46, 46, 80, 80, 0, -90, c3);
 
-  image.saveGif('test.gif', function(error) {
-    image.destroy();
-  });
+image.saveGif('test.gif', function(error) {
+  image.destroy();
 });
 ```
 
@@ -333,8 +318,8 @@ Draw a filled ellipse.
 Fill a drawn form up until its border.
 
 ```javascript
-var gd = require('node-gd');
-var img = gd.createSync(300, 200);
+const gd = require('node-gd');
+var img = await gd.create(300, 200);
 var color0 = img.colorAllocate(255, 255, 255);
 var color1 = img.colorAllocate(255, 0, 255);
 var color2 = img.colorAllocate(0, 255, 255);
@@ -352,7 +337,7 @@ Create a white true color image
 
 ```javascript
 var gd = requide('node-gd');
-var img = gd.createTrueColorSync(100, 100);
+var img = await gd.createTrueColor(100, 100);
 img.fill(0, 0, 0xffffff);
 img.saveFile('./test.jpg');
 img.destroy();
@@ -362,7 +347,7 @@ Create a transparent true color PNG
 
 ```javascript
 var gd = requide('node-gd');
-var img = gd.createTrueColorSync(100, 100);
+var img = await gd.createTrueColor(100, 100);
 img.fill(0, 0, 0x7fffffff);
 img.saveAlpha(1);
 img.saveFile('./result.png');
@@ -383,8 +368,8 @@ img.destroy();
 Set the thickness for lines.
 
 ```javascript
-var gd = require('node-gd');
-var img = gd.createSync(300, 200);
+const gd = require('node-gd');
+var img = await gd.create(300, 200);
 var color0 = img.colorAllocate(255, 255, 255);
 var color1 = img.colorAllocate(255, 0, 255);
 
@@ -402,7 +387,7 @@ Turn on (`1`) or off (`0`) alphablending for what is being drawn next. This swit
 A newly created truecolor image for example has a black background. If you want to start out with a transparent canvas, you will first need to draw a non-blending fully transparent rectangle the size of that image. For example:
 
 ```javascript
-var gd = require('node-gd');
+const gd = require('node-gd');
 var img = gd.createTrueColor(100, 100);
 
 // turn off alpha blending
@@ -436,8 +421,8 @@ img.destroy();
 #### gd.Image#saveAlpha(saveFlag)
 When set to `1`, the alpha information will be saved as a separate channel within the image. If turned off (`0`), all transparency will be handled within the image. Compare these two examples to see the difference:
 ```javascript
-var gd = require('node-gd');
-var img = gd.createTrueColorSync(100, 100);
+const gd = require('node-gd');
+var img = await gd.createTrueColor(100, 100);
 // save the full alpha channel
 // the image will be transparent to e.g. a browser's background color
 img.saveAlpha(1);
@@ -466,8 +451,8 @@ img.destroy();
 And with `saveAlpha` turned off
 
 ```javascript
-var gd = require('node-gd');
-var img = gd.createTrueColorSync(100, 100);
+const gd = require('node-gd');
+var img = await gd.createTrueColor(100, 100);
 // the image will have a white background
 // but the red and blue squares will blend
 // with each other and the white background
@@ -511,11 +496,11 @@ For paletted images, this will return the palette index of the color for that pi
 
 ```javascript
 var gd = requide('node-gd');
-var trueColorImage = gd.openFile('./input.jpg');
+var trueColorImage = await gd.openFile('./input.jpg');
 console.log(trueColorImage.getPixel(20, 20));
 // outputs something like 12205619
 
-var paletteImage = gd.openFile('./input.gif');
+var paletteImage = await gd.openFile('./input.gif');
 console.log(paletteImage.getPixel(20, 20));
 // outputs something like 240
 
@@ -527,8 +512,8 @@ paletteImage.destroy();
 This will return the color integer representation.
 
 ```javascript
-var gd = require('node-gd');
-var img = gd.createTrueColorSync(300, 200);
+const gd = require('node-gd');
+var img = await gd.createTrueColor(300, 200);
 var color = img.colorAllocate(255, 0, 255);
 
 img.setThickness(30);
@@ -672,24 +657,23 @@ Modify the current image, if it is a palette based image, into a true color imag
 The parameter should be a palette based image, which will be modified and which can be saved afterwards. The return value is a `Number`. This method tries to better match the colors from the palette based image to those of its true color original.
 
 ```javascript
-var gd = require('node-gd');
+const gd = require('node-gd');
 
 // open a true color image
-gd.openFile('/path/to/image.jpg', function(err, trueColor) {
+const trueColor = await gd.openFile('/path/to/image.jpg');
 
-  // create a new palette based image
-  var palette = trueColor.createPaletteFromTrueColor(1, 128);
+// create a new palette based image
+var palette = trueColor.createPaletteFromTrueColor(1, 128);
 
-  // match colors to enhance the result of the palette image
-  trueColor.colorMatch(palette);
+// match colors to enhance the result of the palette image
+trueColor.colorMatch(palette);
 
-  // save the palette based image
-  palette.saveFile('/path/to/result.gif', function(err) {
-    if (err) {
-      throw err;
-    }
-    palette.destroy();
-  });
+// save the palette based image
+palette.saveFile('/path/to/result.gif', function(err) {
+  if (err) {
+    throw err;
+  }
+  palette.destroy();
 });
 ```
 
@@ -716,11 +700,11 @@ Create an animated GIF.
 Write and close the GIF animation. A complete working example could look like this:
 
 ```javascript
-var gd = require('node-gd');
+const gd = require('node-gd');
 var anim = './anim.gif';
 
 // create first frame
-var firstFrame = gd.createSync(200,200);
+var firstFrame = await gd.create(200,200);
 
 // allocate some colors
 var whiteBackground = firstFrame.colorAllocate(255, 255, 255);
@@ -737,8 +721,8 @@ for(var i = 0; i < 30; i++) {
   totalFrames.push(i);
 }
 
-totalFrames.forEach(function(i, idx, arr) {
-  var frame = gd.createSync(200, 200);
+totalFrames.forEach(async (i, idx, arr) => {
+  var frame = await gd.create(200, 200);
   arr[idx] = frame;
   frame.ellipse(100, (i * 10 - 40), 100, 100, pink);
   var lastFrame = i === 0 ? firstFrame : arr[i - 1];
@@ -755,7 +739,7 @@ firstFrame.destroy();
 Copy an image onto a destination image: `dest`. You'll have to save the destination image to see the resulting image. This method returns _the image on which it is called_ in order to be able to chain methods.
 
 ```javascript
-var gd = require('node-gd');
+const gd = require('node-gd');
 var output = '../output/image-watermark.png';
 
 var watermark = gd.createFromPng('../input/watermark.png');
@@ -778,7 +762,7 @@ input.savePng(output, 0, function(error) {
 Example using chaining:
 
 ```javascript
-var gd = require('node-gd');
+const gd = require('node-gd');
 var output = '../output/image-watermark.png';
 var output2 = '../output/image-watermark2.png';
 
@@ -824,7 +808,7 @@ input2.savePng(output2, 0, function(error) {
 The functions `gd.Image#savePng`, `gd.Image#saveJpeg`, `gd.Image#saveGif`, etc. are convenience functions which will be processed asynchronously when a callback is supplied. All of the following have a counterpart like `gd.Image#png` and `gd.Image#pngPtr` which write to disk synchronously or store the image data in a memory pointer respectively. `gd.Image#jpeg` will return the instance of `gd.Image`, `gd.Image#jpgPtr` will return the newly created image data.
 
 ```javascript
-var gd = require('node-gd');
+const gd = require('node-gd');
 gd.openPng('/path/to/input.png', function(err, img) {
   if (err) {
     throw err;
@@ -883,7 +867,7 @@ Lets GD decide in which format the image should be stored to disk, based on the 
 Any instance of `gd.Image()` has a basic set of instance properties accessible as read only values.
 
 ```javascript
-var gd = require('node-gd');
+const gd = require('node-gd');
 var img = gd.creatTrueColor(100,100);
 console.log(img);
 img.destroy();
@@ -908,8 +892,8 @@ For paletted images, returns the amount of colors in the palette.
 `Boolean` value for if the image is interlaced or not. This property can also be set. When set to `true` for Jpeg images, GD will save it as a progressive Jpeg image.
 
 ```javascript
-var gd = require('node-gd');
-var img = gd.createTrueColorSync(100,100);
+const gd = require('node-gd');
+var img = await gd.createTrueColor(100,100);
 img.interlace = true; // set interlace to true
 
 // will save jpeg as progressive jpeg image.
@@ -950,7 +934,7 @@ Be aware that since `node-gd` version 0.3.x libgd2 version 2.1.x is mostly suppo
 Another way to check the installed GD version on your system:
 
 ```javascript
-var gd = require('node-gd');
+const gd = require('node-gd');
 
 // as of node-gd 0.4.x
 var version = gd.getGDVersion();
