@@ -15,6 +15,7 @@
  */
 #include <gd.h>
 #include <napi.h>
+#include "node_gd.h"
 
 using namespace Napi;
 
@@ -25,7 +26,7 @@ public:
       Napi::TypeError::New(info.Env(), "Argument must be a string").ThrowAsJavaScriptException();
       return info.Env().Null();
     }
-    std::string path = info[0].As<Napi::String>().Utf8Value().c_str();
+    std::string path = info[0].As<Napi::String>().Utf8Value();
 
     CreateFromFileWorker* worker = new CreateFromFileWorker(info.Env(), "CreateFromFileWorkerResource");
 

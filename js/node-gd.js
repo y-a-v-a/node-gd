@@ -124,10 +124,7 @@ if (bindings.getGDVersion() >= '2.1.1') {
     }
 
     var callback = args[args.length - 1];
-    if (typeof callback !== "function") {
-      return this.file.apply(this, args);
-    }
-    return this.fileCallback.apply(this, args);
+    return this.file.apply(this, args);
   };
 
   /**
@@ -156,7 +153,7 @@ if (bindings.getGDVersion() >= '2.1.1') {
     throw new Error(versionMessage.replace('__METHOD__', 'gd.Image#saveFile()'));
   };
 
-  bindings.openFile = function() {
+  bindings.openFile = function openFile() {
     throw new Error(versionMessage.replace('__METHOD__', 'gd.openFile()'));
   };
 }

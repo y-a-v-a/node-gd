@@ -423,7 +423,6 @@ Napi::Object Gd::Image::Init(Napi::Env env, Napi::Object exports) {
 #endif
 #if SUPPORTS_GD_2_1_1
       InstanceMethod("file", &Gd::Image::File),
-      InstanceMethod("fileCallback", &Gd::Image::FileCallback),
 #endif
 
       /**
@@ -780,25 +779,6 @@ Napi::Value Gd::Image::File(const Napi::CallbackInfo& info) {
   REQ_STR_ARG(0, path);
 
   gdImageFile(this->_image, path.c_str());
-
-  return info.This();
-}
-
-Napi::Value Gd::Image::FileCallback(const Napi::CallbackInfo& info) {
-  REQ_ARGS(2);
-  REQ_STR_ARG(0, path);
-  REQ_FN_ARG(1, cb);
-
-  bool result = gdImageFile(this->_image, path.c_str());
-  if (result == false) {
-    cb.Call({
-      Napi::String::New(info.Env(), "Unable to write file.")
-    });
-  } else {
-    cb.Call({
-      info.Env().Null()
-    });
-  }
 
   return info.This();
 }

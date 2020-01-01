@@ -131,12 +131,8 @@ async function main() {
 
   img.emboss();
   img.brightness(75);
-  img.saveFile('/path/to/newFile.bmp', function(err) {
-    img.destroy();
-    if (err) {
-      throw err;
-    }
-  });
+  img.saveFile('/path/to/newFile.bmp');
+  img.destroy();
 }
 
 main();

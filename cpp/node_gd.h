@@ -101,7 +101,6 @@ public:
 
 #if SUPPORTS_GD_2_1_1
     Napi::Value File(const Napi::CallbackInfo& info);
-    Napi::Value FileCallback(const Napi::CallbackInfo& info);
 #endif
     /**
      * Drawing Functions
