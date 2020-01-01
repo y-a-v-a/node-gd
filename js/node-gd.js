@@ -8,10 +8,7 @@ let versionMessage = 'Node-gd: method __METHOD__ only available from libgd2 vers
 
 function openFormatFn(fmt) {
   return function() {
-    const args = [];
-    for (let i = 0; i < arguments.length; i++) {
-      args[i] = (arguments[i]);
-    }
+    const args = [...arguments];
 
     const file = args.shift();
     const cb = args.pop();
@@ -40,10 +37,7 @@ function saveFormatFn(format) {
   format = format.toLowerCase();
 
   return function () {
-    const args = [];
-    for (let i = 0; i < arguments.length; i++) {
-      args[i] = (arguments[i]);
-    }
+    const args = [...arguments];
 
     const filename = args.shift();
     const callback = args.pop();
@@ -118,12 +112,8 @@ exportFormats();
 
 if (bindings.getGDVersion() >= '2.1.1') {
   bindings.Image.prototype.saveFile = function() {
-    var args = [];
-    for (var i = 0; i < arguments.length; i++) {
-      args[i] = (arguments[i]);
-    }
+    var args = [...arguments];
 
-    var callback = args[args.length - 1];
     return this.file.apply(this, args);
   };
 
