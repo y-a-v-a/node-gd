@@ -54,53 +54,55 @@ There are different flavours of images, of which the main ones are palette-based
 ### API
 Full API documentation and more examples can be found in the [docs](https://github.com/y-a-v-a/node-gd/blob/master/docs/index.md) directory or at [the dedicated github page](https://y-a-v-a.github.io/node-gd/).
 
-### Note
-Since node-gd@1.0.0, `gd.create` and `gd.createTrueColor` are async. *You will have to modify your code.* This means that you should either change all `gd.create` calls to `gd.createSync` and `gd.createTrueColor` to `gd.createTrueColorSync` or rewrite those call and wrap further calls in a callback.
 
 ### Examples
 
-Example of __synchronously__ creating a rectangular image with a bright green background and in magenta the text "Hello world!"
+Example of creating a rectangular image with a bright green background and in magenta the text "Hello world!"
 
 ```javascript
 // Require library
-var gd = require('node-gd');
+const gd = require('node-gd');
 
-// Create blank new image in memory
-var img = gd.createSync(200, 80);
+async function main() {
+  // Create blank new image in memory
+  const img = await gd.create(200, 80);
 
-// Set background color
-img.colorAllocate(0, 255, 0);
+  // Set background color
+  img.colorAllocate(0, 255, 0);
 
-// Set text color
-var txtColor = img.colorAllocate(255, 0, 255);
+  // Set text color
+  const txtColor = img.colorAllocate(255, 0, 255);
 
-// Set full path to font file
-var fontPath = '/full/path/to/font.ttf';
+  // Set full path to font file
+  const fontPath = '/full/path/to/font.ttf';
 
-// Render string in image
-img.stringFT(txtColor, fontPath, 24, 0, 10, 60, 'Hello world!');
+  // Render string in image
+  img.stringFT(txtColor, fontPath, 24, 0, 10, 60, 'Hello world!');
 
-// Write image buffer to disk
-img.savePng('output.png', 1, function(err) {
-  if(err) {
-    throw err;
-  }
-});
+  // Write image buffer to disk
+  img.savePng('output.png', 1, function(err) {
+    if(err) {
+      throw err;
+    }
+  });
 
-// Destroy image to clean memory
-img.destroy();
+  // Destroy image to clean memory
+  img.destroy();
+}
+
+main();
 ```
 
-__Asynchronous__ example of drawing a red lined hexagon on a black background:
+Example of drawing a red lined hexagon on a black background:
 
 
 ```javascript
-var gd = require('node-gd');
+const gd = require('node-gd');
 
-gd.createTrueColor(200,200, function(error, img) {
-  if (error) throw error;
+async function main() {
+  const img = await gd.createTrueColor(200,200);
 
-  var points = [
+  const points = [
     { x: 100, y: 20 },
     { x: 170, y: 60 },
     { x: 170, y: 140},
@@ -114,17 +116,18 @@ gd.createTrueColor(200,200, function(error, img) {
   img.polygon(points, 0xff0000);
   img.bmp('test1.bmp', 0);
   img.destroy();
-});
+}
+
+main();
 ```
 
 Another example:
 
 ```javascript
-var gd = require('node-gd');
-gd.openFile('/path/to/file.jpg', function(err, img) {
-  if (err) {
-    throw err;
-  }
+const gd = require('node-gd');
+
+async function main() {
+  const img = await gd.openFile('/path/to/file.jpg');
 
   img.emboss();
   img.brightness(75);
@@ -134,7 +137,9 @@ gd.openFile('/path/to/file.jpg', function(err, img) {
       throw err;
     }
   });
-});
+}
+
+main();
 ```
 
 Some output functions are synchronous because they are handled by libgd. An example of this is the creation of animated GIFs.

@@ -9,7 +9,7 @@ var source = __dirname + '/fixtures/';
 var target = __dirname + '/output/';
 
 describe('Section Handling file types', function() {
-  it('can copy a png into a jpeg - gd.Image#saveJpeg()', function(done) {
+  it('can copy a png into a jpeg - gd.Image#saveJpeg()', async () => {
     var s, t;
     s = source + 'input.png';
     t = target + 'output.jpg';
@@ -18,7 +18,7 @@ describe('Section Handling file types', function() {
       if (err) {
         throw err;
       }
-      canvas = gd.createTrueColorSync(100, 100);
+      canvas = await gd.createTrueColor(100, 100);
       img.copyResampled(canvas, 0, 0, 0, 0, 100, 100, img.width, img.height);
       return canvas.saveJpeg(t, 10, function(err) {
         if (err) {
@@ -27,12 +27,11 @@ describe('Section Handling file types', function() {
         assert.ok(fs.existsSync(t));
         img.destroy();
         canvas.destroy();
-        return done();
       });
     });
   });
 
-  it('can copy a png into gif - gd.Image#saveGif()', function(done) {
+  it('can copy a png into gif - gd.Image#saveGif()', async () => {
     var s, t;
     s = source + 'input.png';
     t = target + 'output.gif';
@@ -41,7 +40,7 @@ describe('Section Handling file types', function() {
       if (err) {
         throw err;
       }
-      canvas = gd.createTrueColorSync(img.width, img.height);
+      canvas = await gd.createTrueColor(img.width, img.height);
       img.copyResampled(canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height);
       return canvas.saveGif(t, function(err) {
         if (err) {
@@ -55,7 +54,7 @@ describe('Section Handling file types', function() {
     });
   });
 
-  it('can copy a png into gd - gd.Image#saveGd()', function(done) {
+  it('can copy a png into gd - gd.Image#saveGd()', async () => {
     var s, t;
     s = source + 'input.png';
     t = target + 'output.gd';
@@ -64,7 +63,7 @@ describe('Section Handling file types', function() {
       if (err) {
         throw err;
       }
-      canvas = gd.createTrueColorSync(img.width, img.height);
+      canvas = await gd.createTrueColor(img.width, img.height);
       img.copyResampled(canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height);
       return canvas.saveGd(t, function(err) {
         if (err) {
@@ -78,7 +77,7 @@ describe('Section Handling file types', function() {
     });
   });
 
-  it('can copy a png into WBMP - gd.Image#saveWBMP()', function(done) {
+  it('can copy a png into WBMP - gd.Image#saveWBMP()', async () => {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
       this.skip();
@@ -91,7 +90,7 @@ describe('Section Handling file types', function() {
       if (err) {
         throw err;
       }
-      canvas = gd.createTrueColorSync(img.width, img.height);
+      canvas = await gd.createTrueColor(img.width, img.height);
       img.copyResampled(canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height);
       fg = img.getPixel(5, 5);
       return canvas.saveWBMP(t, fg, function(err) {

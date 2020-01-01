@@ -21,6 +21,7 @@
 #include <cstring>
 #include "node_gd.h"
 #include "createworker.cc"
+#include "CreateFromFileWorker.cc"
 #if SUPPORTS_GD_2_1_0
   #include <gd_errors.h>
 #endif
@@ -233,9 +234,7 @@ Napi::Object Gd::Init(Napi::Env env, Napi::Object exports) {
 
   // Image creation, loading and saving
   exports.Set(Napi::String::New(env, "create"), Napi::Function::New(env, ImageCreate));
-  exports.Set(Napi::String::New(env, "createSync"), Napi::Function::New(env, ImageCreateSync));
   exports.Set(Napi::String::New(env, "createTrueColor"), Napi::Function::New(env, ImageCreateTrueColor));
-  exports.Set(Napi::String::New(env, "createTrueColorSync"), Napi::Function::New(env, ImageCreateTrueColorSync));
   exports.Set(Napi::String::New(env, "createFromJpeg"), Napi::Function::New(env, CreateFromJpeg));
   exports.Set(Napi::String::New(env, "createFromJpegPtr"), Napi::Function::New(env, CreateFromJpegPtr));
   exports.Set(Napi::String::New(env, "createFromPng"), Napi::Function::New(env, CreateFromPng));
@@ -275,21 +274,6 @@ Napi::Object Gd::Init(Napi::Env env, Napi::Object exports) {
 }
 
 Napi::Value Gd::ImageCreate(const Napi::CallbackInfo& info) {
-  REQ_ARGS(3);
-  REQ_INT_ARG(0, width);
-  REQ_INT_ARG(1, height);
-  REQ_FN_ARG(2, cb);
-
-  INT_ARG_RANGE(width, "width");
-  INT_ARG_RANGE(height, "height");
-
-  CreateWorker* cw = new CreateWorker(cb, width, height, 0);
-  cw->Queue();
-
-  return info.Env().Undefined();
-}
-
-Napi::Value Gd::ImageCreateSync(const Napi::CallbackInfo& info) {
   REQ_ARGS(2);
   REQ_INT_ARG(0, width);
   REQ_INT_ARG(1, height);
@@ -297,27 +281,13 @@ Napi::Value Gd::ImageCreateSync(const Napi::CallbackInfo& info) {
   INT_ARG_RANGE(width, "width");
   INT_ARG_RANGE(height, "height");
 
-  gdImagePtr im = gdImageCreate(width, height);
+  CreateWorker* worker = new CreateWorker(info.Env(), "CreateWorkerResource", width, height, 0);
+  worker->Queue();
 
-  RETURN_IMAGE(im);
+  return worker->_deferred.Promise();
 }
 
 Napi::Value Gd::ImageCreateTrueColor(const Napi::CallbackInfo& info) {
-  REQ_ARGS(3);
-  REQ_INT_ARG(0, width);
-  REQ_INT_ARG(1, height);
-  REQ_FN_ARG(2, cb);
-
-  INT_ARG_RANGE(width, "width");
-  INT_ARG_RANGE(height, "height");
-
-  CreateWorker* cw = new CreateWorker(cb, width, height, 1);
-  cw->Queue();
-
-  return info.Env().Undefined();
-}
-
-Napi::Value Gd::ImageCreateTrueColorSync(const Napi::CallbackInfo& info) {
   REQ_ARGS(2);
   REQ_INT_ARG(0, width);
   REQ_INT_ARG(1, height);
@@ -325,9 +295,10 @@ Napi::Value Gd::ImageCreateTrueColorSync(const Napi::CallbackInfo& info) {
   INT_ARG_RANGE(width, "width");
   INT_ARG_RANGE(height, "height");
 
-  gdImagePtr im = gdImageCreateTrueColor(width, height);
+  CreateWorker* worker = new CreateWorker(info.Env(), "CreateWorkerResource", width, height, 1);
+  worker->Queue();
 
-  RETURN_IMAGE(im);
+  return worker->_deferred.Promise();
 }
 
 DECLARE_CREATE_FROM(Jpeg);
@@ -348,11 +319,7 @@ DECLARE_CREATE_FROM(Tiff);
 
 #if SUPPORTS_GD_2_1_1
 Napi::Value Gd::CreateFromFile(const Napi::CallbackInfo& info) {
-  REQ_STR_ARG(0, path);
-
-  gdImagePtr im = gdImageCreateFromFile(path.c_str());
-
-  RETURN_IMAGE(im);
+  return  CreateFromFileWorker::DoWork(info);
 }
 #endif
 

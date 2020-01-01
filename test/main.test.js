@@ -156,11 +156,11 @@ describe('Node.js GD Graphics Library', function() {
     });
   });
 
-  it('can scale-down (resize) an image', function(done) {
+  it('can scale-down (resize) an image', async () => {
     var s, t;
     s = source + 'input.png';
     t = target + 'output-scale.png';
-    return gd.openPng(s, function(err, img) {
+    return gd.openPng(s, async (err, img) => {
       var canvas, h, scale, w;
       if (err) {
         throw err;
@@ -168,7 +168,7 @@ describe('Node.js GD Graphics Library', function() {
       scale = 2;
       w = Math.floor(img.width / scale);
       h = Math.floor(img.height / scale);
-      canvas = gd.createTrueColorSync(w, h);
+      canvas = await gd.createTrueColor(w, h);
       img.copyResampled(canvas, 0, 0, 0, 0, w, h, img.width, img.height);
       return canvas.savePng(t, 1, function(err) {
         if (err) {
@@ -177,23 +177,22 @@ describe('Node.js GD Graphics Library', function() {
         assert.ok(fs.existsSync(t));
         img.destroy();
         canvas.destroy();
-        return done();
       });
     });
   });
 
-  it('can rotate an image', function(done) {
+  it('can rotate an image', async () => {
     var s, t;
     s = source + 'input.png';
     t = target + 'output-rotate.png';
-    return gd.openPng(s, function(err, img) {
+    return gd.openPng(s, async (err, img) => {
       var canvas, h, w;
       if (err) {
         throw err;
       }
       w = 100;
       h = 100;
-      canvas = gd.createTrueColorSync(w, h);
+      canvas = await gd.createTrueColor(w, h);
       img.copyRotated(canvas, 50, 50, 0, 0, img.width, img.height, 45);
       return canvas.savePng(t, 1, function(err) {
         if (err) {
@@ -202,7 +201,6 @@ describe('Node.js GD Graphics Library', function() {
         assert.ok(fs.existsSync(t));
         img.destroy();
         canvas.destroy();
-        return done();
       });
     });
   });
@@ -413,7 +411,7 @@ describe('Node.js GD Graphics Library', function() {
     });
   });
 
-  it('can create a truecolor BMP image with text', function(done) {
+  it('can create a truecolor BMP image with text', async () => {
     var f, img, t, txtColor;
     if (gd.getGDVersion() < '2.1.1') {
       this.skip();
@@ -421,7 +419,7 @@ describe('Node.js GD Graphics Library', function() {
     }
     f = source + 'FreeSans.ttf';
     t = target + 'output-truecolor-string.bmp';
-    img = gd.createTrueColorSync(120, 20);
+    img = await gd.createTrueColor(120, 20);
     txtColor = img.colorAllocate(255, 255, 0);
     img.stringFT(txtColor, f, 16, 0, 8, 18, "Hello world!");
     return img.saveBmp(t, 0, function(err) {
@@ -429,11 +427,10 @@ describe('Node.js GD Graphics Library', function() {
         throw err;
       }
       assert.ok(fs.existsSync(t));
-      return done();
     });
   });
 
-  it('can create a truecolor Tiff image with text', function(done) {
+  it('can create a truecolor Tiff image with text', async () => {
     var f, img, t, txtColor;
     if (gd.getGDVersion() < '2.2.4') {
       this.skip();
@@ -441,7 +438,7 @@ describe('Node.js GD Graphics Library', function() {
     }
     f = source + 'FreeSans.ttf';
     t = target + 'output-truecolor-string.tif';
-    img = gd.createTrueColorSync(120, 20);
+    img = await gd.createTrueColor(120, 20);
     txtColor = img.colorAllocate(255, 255, 0);
     img.stringFT(txtColor, f, 16, 0, 8, 18, "Hello world!");
     return img.saveTiff(t, function(err) {
@@ -449,7 +446,6 @@ describe('Node.js GD Graphics Library', function() {
         throw err;
       }
       assert.ok(fs.existsSync(t));
-      return done();
     });
   });
 });

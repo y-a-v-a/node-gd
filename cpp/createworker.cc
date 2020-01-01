@@ -11,16 +11,14 @@
 
 class CreateWorker : public Napi::AsyncWorker {
   public:
-    CreateWorker(Napi::Function callback, int width, int height, int trueColor)
-      : Napi::AsyncWorker(callback), _width(width), _height(height), _trueColor(trueColor) {}
-    ~CreateWorker() {
-      image = NULL;
-      _width = 0;
-      _height = 0;
-      _trueColor = 0;
+    CreateWorker(napi_env env, const char* resource_name, int width, int height, int trueColor)
+    : AsyncWorker(env, resource_name), _deferred(Napi::Promise::Deferred::New(env)), _width(width), _height(height), _trueColor(trueColor) {
     }
 
-    void Execute() {
+    Napi::Promise::Deferred _deferred;
+
+  protected:
+    void Execute() override {
       if (_trueColor == 0) {
         image = gdImageCreate(_width, _height);
       } else {
@@ -31,21 +29,23 @@ class CreateWorker : public Napi::AsyncWorker {
       }
     }
 
-    void OnOK() {
-      Napi::HandleScope scope(Env());
-
+    virtual void OnOK() override {
       Napi::Value _argv = Napi::External<gdImagePtr>::New(Env(), &image);
-      Napi::Object _image = Gd::Image::constructor.New({_argv});
+      Napi::Object instance = Gd::Image::constructor.New({_argv});
 
-      Callback().Call({
-        Env().Null(),
-        _image
-      });
+      _deferred.Resolve(instance);
+    }
+
+    virtual void OnError(const Napi::Error& e) override {
+      _deferred.Reject(Napi::String::New(Env(), e.Message()));
     }
 
   private:
     gdImagePtr image;
+
     int _width;
+
     int _height;
+
     int _trueColor;
 };

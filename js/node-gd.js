@@ -130,24 +130,26 @@ if (bindings.getGDVersion() >= '2.1.1') {
     return this.fileCallback.apply(this, args);
   };
 
-  bindings.openFile = function() {
-    const args = [];
-    let image;
-    for (let i = 0; i < arguments.length; i++) {
-      args[i] = (arguments[i]);
-    }
+  /**
+   * Wrapper around gdImageCreateFromFile
+   * With safety check for file existence to mitigate
+   * uninformative segmentation faults from libgd
+   *
+   * @param {string} file  Path of file to open
+   * @returns Promise<gd.Image>
+   */
+  bindings.openFile = function openFile(file) {
+    return new Promise((resolve, reject) => {
+      const filePath = path.normalize(file);
 
-    const callback = args[args.length - 1];
-    if (typeof callback !== "function") {
-      return this.createFromFile.apply(this, args);
-    }
+      fs.access(filePath, fs.constants.F_OK, (error) => {
+        if (error) {
+          return reject(error);
+        }
 
-    try {
-      image = this.createFromFile.apply(this, args);
-    } catch (e) {
-      return callback(e);
-    }
-    return callback(null, image);
+        resolve(this.createFromFile(filePath));
+      });
+    });
   };
 } else {
   bindings.Image.prototype.saveFile = function() {

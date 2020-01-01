@@ -9,140 +9,120 @@ var source = __dirname + '/fixtures/';
 var target = __dirname + '/output/';
 
 /**
- * gd.create and gd.createSync
+ * gd.create
  * ╦┌┬┐┌─┐┌─┐┌─┐  ┌─┐┬─┐┌─┐┌─┐┌┬┐┬┌─┐┌┐┌
  * ║│││├─┤│ ┬├┤   │  ├┬┘├┤ ├─┤ │ ││ ││││
  * ╩┴ ┴┴ ┴└─┘└─┘  └─┘┴└─└─┘┴ ┴ ┴ ┴└─┘┘└┘
  */
 describe('Creating a paletted image', function() {
-  it('can be done synchronously', function(done) {
-    var img = gd.createSync(100, 100);
+  it('can be done synchronously', async () => {
+    var img = await gd.create(100, 100);
 
     assert.ok(img instanceof gd.Image);
     img.destroy();
-    return done();
   });
 
-  it('throws an Error when too few arguments are supplied', function(done) {
+  it('throws an Error when too few arguments are supplied', async () => {
     var img;
     try {
-      img = gd.createSync(100);
+      img = await gd.create(100);
     } catch (e) {
       assert.ok(e instanceof Error);
-      return done();
     }
   });
 
-  it('throws an Error when argument is not a Number - NaN', function(done) {
+  it('throws an Error when argument is not a Number - NaN', async () => {
     var img;
     try {
-      img = gd.createSync(NaN, 100);
+      img = await gd.create(NaN, 100);
     } catch (e) {
       assert.ok(e instanceof Error);
-      return done();
     }
   });
 
-  it('throws an Error when argument is not a Number - Infinity', function(done) {
+  it('throws an Error when argument is not a Number - Infinity', async () => {
     var img;
     try {
-      img = gd.createSync(Infinity, 100);
+      img = await gd.create(Infinity, 100);
     } catch (e) {
       assert.ok(e instanceof Error);
-      return done();
     }
   });
 
-  it('throws an TypeError when the first argument if of wrong type', function(done) {
+  it('throws an TypeError when the first argument if of wrong type', async () => {
     var img;
     try {
-      img = gd.createSync('bogus', undefined);
+      img = await gd.create('bogus', undefined);
     } catch (e) {
       assert.ok(e instanceof TypeError);
-      return done();
     }
   });
 
-  it('throws an TypeError when the second argument if of wrong type', function(done) {
+  it('throws an TypeError when the second argument if of wrong type', async () => {
     var img;
     try {
-      img = gd.createSync(100, 'bogus');
+      img = await gd.create(100, 'bogus');
     } catch (e) {
       assert.ok(e instanceof TypeError);
-      return done();
     }
   });
 
-  it('can be done asynchronously.', function(done) {
-    gd.create(10, 10, function(error, img) {
-      assert.ok(img instanceof gd.Image);
-      img.destroy();
 
-      done();
-    });
-  });
-
-  it('throws a RangeError when the width parameter is 0', function(done) {
+  it('throws a RangeError when the width parameter is 0', async () => {
     var img;
     try {
-      img = gd.createSync(0, 100);
+      img = await gd.create(0, 100);
     } catch (e) {
       assert.ok(e instanceof RangeError);
-      return done();
     }
   });
 
-  it('throws a RangeError when the height parameter is 0', function(done) {
+  it('throws a RangeError when the height parameter is 0', async () => {
     var img;
     try {
-      img = gd.createSync(100, 0);
+      img = await gd.create(100, 0);
     } catch (e) {
       assert.ok(e instanceof RangeError);
-      return done();
     }
   });
 
-  it('throws a RangeError when the height parameter is a negative value', function(done) {
+  it('throws a RangeError when the height parameter is a negative value', async () => {
     var img;
     try {
-      img = gd.createSync(100, -10);
+      img = await gd.create(100, -10);
     } catch (e) {
       assert.ok(e instanceof RangeError);
-      return done();
     }
   });
 
-  it('throws an Error when creating an image without width and height - gd.create()', function(done) {
+  it('throws an Error when creating an image without width and height - gd.create()', async () => {
     try {
       gd.create();
     } catch (exception) {
       assert.ok(exception instanceof Error);
-      return done();
     }
   });
 
-  it('throws a Error when the height parameter is 0 async', function(done) {
+  it('throws a Error when the height parameter is 0 async', async () => {
     var img;
     try {
       gd.create(100, 0, function(error, img) { });
     } catch (e) {
       assert.ok(e instanceof RangeError);
-      done();
     }
   });
 
-  it('returns an object containing basic information about the created image', function(done) {
-    var img = gd.createSync(100, 100);
+  it('returns an object containing basic information about the created image', async () => {
+    var img = await gd.create(100, 100);
 
     assert.equal(img.width, 100);
     assert.equal(img.height, 100);
     assert.equal(img.trueColor, 0);
 
     img.destroy();
-    return done();
   });
 
-  it('returns an object containing basic information about the created image async', function(done) {
+  it('returns an object containing basic information about the created image async', async () => {
     gd.create(100, 100, function(error, image) {
       if (error) {
         throw error;
@@ -153,85 +133,75 @@ describe('Creating a paletted image', function() {
       assert.equal(image.trueColor, 0);
 
       image.destroy();
-      return done();
     });
   });
 });
 
 /**
- * gd.createTrueColor and gd.createTrueColorSync
+ * gd.createTrueColor and await gd.createTrueColor
  */
 describe('Create a true color image', function() {
-  it('can be done synchronously.', function(done) {
-    var img = gd.createTrueColorSync(100, 100);
+  it('can be done synchronously.', async () => {
+    var img = await gd.createTrueColor(100, 100);
     assert.ok(img instanceof gd.Image);
     img.destroy();
-    return done();
   });
 
-  it('throws an Error when too few arguments are supplied', function(done) {
+  it('throws an Error when too few arguments are supplied', async () => {
     var img;
     try {
-      img = gd.createTrueColorSync(100);
+      img = await gd.createTrueColor(100);
     } catch (e) {
       assert.ok(e instanceof Error);
-      return done();
     }
   });
 
-  it('throws an TypeError when the first argument if of wrong type', function(done) {
+  it('throws an TypeError when the first argument if of wrong type', async () => {
     var img;
     try {
-      img = gd.createTrueColorSync('bogus', undefined);
+      img = await gd.createTrueColor('bogus', undefined);
     } catch (e) {
       assert.ok(e instanceof TypeError);
-      return done();
     }
   });
 
-  it('throws an TypeError when the second argument if of wrong type', function(done) {
+  it('throws an TypeError when the second argument if of wrong type', async () => {
     var img;
     try {
-      img = gd.createTrueColorSync(100, 'bogus');
+      img = await gd.createTrueColor(100, 'bogus');
     } catch (e) {
       assert.ok(e instanceof TypeError);
-      return done();
     }
   });
 
-  it('can be done asynchronously.', function(done) {
-    return gd.createTrueColor(10, 10, function(error, img) {
-      assert.ok(img instanceof gd.Image);
-      img.destroy();
+  it('can be done asynchronously.', async () => {
+    var img = await gd.createTrueColor(10, 10);
+    assert.ok(img instanceof gd.Image);
+    img.destroy();
 
-      return done();
-    });
   });
 
-  it('throws a RangeError when the width parameter is 0', function(done) {
+  it('throws a RangeError when the width parameter is 0', async () => {
     var img;
     try {
-      img = gd.createTrueColorSync(0, 100);
+      img = await gd.createTrueColor(0, 100);
     } catch (e) {
       assert.ok(e instanceof RangeError);
-      return done();
     }
   });
 
-  it('throws a RangeError when the height parameter is 0', function(done) {
+  it('throws a RangeError when the height parameter is 0', async () => {
     var img;
     try {
-      img = gd.createTrueColorSync(100, 0);
+      img = await gd.createTrueColor(100, 0);
     } catch (e) {
       assert.ok(e instanceof RangeError);
-      return done();
     }
   });
 
-  it('returns an object containing basic information about the created image', function(done) {
-    var img = gd.createTrueColorSync(100, 100);
+  it('returns an object containing basic information about the created image', async () => {
+    var img = await gd.createTrueColor(100, 100);
     assert.ok(img.width === 100 && img.height === 100 && img.trueColor === 1);
     img.destroy();
-    return done();
   });
 });

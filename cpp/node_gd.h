@@ -228,9 +228,7 @@ public:
 
 private:
   static Napi::Value ImageCreate(const Napi::CallbackInfo& info);
-  static Napi::Value ImageCreateSync(const Napi::CallbackInfo& info);
   static Napi::Value ImageCreateTrueColor(const Napi::CallbackInfo& info);
-  static Napi::Value ImageCreateTrueColorSync(const Napi::CallbackInfo& info);
 
   static Napi::Value CreateFromJpeg(const Napi::CallbackInfo& info);
   static Napi::Value CreateFromJpegPtr(const Napi::CallbackInfo& info);
