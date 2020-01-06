@@ -208,8 +208,7 @@ describe('Node.js GD Graphics Library', function() {
   it('can convert to grayscale', function(done) {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
-      this.skip();
-      return;
+      return this.skip();
     }
     s = source + 'input.png';
     t = target + 'output-grayscale.png';
@@ -232,8 +231,7 @@ describe('Node.js GD Graphics Library', function() {
   it('can add gaussian blur to an image', function(done) {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
-      this.skip();
-      return;
+      return this.skip();
     }
     s = source + 'input.png';
     t = target + 'output-gaussianblur.png';
@@ -259,8 +257,7 @@ describe('Node.js GD Graphics Library', function() {
   it('can negate an image', function(done) {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
-      this.skip();
-      return;
+      return this.skip();
     }
     s = source + 'input.png';
     t = target + 'output-negate.png';
@@ -283,8 +280,7 @@ describe('Node.js GD Graphics Library', function() {
   it('can change brightness of an image', function(done) {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
-      this.skip();
-      return;
+      return this.skip();
     }
     s = source + 'input.png';
     t = target + 'output-brightness.png';
@@ -309,8 +305,7 @@ describe('Node.js GD Graphics Library', function() {
   it('can change contrast of an image', function(done) {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
-      this.skip();
-      return;
+      return this.skip();
     }
     s = source + 'input.png';
     t = target + 'output-contrast.png';
@@ -335,8 +330,7 @@ describe('Node.js GD Graphics Library', function() {
   it('can emboss an image', function(done) {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
-      this.skip();
-      return;
+      return this.skip();
     }
     s = source + 'input.png';
     t = target + 'output-emboss.png';
@@ -359,8 +353,7 @@ describe('Node.js GD Graphics Library', function() {
   it('can apply selective blur to an image', function(done) {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
-      this.skip();
-      return;
+      return this.skip();
     }
     s = source + 'input.png';
     t = target + 'output-selectiveBlur.png';
@@ -411,11 +404,10 @@ describe('Node.js GD Graphics Library', function() {
     });
   });
 
-  it('can create a truecolor BMP image with text', async () => {
+  it('can create a truecolor BMP image with text', async function() {
     var f, img, t, txtColor;
     if (gd.getGDVersion() < '2.1.1') {
-      this.skip();
-      return;
+      return this.skip();
     }
     f = source + 'FreeSans.ttf';
     t = target + 'output-truecolor-string.bmp';
@@ -430,11 +422,10 @@ describe('Node.js GD Graphics Library', function() {
     });
   });
 
-  it('can create a truecolor Tiff image with text', async () => {
+  it('can create a truecolor Tiff image with text', async function() {
     var f, img, t, txtColor;
     if (gd.getGDVersion() < '2.2.4' || !gd.GD_TIFF) {
-      this.skip();
-      return;
+      return this.skip();
     }
     f = source + 'FreeSans.ttf';
     t = target + 'output-truecolor-string.tif';
