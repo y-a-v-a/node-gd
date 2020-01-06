@@ -32,4 +32,4 @@ addons:
     - g++-5
     - clang
     - libgd2-dev
-    - libtiff
+    - libtiff5-dev
