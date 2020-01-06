@@ -432,7 +432,7 @@ describe('Node.js GD Graphics Library', function() {
 
   it('can create a truecolor Tiff image with text', async () => {
     var f, img, t, txtColor;
-    if (gd.getGDVersion() < '2.2.4') {
+    if (gd.getGDVersion() < '2.2.4' || !gd.GD_TIFF) {
       this.skip();
       return;
     }
