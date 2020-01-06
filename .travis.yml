@@ -12,7 +12,7 @@ node_js:
 
 sudo: required
 
-dist: trusty
+dist: xenial
 
 install:
  - npm install
