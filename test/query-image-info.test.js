@@ -45,26 +45,21 @@ describe('Section Querying image information', function() {
     assert.equal(image.blue(someColor), 191);
   });
 
-  it('can query the color of a pixel within image bounds', function(done) {
+  it('can query the color of a pixel within image bounds', async function() {
     var s = source + 'input.png';
-    gd.openPng(s, function(error, image) {
-      var color = image.getTrueColorPixel(0,0);
-      assert.isNumber(color, 'got Number for getTrueColorPixel');
-      done();
-    });
+    const image = await gd.openPng(s);
+    var color = image.getTrueColorPixel(0,0);
+    assert.isNumber(color, 'got Number for getTrueColorPixel');
   });
 
-  it('will throw an error when quering the color of a pixel outside of image bounds', function(done) {
+  it('will throw an error when quering the color of a pixel outside of image bounds', async function() {
     var s = source + 'input.png';
-    gd.openPng(s, function(error, image) {
-      assert.throws(function() {
-        var color = image.getTrueColorPixel(-1,-1);
-      }, 'Value for x and y must be greater than 0');
+    const image = await gd.openPng(s);
+    assert.throws(function() {
+      var color = image.getTrueColorPixel(-1,-1);
+    }, 'Value for x and y must be greater than 0');
 
-      var color = image.getTrueColorPixel(image.width + 1,1);
-      assert.equal(0, color, '0 should be returned when querying above upper bounds');
-
-      done();
-    });
+    var color = image.getTrueColorPixel(image.width + 1,1);
+    assert.equal(0, color, '0 should be returned when querying above upper bounds');
   });
 });

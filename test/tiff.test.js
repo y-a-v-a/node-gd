@@ -9,32 +9,22 @@ var source = __dirname + '/fixtures/';
 var target = __dirname + '/output/';
 
 describe('Section Handling TIFF files', function() {
-  it('can open a tiff and save it as a jpg', function(done) {
+  it('can open a tiff and save it as a jpg', async function() {
     var s;
     var t;
     if (gd.getGDVersion() < '2.2.4') {
       this.skip();
-      return;
     }
     s = source + 'input.tif';
     t = target + 'output-from-tiff.jpg';
 
-    return gd.openTiff(s, function(error, img) {
-      if (error) {
-        throw error;
-      }
-      return img.saveJpeg(t, 100, function(error) {
-        if (error) {
-          throw error;
-        }
-        assert.ok(fs.existsSync(t));
-        img.destroy();
-        return done();
-      })
-    });
+    const img = await gd.openTiff(s);
+    await img.saveJpeg(t, 100);
+    assert.ok(fs.existsSync(t));
+    img.destroy();
   });
 
-  it('can open a jpg file and save it as a tiff', function(done) {
+  it('can open a jpg file and save it as a tiff', async function() {
     var s;
     var t;
     if (gd.getGDVersion() < '2.2.4') {
@@ -44,22 +34,13 @@ describe('Section Handling TIFF files', function() {
     s = source + 'input.jpg';
     t = target + 'output-from-jpg.tiff';
 
-    return gd.openJpeg(s, function(error, img) {
-      if (error) {
-        throw error;
-      }
-      return img.saveTiff(t, function(error) {
-        if (error) {
-          throw error;
-        }
-        assert.ok(fs.existsSync(t));
-        img.destroy();
-        return done();
-      });
-    });
+    const img = await gd.openJpeg(s);
+    await img.saveTiff(t);
+    assert.ok(fs.existsSync(t));
+    img.destroy();
   });
 
-  it('can open a tiff and save it as a tiff', function(done) {
+  it('can open a tiff and save it as a tiff', async function() {
     var s;
     var t;
     if (gd.getGDVersion() < '2.2.4') {
@@ -69,18 +50,13 @@ describe('Section Handling TIFF files', function() {
     s = source + 'input.tif';
     t = target + 'output-from-tiff.tif';
 
-    var image = gd.createFromTiff(s);
-    return image.saveTiff(t, function(error) {
-      if (error) {
-        throw error;
-      }
-      assert.ok(fs.existsSync(t));
-      image.destroy();
-      return done();
-    })
+    var image = await gd.createFromTiff(s);
+    await image.saveTiff(t);
+    assert.ok(fs.existsSync(t));
+    image.destroy();
   });
 
-  it('can open a tif and store it in a pointer and save a tiff from the pointer', function(done) {
+  it('can open a tif and store it in a pointer and save a tiff from the pointer', async function() {
     if (gd.getGDVersion() < '2.2.4') {
       this.skip();
       return;
@@ -90,14 +66,8 @@ describe('Section Handling TIFF files', function() {
 
     var imageData = fs.readFileSync(s);
     var image = gd.createFromTiffPtr(imageData);
-    return image.saveTiff(t, function(error) {
-      if (error) {
-        throw error;
-      }
-      assert.ok(fs.existsSync(t));
-      image.destroy();
-      return done();
-    });
-
+    await image.saveTiff(t);
+    assert.ok(fs.existsSync(t));
+    image.destroy();
   });
 });

@@ -21,4 +21,19 @@ describe("gd#openFile", () => {
       assert.ok(exception instanceof Error);
     }
   });
+
+  it('saveFile returns a Promise', async () => {
+    const img = await gd.openFile(`${source}input.jpg`);
+
+    var a = img.file(`${target}test.jpg`);
+    assert.isTrue(a.constructor == Promise);
+  });
+
+  it('saveFile returns a Promise which resolves to boolean', async () => {
+    const img = await gd.openFile(`${source}input.jpg`);
+
+    var a = await img.file(`${target}test1.jpg`);
+
+    assert.isTrue(a === true);
+  });
 })

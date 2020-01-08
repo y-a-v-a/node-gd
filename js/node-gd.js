@@ -6,48 +6,35 @@ let bindings;
 let versionMessage = 'Node-gd: method __METHOD__ only available from libgd2 version 2.1.1. '
     + 'Current installed is ';
 
-function openFormatFn(fmt) {
-  return function() {
-    const args = [...arguments];
-
-    const file = args.shift();
-    const cb = args.pop();
-
-    if (typeof cb !== "function") {
-      return bindings[`createFrom${fmt}`].apply(this, arguments);
-    }
-
-    return fs.readFile(file, function (err, data) {
-      let img;
-      if (err) {
-        return cb(err);
-      } else {
-        try {
-          img = bindings[`createFrom${fmt}Ptr`](data);
-        } catch (e) {
-          return cb(e);
-        }
-        return cb(null, img);
-      }
-    });
+/**
+ * @param {string} format
+ */
+function openFormatFn(format) {
+  return function(path = '') {
+    return bindings[`createFrom${format}`].call(this, path);
   };
 }
 
+/**
+ * @param {string} format
+ */
 function saveFormatFn(format) {
   format = format.toLowerCase();
 
-  return function () {
+  return function() {
     const args = [...arguments];
-
     const filename = args.shift();
-    const callback = args.pop();
 
-    if (typeof callback !== "function") {
-      return this[format].apply(this, arguments);
-    }
+    return new Promise((resolve, reject) => {
+      const data = this[`${format}Ptr`].apply(this, args);
 
-    const data = this[`${format}Ptr`].apply(this, args);
-    return fs.writeFile(filename, data, "binary", callback);
+      fs.writeFile(filename, data, 'latin1', error => {
+        if (error) {
+          return reject(error);
+        }
+        resolve(true);
+      });
+    });
   };
 }
 
@@ -111,11 +98,17 @@ versionMessage += bindings.getGDVersion();
 exportFormats();
 
 if (bindings.getGDVersion() >= '2.1.1') {
-  bindings.Image.prototype.saveFile = function() {
-    var args = [...arguments];
+  /**
+   * Wrapper around gdImageFile
+   * @returns Promise<gd.Image>
+   */
+  // bindings.Image.prototype.saveFile = function saveFile() {
+  //   var args = [...arguments];
 
-    return this.file.apply(this, args);
-  };
+  //   return new Promise((resolve, reject) => {
+  //     resolve(this.file.apply(this, args));
+  //   });
+  // };
 
   /**
    * Wrapper around gdImageCreateFromFile
@@ -139,9 +132,9 @@ if (bindings.getGDVersion() >= '2.1.1') {
     });
   };
 } else {
-  bindings.Image.prototype.saveFile = function() {
-    throw new Error(versionMessage.replace('__METHOD__', 'gd.Image#saveFile()'));
-  };
+  // bindings.Image.prototype.saveFile = function() {
+  //   throw new Error(versionMessage.replace('__METHOD__', 'gd.Image#saveFile()'));
+  // };
 
   bindings.openFile = function openFile() {
     throw new Error(versionMessage.replace('__METHOD__', 'gd.openFile()'));

@@ -50,6 +50,134 @@
 #define HAS_LIBTIFF (HAVE_LIBTIFF && SUPPORTS_GD_2_2_4)
 #define HAS_LIBWEBP (HAVE_LIBWEBP && SUPPORTS_GD_2_1_0)
 
+// Since gd 2.0.28, these are always built in
+#define GD_GIF 1
+#define GD_GIFANIM 1
+#define GD_OPENPOLYGON 1
+
+#define COLOR_ANTIALIASED    gdAntiAliased
+#define COLOR_BRUSHED        gdBrushed
+#define COLOR_STYLED         gdStyled
+#define COLOR_STYLEDBRUSHED  gdStyledBrushed
+#define COLOR_TITLED         gdTiled
+#define COLOR_TRANSPARENT    gdTransparent
+
+
+#define REQ_ARGS(N)                                                     \
+  if (info.Length() < (N)) {                                            \
+    Napi::Error::New(info.Env(), "Expected " #N " arguments").ThrowAsJavaScriptException(); \
+    return info.Env().Null();                                           \
+  }
+
+#define REQ_STR_ARG(I, VAR)                                             \
+  if (info.Length() <= (I) || !info[I].IsString()) {                    \
+    Napi::TypeError::New(info.Env(), "Argument " #I " must be a string").ThrowAsJavaScriptException(); \
+    return info.Env().Null();                                           \
+  }                                                                     \
+  std::string VAR = info[I].As<Napi::String>().Utf8Value().c_str();
+
+#define REQ_INT_ARG(I, VAR)                                             \
+  int VAR;                                                              \
+  if (info.Length() <= (I) || !info[I].IsNumber()) {                    \
+    Napi::TypeError::New(info.Env(), "Argument " #I " must be an integer").ThrowAsJavaScriptException(); \
+    return info.Env().Null();                                           \
+  }                                                                     \
+  VAR = info[I].ToNumber();
+
+#define INT_ARG_RANGE(I, PROP)                                          \
+  if ((I) < 1) {                                                        \
+    Napi::RangeError::New(info.Env(), "Value for " #PROP  " must be greater than 0").ThrowAsJavaScriptException(); \
+    return info.Env().Null();                                           \
+  }
+
+#define REQ_FN_ARG(I, VAR)                                              \
+  if (info.Length() <= (I) || !info[I].IsFunction()) {                  \
+    Napi::TypeError::New(info.Env(), "Argument " #I " must be a function").ThrowAsJavaScriptException(); \
+    return info.Env().Null();                                           \
+  }                                                                     \
+  Napi::Function VAR = info[I].As<Napi::Function>();
+
+#define REQ_DOUBLE_ARG(I, VAR)                                          \
+  double VAR;                                                           \
+  if (info.Length() <= (I) || !info[I].IsNumber()) {                    \
+    Napi::TypeError::New(info.Env(), "Argument " #I " must be a number").ThrowAsJavaScriptException(); \
+    return info.Env().Null();                                           \
+  }                                                                     \
+  VAR = info[I].ToNumber();
+
+#define REQ_EXT_ARG(I, VAR)                                             \
+  if (info.Length() <= (I) || !info[I].IsExternal()) {                  \
+    Napi::TypeError::New(info.Env(), "Argument " #I " invalid").ThrowAsJavaScriptException(); \
+  }                                                                     \
+  Napi::External<gdImagePtr> VAR = info[I].As<Napi::External<gdImagePtr>>();
+
+#define REQ_IMG_ARG(I, VAR)                                             \
+  if (info.Length() <= (I) || !info[I].IsObject()) {                    \
+    Napi::TypeError::New(info.Env(), "Argument " #I " must be an object").ThrowAsJavaScriptException(); \
+    return info.Env().Null();                                           \
+  }                                                                     \
+  Gd::Image* _obj_ = Napi::ObjectWrap<Gd::Image>::Unwrap(info[I].As<Napi::Object>()); \
+  gdImagePtr VAR = _obj_->getGdImagePtr();
+
+#define OPT_INT_ARG(I, VAR, DEFAULT)                                    \
+  int VAR;                                                              \
+  if (info.Length() <= (I)) {                                           \
+    VAR = (DEFAULT);                                                    \
+  } else if (info[I].IsNumber()) {                                      \
+    VAR = info[I].ToNumber();                                           \
+  } else {                                                              \
+    Napi::TypeError::New(info.Env(), "Optional argument " #I " must be an integer").ThrowAsJavaScriptException(); \
+    return info.Env().Null();                                           \
+  }
+
+#define OPT_BOOL_ARG(I, VAR, DEFAULT)                                   \
+  bool VAR;                                                             \
+  if (info.Length() <= (I)) {                                           \
+    VAR = (DEFAULT);                                                    \
+  } else if (info[I].IsBoolean()) {                                     \
+    VAR = info[I].ToBoolean();                                          \
+  } else {                                                              \
+    Napi::TypeError::New(info.Env(), "Optional argument " #I " must be a boolean").ThrowAsJavaScriptException(); \
+    return info.Env().Null();                                           \
+  }
+
+#define RETURN_IMAGE(IMG)                                               \
+  if (!IMG) {                                                           \
+    return info.Env().Null();                                           \
+  } else {                                                              \
+    Napi::Value argv = Napi::External<gdImagePtr>::New(info.Env(), &IMG); \
+    Napi::Object instance = Gd::Image::constructor.New({argv});         \
+    return instance;                                                    \
+  }
+
+#define DECLARE_CREATE_FROM(TYPE)                                       \
+  Napi::Value Gd::CreateFrom##TYPE(const Napi::CallbackInfo& info) {    \
+    return CreateFrom##TYPE##Worker::DoWork(info);                      \
+  }                                                                     \
+  Napi::Value Gd::CreateFrom##TYPE##Ptr(const Napi::CallbackInfo& info) { \
+    REQ_ARGS(1);                                                        \
+    ASSERT_IS_BUFFER(info[0]);                                          \
+    gdImagePtr im;                                                      \
+    Napi::Buffer<char> buffer = info[0].As<Napi::Buffer<char>>();       \
+    char *buffer_data = buffer.Data();                                  \
+    size_t buffer_length = buffer.Length();                             \
+    im = gdImageCreateFrom##TYPE##Ptr(buffer_length, buffer_data);      \
+    RETURN_IMAGE(im)                                                    \
+  }
+
+#define ASSERT_IS_BUFFER(val)                                           \
+  if (!val.IsBuffer()) {                                                \
+    Napi::TypeError::New(info.Env(), "Argument not a Buffer")           \
+      .ThrowAsJavaScriptException();                                    \
+    return info.Env().Null();                                           \
+  }
+
+#define RETURN_DATA                                                     \
+  Napi::Buffer<char> result = Napi::Buffer<char>::Copy(info.Env(), data, size); \
+  delete[] data;                                                        \
+  return result;
+
+
 class Gd : public Napi::ObjectWrap<Gd> {
 public:
   static Napi::Object Init(Napi::Env env, Napi::Object exports);

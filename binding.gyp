@@ -21,6 +21,7 @@
       "include_dirs": [
         "<!@(node -p \"require('node-addon-api').include\")"
       ],
+      'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
       'defines': [ 'NAPI_DISABLE_CPP_EXCEPTIONS' ],
       "conditions": [
         [ "OS=='freebsd'", {
@@ -28,6 +29,8 @@
           "include_dirs": ["/usr/local/include"]
         }],
         [ "OS=='mac'", {
+          'cflags+': ['-fvisibility=hidden'],
+          'cflags_cc': [ '-pedantic-errors', '-Wall', '-Weffc++', '-Wextra', '-Wsign-conversion'],
           "libraries": ["-L/usr/local/lib", "-L/opt/local/lib"],
           "include_dirs": ["/usr/local/include", "/opt/local/include"]
         }],

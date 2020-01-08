@@ -97,7 +97,7 @@ describe('Creating a paletted image', function() {
 
   it('throws an Error when creating an image without width and height - gd.create()', async () => {
     try {
-      gd.create();
+      await gd.create();
     } catch (exception) {
       assert.ok(exception instanceof Error);
     }
@@ -106,7 +106,7 @@ describe('Creating a paletted image', function() {
   it('throws a Error when the height parameter is 0 async', async () => {
     var img;
     try {
-      gd.create(100, 0, function(error, img) { });
+      await gd.create(100, 0);
     } catch (e) {
       assert.ok(e instanceof RangeError);
     }
@@ -123,17 +123,13 @@ describe('Creating a paletted image', function() {
   });
 
   it('returns an object containing basic information about the created image async', async () => {
-    gd.create(100, 100, function(error, image) {
-      if (error) {
-        throw error;
-      }
+    const image = await gd.create(100, 100);
 
-      assert.equal(image.width, 100);
-      assert.equal(image.height, 100);
-      assert.equal(image.trueColor, 0);
+    assert.equal(image.width, 100);
+    assert.equal(image.height, 100);
+    assert.equal(image.trueColor, 0);
 
-      image.destroy();
-    });
+    image.destroy();
   });
 });
 

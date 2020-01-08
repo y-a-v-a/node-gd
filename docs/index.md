@@ -15,15 +15,12 @@ Create a new image in memory of specified size and returns a Promise for an inst
 const gd = require('node-gd');
 const img = await gd.create(100, 100);
 
-img.saveJpeg('./test.jpg', 100, function(error) {
-  if (error) {
-    throw error;
-  }
-  img.destroy();
-});
+await img.saveJpeg('./test.jpg', 100)
+img.destroy();
 ```
 
 #### gd.createTrueColor(width, height)
+
 This is a true color image, and thus has a black background and a palette of millions of colors.
 
 ```javascript
@@ -31,40 +28,32 @@ const gd = require('node-gd');
 
 const img = await gd.createTrueColor(100, 100);
 
-img.saveJpeg('./test.jpg', 100, function(error) {
-  if (error) throw error;
-  img.destroy();
-});
+await img.saveJpeg('./test.jpg', 100);
+img.destroy();
 ```
 
-#### gd.openJpeg(path[, callback])
-Open a JPG file. If no callback is supplied, it will return an instance of `gd.Image`. In case of a supplied callback, it will receive two parameters: `error` and an instance of `gd.Image`. Uses `fs.readFile()` and `gd.createFromJpegPtr()` to load the image asynchronously.
+#### gd.openJpeg(path)
+
+Open a JPG file. It will return a Promise which will resolve with an instance of `gd.Image`. This is a short hand of `gd.createFromJpeg`.
 
 ```javascript
 const gd = require('node-gd');
 
 // open Jpeg image
-gd.openJpeg('/path/to/file.jpg', function(error, image) {
-  if (error) {
-    throw error;
-  }
+const image = await gd.openJpeg('/path/to/file.jpg');
 
-  // save it as a PNG image
-  image.savePng('/path/to/file.png', 0, function(error) {
-    if (error) {
-      throw error;
-    }
-    img.destroy();
-  });
-});
+// save it as a PNG image
+await image.savePng('/path/to/file.png', 0);
+img.destroy();
 ```
 
 #### gd.createFromJpeg(path)
-Synchronous version of `gd.openJpeg()`.
+
+Asynchronously load an image from disk. Returns a Promise.
 
 ```javascript
 const gd = require('node-gd');
-var img = gd.createFromJpeg('./path/to/image.jpg');
+var img = await gd.createFromJpeg('./path/to/image.jpg');
 
 // do something with img
 
@@ -74,26 +63,28 @@ img.destroy();
 #### gd.createFromJpegPtr(data)
 Load an image from a resource which is either a `String` or a `Buffer`.
 
-#### gd.openPng(path[, callback])
-Open a PNG file. The callback, if supplied, gets `error` and `image` as parameter. The image is an instance of `gd.Image`.
+#### gd.openPng(path)
+Open a PNG file. Returns a Promise.
 
 #### gd.createFromPng(path)
-Synchronous version of `gd.openPng()`.
+Asynchronously load a Png from disk. Returns a Promise.
 
 #### gd.createFromPngPtr(data)
 Load an image from a resource.
 
-#### gd.openGif(path[, callback])
-Open a GIF file asynchronously.
+#### gd.openGif(path)
+Open a GIF file asynchronously. Returns a Promise.
 
 #### gd.createFromGif(path)
-Synchronous version of `gd.openGif()`.
+Asynchronously load a Gif from disk. Returns a Promise.
 
 #### gd.createFromGifPtr(data)
 
-#### gd.openGd2(path[, callback])
+#### gd.openGd2(path)
+Returns a Promise.
 
 #### gd.createFromGd2(path)
+Asynchronously load a Gd2 from disk. Returns a Promise.
 
 #### gd.createFromGd2Ptr(data)
 
@@ -103,23 +94,27 @@ Synchronous version of `gd.openGif()`.
 
 #### gd.createFromGd2PartPtr(data, srcX, srcY, width, height)
 
-#### gd.openWBMP(path[, callback])
-Open a WBMP image file. WBMP stands for Wireless Application Protocol Bitmap Format, a monochrome graphics file format.
+#### gd.openWBMP(path)
+Open a WBMP image file. WBMP stands for Wireless Application Protocol Bitmap Format, a monochrome graphics file format. Returns a Promise.
 
-#### gd.createFromWBMP(path[, callback])
+#### gd.createFromWBMP(path)
+Asynchronously load a WBMP from disk. Returns a Promise.
 
 #### gd.createFromWBMPPtr(data)
 
-#### gd.openBmp(path[, callback])
-Open a BMP bitmap image file.
+#### gd.openBmp(path)
+Open a BMP bitmap image file. Returns a Promise.
 
 #### gd.createFromBmp(path)
+Asynchronously load a Bmp from disk. Returns a Promise.
 
 #### gd.createFromBmpPtr(data)
 
-#### gd.openTiff(path[, callback])
+#### gd.openTiff(path)
+Returns a Promise.
 
 #### gd.createFromTiff(path)
+Asynchronously load a Tiff from disk. Returns a Promise.
 
 #### gd.createFromTiffPtr(data)
 
@@ -206,10 +201,8 @@ const image = await gd.createTrueColor(101, 101);
 
 image.setPixel(51, 51, 0xff00ff);
 
-image.savePng('./test.png', 0, function(error) {
-  if (error) throw error;
-  image.destroy();
-});
+await image.savePng('./test.png', 0);
+image.destroy();
 ```
 
 #### gd.Image#line(x1, y1, x2, y2, color)
@@ -253,7 +246,7 @@ var color0 = img.colorAllocate(255,255,255);
 var color1 = img.colorAllocate(255,0,255);
 
 img.rectangle(20, 20, 280, 180, color1);
-img.saveFile('./test.png');
+await img.saveFile('./test.png');
 
 img.destroy();
 ```
@@ -270,7 +263,7 @@ var color1 = img.colorAllocate(255,0,255);
 
 img.filledRectangle(20, 20, 280, 180, color1);
 
-img.saveFile('./test.png');
+await img.saveFile('./test.png');
 img.destroy();
 ```
 
@@ -287,7 +280,7 @@ var color2 = img.colorAllocate(0, 255, 255);
 img.arc(150, 100, 200, 160, 0, 270, color1);
 img.arc(150, 100, 120, 120, 90, 0, color2);
 
-img.saveFile('./test.png');
+await img.saveFile('./test.png');
 img.destroy();
 ```
 
@@ -303,9 +296,8 @@ var c3 = image.colorAllocate(0, 50, 200); // blue
 image.filledArc(50, 50, 80, 80, 0, 225, c2, 4);
 image.arc(46, 46, 80, 80, 0, -90, c3);
 
-image.saveGif('test.gif', function(error) {
-  image.destroy();
-});
+await image.saveGif('test.gif');
+image.destroy();
 ```
 
 #### gd.Image#ellipse(cx, cy, width, height, color)
@@ -327,7 +319,7 @@ var color2 = img.colorAllocate(0, 255, 255);
 img.ellipse(150, 100, 160, 160, color2);
 img.fillToBorder(150,100, 2, color1);
 
-img.saveFile('./test.png');
+await img.saveFile('./test.png');
 img.destroy();
 ```
 
@@ -339,7 +331,7 @@ Create a white true color image
 var gd = requide('node-gd');
 var img = await gd.createTrueColor(100, 100);
 img.fill(0, 0, 0xffffff);
-img.saveFile('./test.jpg');
+await img.saveFile('./test.jpg');
 img.destroy();
 ```
 
@@ -350,7 +342,7 @@ var gd = requide('node-gd');
 var img = await gd.createTrueColor(100, 100);
 img.fill(0, 0, 0x7fffffff);
 img.saveAlpha(1);
-img.saveFile('./result.png');
+await img.saveFile('./result.png');
 img.destroy();
 ```
 
@@ -377,7 +369,7 @@ img.setThickness(30);
 img.line(0, 0, 300, 200, color1);
 img.line(0, 200, 300, 0, color1);
 
-img.saveFile('./test.png');
+await img.saveFile('./test.png');
 img.destroy();
 ```
 
@@ -409,12 +401,7 @@ img.filledRectangle(0, 0, 100, 100, color);
 // elements to blend with other layers.
 // img.alphaBlending(1);
 
-img.savePng('output.png', 0, function(err) {
-  if(err) {
-    throw err;
-  }
-});
-
+await img.savePng('output.png', 0);
 img.destroy();
 ```
 
@@ -439,12 +426,7 @@ var blue = gd.trueColorAlpha(0, 0, 255, 64);
 img.filledRectangle(0, 0, 80, 80, red);
 img.filledRectangle(20, 20, 100, 100, blue);
 
-img.savePng('output.png', 0, function(err) {
-  if(err) {
-    throw err;
-  }
-});
-
+await img.savePng('output.png', 0);
 img.destroy();
 ```
 
@@ -470,12 +452,7 @@ var blue = gd.trueColorAlpha(0, 0, 255, 64);
 img.filledRectangle(0, 0, 80, 80, red);
 img.filledRectangle(20, 20, 100, 100, blue);
 
-img.savePng('output2.png', 0, function(err) {
-  if(err) {
-    throw err;
-  }
-});
-
+await img.savePng('output2.png', 0);
 img.destroy();
 ```
 
@@ -523,7 +500,7 @@ img.line(0, 200, 300, 0, color);
 // will output ff00ff
 console.log(img.getTrueColorPixel(50, 50).toString(16));
 
-img.saveFile('./test.png');
+await img.saveFile('./test.png');
 img.destroy();
 ```
 
@@ -669,12 +646,8 @@ var palette = trueColor.createPaletteFromTrueColor(1, 128);
 trueColor.colorMatch(palette);
 
 // save the palette based image
-palette.saveFile('/path/to/result.gif', function(err) {
-  if (err) {
-    throw err;
-  }
-  palette.destroy();
-});
+await palette.saveFile('/path/to/result.gif');
+palette.destroy();
 ```
 
 #### gd.Image#gifAnimBegin(anim, useGlobalColorMap, loops)
@@ -742,8 +715,8 @@ Copy an image onto a destination image: `dest`. You'll have to save the destinat
 const gd = require('node-gd');
 var output = '../output/image-watermark.png';
 
-var watermark = gd.createFromPng('../input/watermark.png');
-var input = gd.createFromPng('../input/input.png');
+var watermark = await gd.createFromPng('../input/watermark.png');
+var input = await gd.createFromPng('../input/input.png');
 
 watermark.alphaBlending(1);
 watermark.saveAlpha(1);
@@ -752,11 +725,9 @@ watermark.saveAlpha(1);
 watermark.copy(input, 0, 0, 0, 0, 100, 100);
 
 // save the destination
-input.savePng(output, 0, function(error) {
-  if (error) throw error;
-  input.destroy();
-  watermark.destroy();
-});
+await input.savePng(output, 0);
+input.destroy();
+watermark.destroy();
 ```
 
 Example using chaining:
@@ -766,9 +737,9 @@ const gd = require('node-gd');
 var output = '../output/image-watermark.png';
 var output2 = '../output/image-watermark2.png';
 
-var watermark = gd.createFromPng('../input/watermark.png');
-var input = gd.createFromPng('../input/input.png');
-var input2 = gd.createFromPng('../input/input2.png');
+var watermark = await gd.createFromPng('../input/watermark.png');
+var input = await gd.createFromPng('../input/input.png');
+var input2 = await gd.createFromPng('../input/input2.png');
 
 watermark.alphaBlending(1)
 .saveAlpha(1)
@@ -776,13 +747,8 @@ watermark.alphaBlending(1)
 .contrast(-900)
 .copy(input2, 0, 0, 0, 0, 100, 100)
 
-input.savePng(output, 0, function(error) {
-  if (error) throw error;
-});
-
-input2.savePng(output2, 0, function(error) {
-  if (error) throw error;
-});
+await input.savePng(output);
+await input2.savePng(output2, 0);
 ```
 
 
@@ -809,7 +775,7 @@ The functions `gd.Image#savePng`, `gd.Image#saveJpeg`, `gd.Image#saveGif`, etc. 
 
 ```javascript
 const gd = require('node-gd');
-gd.openPng('/path/to/input.png', function(err, img) {
+gd.openPng('/path/to/input.png', async function(err, img) {
   if (err) {
     throw err;
   }
@@ -821,16 +787,11 @@ gd.openPng('/path/to/input.png', function(err, img) {
 
   // create instance of gd.Image() for jpg file
   var jpgImage = gd.createFromJpegPtr(jpgImageData);
-  jpgImage.saveFile('./test01.jpg', function(err) {
-    if (err) throw err;
-  });
+  await jpgImage.saveFile('./test01.jpg');
 
   // create instance of gd.Image() for gif file
   var gifImage = gd.createFromGifPtr(gifImageData);
-  gifImage.saveFile('./test01.gif', function(err) {
-    if (err) throw err;
-  });
-
+  await gifImage.saveFile('./test01.gif');
   img.destroy();
 });
 ```
@@ -897,10 +858,8 @@ var img = await gd.createTrueColor(100,100);
 img.interlace = true; // set interlace to true
 
 // will save jpeg as progressive jpeg image.
-img.saveJpeg('/path/to/output.jpg', 100, function(err) {
-  if (err) throw err;
-  img.destroy();
-});
+await img.saveJpeg('/path/to/output.jpg', 100);
+img.destroy();
 ```
 
 #### gd.Image#height
