@@ -304,7 +304,7 @@ class CreateFromTiffWorker : public CreateFromWorker {
 // File
 class FileWorker : public AsyncWorker {
   public:
-    static Value DoWork(const CallbackInfo& info, gdImagePtr gdImage) {
+    static Value DoWork(const CallbackInfo& info, gdImagePtr& gdImage) {
       REQ_STR_ARG(0, path);
 
       FileWorker* worker = new FileWorker(info.Env(), "FileWorkerResource");
@@ -320,7 +320,7 @@ class FileWorker : public AsyncWorker {
       _success = gdImageFile(*_gdImage, path.c_str());
 
       if (!_success) {
-        SetError("Cannot safe file");
+        SetError("Cannot save file");
       }
     }
 

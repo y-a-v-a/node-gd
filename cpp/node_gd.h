@@ -51,9 +51,9 @@
 #define HAS_LIBWEBP (HAVE_LIBWEBP && SUPPORTS_GD_2_1_0)
 
 // Since gd 2.0.28, these are always built in
-#define GD_GIF 1
-#define GD_GIFANIM 1
-#define GD_OPENPOLYGON 1
+#define GD_GIF          1
+#define GD_GIFANIM      1
+#define GD_OPENPOLYGON  1
 
 #define COLOR_ANTIALIASED    gdAntiAliased
 #define COLOR_BRUSHED        gdBrushed

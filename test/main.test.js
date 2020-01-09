@@ -308,18 +308,4 @@ describe('Node.js GD Graphics Library', function() {
     await img.saveBmp(t, 0);
     assert.ok(fs.existsSync(t));
   });
-
-  it('can create a truecolor Tiff image with text', async function() {
-    var f, img, t, txtColor;
-    if (gd.getGDVersion() < '2.2.4' || !gd.GD_TIFF) {
-      return this.skip();
-    }
-    f = source + 'FreeSans.ttf';
-    t = target + 'output-truecolor-string.tif';
-    img = await gd.createTrueColor(120, 20);
-    txtColor = img.colorAllocate(255, 255, 0);
-    img.stringFT(txtColor, f, 16, 0, 8, 18, "Hello world!");
-    await img.saveTiff(t);
-    assert.ok(fs.existsSync(t));
-  });
 });
