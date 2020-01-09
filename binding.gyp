@@ -16,7 +16,9 @@
   "targets": [
     {
       "target_name": "node_gd",
-      "sources": ["cpp/addon.cc"],
+      "sources": [
+        "cpp/addon.cc"
+      ],
       "libraries": ["-lgd"],
       "include_dirs": [
         "<!@(node -p \"require('node-addon-api').include\")"
@@ -30,7 +32,9 @@
         }],
         [ "OS=='mac'", {
           'cflags+': ['-fvisibility=hidden'],
-          'cflags_cc': [ '-pedantic-errors', '-Wall', '-Weffc++', '-Wextra', '-Wsign-conversion'],
+          'xcode_settings': {
+            'GCC_SYMBOLS_PRIVATE_EXTERN': 'YES', # -fvisibility=hidden
+          },
           "libraries": ["-L/usr/local/lib", "-L/opt/local/lib"],
           "include_dirs": ["/usr/local/include", "/opt/local/include"]
         }],

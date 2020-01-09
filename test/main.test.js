@@ -1,3 +1,7 @@
+/**
+ * Note to self: when skipping a test with `this.skip()`, do not use an arrow function,
+ * since Mocha appears to try to bind `this` to the test function.
+ */
 var fs = require('fs');
 
 var gd = require('../js/node-gd.js');

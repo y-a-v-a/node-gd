@@ -9,6 +9,9 @@
   "os": [
     "!win32"
   ],
+  "engines": {
+    "node": ">=6"
+  },
   "homepage": "https://github.com/y-a-v-a/node-gd",
   "bugs": "https://github.com/y-a-v-a/node-gd/issues",
   "scripts": {

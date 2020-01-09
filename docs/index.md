@@ -246,7 +246,7 @@ var color0 = img.colorAllocate(255,255,255);
 var color1 = img.colorAllocate(255,0,255);
 
 img.rectangle(20, 20, 280, 180, color1);
-await img.saveFile('./test.png');
+await img.file('./test.png');
 
 img.destroy();
 ```
@@ -263,7 +263,7 @@ var color1 = img.colorAllocate(255,0,255);
 
 img.filledRectangle(20, 20, 280, 180, color1);
 
-await img.saveFile('./test.png');
+await img.file('./test.png');
 img.destroy();
 ```
 
@@ -280,7 +280,7 @@ var color2 = img.colorAllocate(0, 255, 255);
 img.arc(150, 100, 200, 160, 0, 270, color1);
 img.arc(150, 100, 120, 120, 90, 0, color2);
 
-await img.saveFile('./test.png');
+await img.file('./test.png');
 img.destroy();
 ```
 
@@ -319,7 +319,7 @@ var color2 = img.colorAllocate(0, 255, 255);
 img.ellipse(150, 100, 160, 160, color2);
 img.fillToBorder(150,100, 2, color1);
 
-await img.saveFile('./test.png');
+await img.file('./test.png');
 img.destroy();
 ```
 
@@ -331,7 +331,7 @@ Create a white true color image
 var gd = requide('node-gd');
 var img = await gd.createTrueColor(100, 100);
 img.fill(0, 0, 0xffffff);
-await img.saveFile('./test.jpg');
+await img.file('./test.jpg');
 img.destroy();
 ```
 
@@ -342,7 +342,7 @@ var gd = requide('node-gd');
 var img = await gd.createTrueColor(100, 100);
 img.fill(0, 0, 0x7fffffff);
 img.saveAlpha(1);
-await img.saveFile('./result.png');
+await img.file('./result.png');
 img.destroy();
 ```
 
@@ -369,7 +369,7 @@ img.setThickness(30);
 img.line(0, 0, 300, 200, color1);
 img.line(0, 200, 300, 0, color1);
 
-await img.saveFile('./test.png');
+await img.file('./test.png');
 img.destroy();
 ```
 
@@ -500,7 +500,7 @@ img.line(0, 200, 300, 0, color);
 // will output ff00ff
 console.log(img.getTrueColorPixel(50, 50).toString(16));
 
-await img.saveFile('./test.png');
+await img.file('./test.png');
 img.destroy();
 ```
 
@@ -646,7 +646,7 @@ var palette = trueColor.createPaletteFromTrueColor(1, 128);
 trueColor.colorMatch(palette);
 
 // save the palette based image
-await palette.saveFile('/path/to/result.gif');
+await palette.file('/path/to/result.gif');
 palette.destroy();
 ```
 
@@ -787,11 +787,11 @@ gd.openPng('/path/to/input.png', async function(err, img) {
 
   // create instance of gd.Image() for jpg file
   var jpgImage = gd.createFromJpegPtr(jpgImageData);
-  await jpgImage.saveFile('./test01.jpg');
+  await jpgImage.file('./test01.jpg');
 
   // create instance of gd.Image() for gif file
   var gifImage = gd.createFromGifPtr(gifImageData);
-  await gifImage.saveFile('./test01.gif');
+  await gifImage.file('./test01.gif');
   img.destroy();
 });
 ```
@@ -821,8 +821,8 @@ Only available from GD version 2.1.1. The compression parameter is eiterh `0` fo
 #### gd.Image#saveTiff(path[, callback])
 As per libgd 2.2.4, opening TIFF files appears to be fixed, and saving image data as TIFF worked already fine. Therefore, `gd.openTiff()` is available again. Only available from GD version 2.1.1.
 
-#### gd.Image#saveFile(path[, callback])
-Lets GD decide in which format the image should be stored to disk, based on the supplied file name extension. Only available from GD version 2.1.1. This is not really asynchronous, since it uses a GD implementation of writing to disk, instead of a node / libuv based one.
+#### gd.Image#file(path)
+Lets GD decide in which format the image should be stored to disk, based on the supplied file name extension. Only available from GD version 2.1.1. Returns a Promise.
 
 ### Image properties
 Any instance of `gd.Image()` has a basic set of instance properties accessible as read only values.

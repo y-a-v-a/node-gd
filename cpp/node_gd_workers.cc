@@ -17,13 +17,16 @@
 #include <napi.h>
 #include "node_gd.h"
 
+/**
+ * @see https://github.com/nodejs/node-addon-api
+ */
 using namespace Napi;
 
 /**
  * CreateFromWorker only to be inherited from
  *
  * This worker class contains recurring code. The CreateFromJpegWorker and others
- * are children of this class
+ * are decendants of this class. Returns a Promise.
  */
 class CreateFromWorker : public AsyncWorker {
   public:
@@ -53,7 +56,9 @@ class CreateFromWorker : public AsyncWorker {
     std::string path;
 };
 
-// JPG
+/**
+ * CreateFromJpegWorker for Jpeg files
+ */
 class CreateFromJpegWorker : public CreateFromWorker {
   public:
     static Value DoWork(const CallbackInfo& info) {
@@ -68,9 +73,9 @@ class CreateFromJpegWorker : public CreateFromWorker {
 
   protected:
     void Execute() override {
-      // execute the async task
+      // execute the task
       FILE *in; in = fopen(path.c_str(), "rb");
-      if (in == NULL) {
+      if (in == nullptr) {
         SetError("Cannot open JPEG file");
       }
       image = gdImageCreateFromJpeg(in);
@@ -100,7 +105,7 @@ class CreateFromPngWorker : public CreateFromWorker {
     void Execute() override {
       // execute the async task
       FILE *in; in = fopen(path.c_str(), "rb");
-      if (in == NULL) {
+      if (in == nullptr) {
         SetError("Cannot open PNG file");
       }
       image = gdImageCreateFromPng(in);
@@ -130,7 +135,7 @@ class CreateFromGifWorker : public CreateFromWorker {
     void Execute() override {
       // execute the async task
       FILE *in; in = fopen(path.c_str(), "rb");
-      if (in == NULL) {
+      if (in == nullptr) {
         SetError("Cannot open GIF file");
       }
       image = gdImageCreateFromGif(in);
@@ -160,7 +165,7 @@ class CreateFromGd2Worker : public CreateFromWorker {
     void Execute() override {
       // execute the async task
       FILE *in; in = fopen(path.c_str(), "rb");
-      if (in == NULL) {
+      if (in == nullptr) {
         SetError("Cannot open GD2 file");
       }
       image = gdImageCreateFromGd2(in);
@@ -190,7 +195,7 @@ class CreateFromWBMPWorker : public CreateFromWorker {
     void Execute() override {
       // execute the async task
       FILE *in; in = fopen(path.c_str(), "rb");
-      if (in == NULL) {
+      if (in == nullptr) {
         SetError("Cannot open WBMP file");
       }
       image = gdImageCreateFromWBMP(in);
@@ -220,7 +225,7 @@ class CreateFromWebpWorker : public CreateFromWorker {
     void Execute() override {
       // execute the async task
       FILE *in; in = fopen(path.c_str(), "rb");
-      if (in == NULL) {
+      if (in == nullptr) {
         SetError("Cannot open WEBP file");
       }
       image = gdImageCreateFromWebp(in);
@@ -250,7 +255,7 @@ class CreateFromBmpWorker : public CreateFromWorker {
     void Execute() override {
       // execute the async task
       FILE *in; in = fopen(path.c_str(), "rb");
-      if (in == NULL) {
+      if (in == nullptr) {
         SetError("Cannot open BMP file");
       }
       image = gdImageCreateFromBmp(in);
@@ -280,7 +285,7 @@ class CreateFromTiffWorker : public CreateFromWorker {
     void Execute() override {
       // execute the async task
       FILE *in; in = fopen(path.c_str(), "rb");
-      if (in == NULL) {
+      if (in == nullptr) {
         SetError("Cannot open TIFF file");
       }
       image = gdImageCreateFromTiff(in);
@@ -301,7 +306,10 @@ class CreateFromTiffWorker : public CreateFromWorker {
 
 
 
-// File
+/**
+ * FileWorker handling gdImageFile via the AsyncWorker
+ * Returns a Promise
+ */
 class FileWorker : public AsyncWorker {
   public:
     static Value DoWork(const CallbackInfo& info, gdImagePtr& gdImage) {

@@ -53,7 +53,7 @@ describe('Section Handling file types', function() {
     canvas.destroy();
   });
 
-  it('can copy a png into WBMP - gd.Image#saveWBMP()', async () => {
+  it('can copy a png into WBMP - gd.Image#saveWBMP()', async function() {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
       this.skip();

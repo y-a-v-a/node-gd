@@ -80,11 +80,7 @@ async function main() {
   img.stringFT(txtColor, fontPath, 24, 0, 10, 60, 'Hello world!');
 
   // Write image buffer to disk
-  img.savePng('output.png', 1, function(err) {
-    if(err) {
-      throw err;
-    }
-  });
+  await img.savePng('output.png', 1);
 
   // Destroy image to clean memory
   img.destroy();
@@ -114,7 +110,7 @@ async function main() {
 
   img.setThickness(4);
   img.polygon(points, 0xff0000);
-  img.bmp('test1.bmp', 0);
+  img.saveBmp('test1.bmp', 0);
   img.destroy();
 }
 
@@ -131,7 +127,7 @@ async function main() {
 
   img.emboss();
   img.brightness(75);
-  img.saveFile('/path/to/newFile.bmp');
+  await img.file('/path/to/newFile.bmp');
   img.destroy();
 }
 

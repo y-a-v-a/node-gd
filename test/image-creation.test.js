@@ -15,7 +15,14 @@ var target = __dirname + '/output/';
  * ╩┴ ┴┴ ┴└─┘└─┘  └─┘┴└─└─┘┴ ┴ ┴ ┴└─┘┘└┘
  */
 describe('Creating a paletted image', function() {
-  it('can be done synchronously', async () => {
+  it('returns a Promise', () => {
+    const imagePromise = gd.create(100,100);
+    assert.ok(imagePromise.constructor === Promise);
+
+    imagePromise.then(image => image.destroy());
+  });
+
+  it('can be done', async () => {
     var img = await gd.create(100, 100);
 
     assert.ok(img instanceof gd.Image);
@@ -121,23 +128,29 @@ describe('Creating a paletted image', function() {
 
     img.destroy();
   });
-
-  it('returns an object containing basic information about the created image async', async () => {
-    const image = await gd.create(100, 100);
-
-    assert.equal(image.width, 100);
-    assert.equal(image.height, 100);
-    assert.equal(image.trueColor, 0);
-
-    image.destroy();
-  });
 });
 
 /**
  * gd.createTrueColor and await gd.createTrueColor
  */
 describe('Create a true color image', function() {
-  it('can be done synchronously.', async () => {
+  it('returns a Promise', () => {
+    const imagePromise = gd.createTrueColor(101,101);
+
+    assert.ok(imagePromise.constructor === Promise);
+
+    imagePromise.then(image => image.destroy());
+  });
+
+  it('returns a Promise that resolves to an Image', async function() {
+    const imagePromise = gd.createTrueColor(101,101);
+
+    imagePromise.then(image => {
+      assert.ok(image.constructor === gd.Image);
+    });
+  });
+
+  it('can be done', async () => {
     var img = await gd.createTrueColor(100, 100);
     assert.ok(img instanceof gd.Image);
     img.destroy();
@@ -168,13 +181,6 @@ describe('Create a true color image', function() {
     } catch (e) {
       assert.ok(e instanceof TypeError);
     }
-  });
-
-  it('can be done asynchronously.', async () => {
-    var img = await gd.createTrueColor(10, 10);
-    assert.ok(img instanceof gd.Image);
-    img.destroy();
-
   });
 
   it('throws a RangeError when the width parameter is 0', async () => {

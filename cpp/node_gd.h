@@ -65,13 +65,17 @@
 
 #define REQ_ARGS(N)                                                     \
   if (info.Length() < (N)) {                                            \
-    Napi::Error::New(info.Env(), "Expected " #N " arguments").ThrowAsJavaScriptException(); \
+    Napi::Error::New(info.Env(),                                        \
+      "Expected " #N " arguments")                                      \
+      .ThrowAsJavaScriptException();                                    \
     return info.Env().Null();                                           \
   }
 
 #define REQ_STR_ARG(I, VAR)                                             \
   if (info.Length() <= (I) || !info[I].IsString()) {                    \
-    Napi::TypeError::New(info.Env(), "Argument " #I " must be a string").ThrowAsJavaScriptException(); \
+    Napi::TypeError::New(info.Env(),                                    \
+      "Argument " #I " must be a string")                               \
+      .ThrowAsJavaScriptException();                                    \
     return info.Env().Null();                                           \
   }                                                                     \
   std::string VAR = info[I].As<Napi::String>().Utf8Value().c_str();
@@ -79,20 +83,26 @@
 #define REQ_INT_ARG(I, VAR)                                             \
   int VAR;                                                              \
   if (info.Length() <= (I) || !info[I].IsNumber()) {                    \
-    Napi::TypeError::New(info.Env(), "Argument " #I " must be an integer").ThrowAsJavaScriptException(); \
+    Napi::TypeError::New(info.Env(),                                    \
+      "Argument " #I " must be an integer")                             \
+      .ThrowAsJavaScriptException();                                    \
     return info.Env().Null();                                           \
   }                                                                     \
   VAR = info[I].ToNumber();
 
 #define INT_ARG_RANGE(I, PROP)                                          \
   if ((I) < 1) {                                                        \
-    Napi::RangeError::New(info.Env(), "Value for " #PROP  " must be greater than 0").ThrowAsJavaScriptException(); \
+    Napi::RangeError::New(info.Env(),                                   \
+      "Value for " #PROP " must be greater than 0")                     \
+      .ThrowAsJavaScriptException();                                    \
     return info.Env().Null();                                           \
   }
 
 #define REQ_FN_ARG(I, VAR)                                              \
   if (info.Length() <= (I) || !info[I].IsFunction()) {                  \
-    Napi::TypeError::New(info.Env(), "Argument " #I " must be a function").ThrowAsJavaScriptException(); \
+    Napi::TypeError::New(info.Env(),                                    \
+      "Argument " #I " must be a function")                             \
+      .ThrowAsJavaScriptException();                                    \
     return info.Env().Null();                                           \
   }                                                                     \
   Napi::Function VAR = info[I].As<Napi::Function>();
@@ -100,23 +110,31 @@
 #define REQ_DOUBLE_ARG(I, VAR)                                          \
   double VAR;                                                           \
   if (info.Length() <= (I) || !info[I].IsNumber()) {                    \
-    Napi::TypeError::New(info.Env(), "Argument " #I " must be a number").ThrowAsJavaScriptException(); \
+    Napi::TypeError::New(info.Env(),                                    \
+      "Argument " #I " must be a number")                               \
+      .ThrowAsJavaScriptException();                                    \
     return info.Env().Null();                                           \
   }                                                                     \
   VAR = info[I].ToNumber();
 
 #define REQ_EXT_ARG(I, VAR)                                             \
   if (info.Length() <= (I) || !info[I].IsExternal()) {                  \
-    Napi::TypeError::New(info.Env(), "Argument " #I " invalid").ThrowAsJavaScriptException(); \
+    Napi::TypeError::New(info.Env(),                                    \
+      "Argument " #I " invalid")                                        \
+      .ThrowAsJavaScriptException();                                    \
   }                                                                     \
-  Napi::External<gdImagePtr> VAR = info[I].As<Napi::External<gdImagePtr>>();
+  Napi::External<gdImagePtr> VAR =                                      \
+    info[I].As<Napi::External<gdImagePtr>>();
 
 #define REQ_IMG_ARG(I, VAR)                                             \
   if (info.Length() <= (I) || !info[I].IsObject()) {                    \
-    Napi::TypeError::New(info.Env(), "Argument " #I " must be an object").ThrowAsJavaScriptException(); \
+    Napi::TypeError::New(info.Env(),                                    \
+      "Argument " #I " must be an object")                              \
+      .ThrowAsJavaScriptException();                                    \
     return info.Env().Null();                                           \
   }                                                                     \
-  Gd::Image* _obj_ = Napi::ObjectWrap<Gd::Image>::Unwrap(info[I].As<Napi::Object>()); \
+  Gd::Image* _obj_ =                                                    \
+    Napi::ObjectWrap<Gd::Image>::Unwrap(info[I].As<Napi::Object>());    \
   gdImagePtr VAR = _obj_->getGdImagePtr();
 
 #define OPT_INT_ARG(I, VAR, DEFAULT)                                    \
@@ -126,7 +144,9 @@
   } else if (info[I].IsNumber()) {                                      \
     VAR = info[I].ToNumber();                                           \
   } else {                                                              \
-    Napi::TypeError::New(info.Env(), "Optional argument " #I " must be an integer").ThrowAsJavaScriptException(); \
+    Napi::TypeError::New(info.Env(),                                    \
+      "Optional argument " #I " must be an integer")                    \
+      .ThrowAsJavaScriptException();                                    \
     return info.Env().Null();                                           \
   }
 
@@ -137,7 +157,9 @@
   } else if (info[I].IsBoolean()) {                                     \
     VAR = info[I].ToBoolean();                                          \
   } else {                                                              \
-    Napi::TypeError::New(info.Env(), "Optional argument " #I " must be a boolean").ThrowAsJavaScriptException(); \
+    Napi::TypeError::New(info.Env(),                                    \
+      "Optional argument " #I " must be a boolean")                     \
+      .ThrowAsJavaScriptException();                                    \
     return info.Env().Null();                                           \
   }
 
@@ -145,7 +167,8 @@
   if (!IMG) {                                                           \
     return info.Env().Null();                                           \
   } else {                                                              \
-    Napi::Value argv = Napi::External<gdImagePtr>::New(info.Env(), &IMG); \
+    Napi::Value argv =                                                  \
+      Napi::External<gdImagePtr>::New(info.Env(), &IMG);                \
     Napi::Object instance = Gd::Image::constructor.New({argv});         \
     return instance;                                                    \
   }
@@ -154,7 +177,8 @@
   Napi::Value Gd::CreateFrom##TYPE(const Napi::CallbackInfo& info) {    \
     return CreateFrom##TYPE##Worker::DoWork(info);                      \
   }                                                                     \
-  Napi::Value Gd::CreateFrom##TYPE##Ptr(const Napi::CallbackInfo& info) { \
+  Napi::Value Gd::CreateFrom##TYPE##Ptr                                 \
+      (const Napi::CallbackInfo& info) {                                \
     REQ_ARGS(1);                                                        \
     ASSERT_IS_BUFFER(info[0]);                                          \
     gdImagePtr im;                                                      \
@@ -173,7 +197,8 @@
   }
 
 #define RETURN_DATA                                                     \
-  Napi::Buffer<char> result = Napi::Buffer<char>::Copy(info.Env(), data, size); \
+  Napi::Buffer<char> result =                                           \
+    Napi::Buffer<char>::Copy(info.Env(), data, size);                   \
   delete[] data;                                                        \
   return result;
 
@@ -355,9 +380,15 @@ public:
   };
 
 private:
+  /**
+   * Section A - Creation of new image in memory
+   */
   static Napi::Value ImageCreate(const Napi::CallbackInfo& info);
   static Napi::Value ImageCreateTrueColor(const Napi::CallbackInfo& info);
 
+  /**
+   * Section B - Creation of image in memory from a source (either file or Buffer)
+   */
   static Napi::Value CreateFromJpeg(const Napi::CallbackInfo& info);
   static Napi::Value CreateFromJpegPtr(const Napi::CallbackInfo& info);
   static Napi::Value CreateFromPng(const Napi::CallbackInfo& info);
@@ -382,14 +413,25 @@ private:
   static Napi::Value CreateFromTiffPtr(const Napi::CallbackInfo& info);
 #endif
 
+/**
+ * Section C - Creation of image in memory from a file, type based on file extension
+ */
 #if SUPPORTS_GD_2_1_1
   static Napi::Value CreateFromFile(const Napi::CallbackInfo& info);
 #endif
 
   static Napi::Value CreateFromGd2Part(const Napi::CallbackInfo& info);
   static Napi::Value CreateFromGd2PartPtr(const Napi::CallbackInfo& info);
+
+  /**
+   * Section D - Calculate functions
+   */
   static Napi::Value TrueColor(const Napi::CallbackInfo& info);
   static Napi::Value TrueColorAlpha(const Napi::CallbackInfo& info);
+
+  /**
+   * Section E - Meta information
+   */
   static Napi::Value GdVersionGetter(const Napi::CallbackInfo& info);
 };
 

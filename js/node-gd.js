@@ -99,18 +99,6 @@ exportFormats();
 
 if (bindings.getGDVersion() >= '2.1.1') {
   /**
-   * Wrapper around gdImageFile
-   * @returns Promise<gd.Image>
-   */
-  // bindings.Image.prototype.saveFile = function saveFile() {
-  //   var args = [...arguments];
-
-  //   return new Promise((resolve, reject) => {
-  //     resolve(this.file.apply(this, args));
-  //   });
-  // };
-
-  /**
    * Wrapper around gdImageCreateFromFile
    * With safety check for file existence to mitigate
    * uninformative segmentation faults from libgd
@@ -132,9 +120,9 @@ if (bindings.getGDVersion() >= '2.1.1') {
     });
   };
 } else {
-  // bindings.Image.prototype.saveFile = function() {
-  //   throw new Error(versionMessage.replace('__METHOD__', 'gd.Image#saveFile()'));
-  // };
+  bindings.Image.prototype.file = function() {
+    throw new Error(versionMessage.replace('__METHOD__', 'gd.Image#file()'));
+  };
 
   bindings.openFile = function openFile() {
     throw new Error(versionMessage.replace('__METHOD__', 'gd.openFile()'));

@@ -62,6 +62,9 @@ Napi::Object Gd::Init(Napi::Env env, Napi::Object exports) {
   gdSetErrorMethod(nodeGdErrorWrapper);
 #endif
 
+  /**
+   * Section E - Meta information
+   */
   exports.Set("COLOR_ANTIALIASED", Napi::Number::New(env, COLOR_ANTIALIASED));
   exports.Set("COLOR_BRUSHED", Napi::Number::New(env, COLOR_BRUSHED));
   exports.Set("COLOR_STYLED", Napi::Number::New(env, COLOR_STYLED));
@@ -457,7 +460,7 @@ Gd::Image::Image(const Napi::CallbackInfo& info)
 Gd::Image::~Image() {
   if(this->_image) {
     gdImageDestroy(this->_image);
-    this->_image = NULL;
+    this->_image = nullptr;
   }
 }
 
@@ -467,10 +470,10 @@ Gd::Image::~Image() {
 Napi::Value Gd::Image::Destroy(const Napi::CallbackInfo& info) {
   if(this->_image){
     gdImageDestroy(this->_image);
-    this->_image = NULL;
+    this->_image = nullptr;
   }
 
-  this->_image = NULL;
+  this->_image = nullptr;
   return info.Env().Undefined();
 }
 
@@ -1147,7 +1150,7 @@ Napi::Value Gd::Image::StringFTBBox(const Napi::CallbackInfo& info) {
   char *fontlist = &font[0];
   char *text = &str[0];
 
-  err = gdImageStringFT(NULL, &brect[0], color, fontlist, size, angle, x, y, text);
+  err = gdImageStringFT(nullptr, &brect[0], color, fontlist, size, angle, x, y, text);
   if (err) {
     Napi::Error::New(info.Env(), err).ThrowAsJavaScriptException();
     return info.Env().Null();
@@ -1179,7 +1182,7 @@ Napi::Value Gd::Image::StringFT(const Napi::CallbackInfo& info) {
   char *text = &str[0];
 
   if (return_rectangle) {
-    error = gdImageStringFT(NULL, &brect[0], color, fontlist, size, angle, x, y, text);
+    error = gdImageStringFT(nullptr, &brect[0], color, fontlist, size, angle, x, y, text);
     if (error) {
       Napi::Error::New(info.Env(), error).ThrowAsJavaScriptException();
       return info.Env().Null();
@@ -1322,7 +1325,7 @@ Napi::Value Gd::Image::StringFTEx(const Napi::CallbackInfo& info) {
     is_use_fontpathname = stringExtraParameter.Get(return_fontpathname).As<Napi::Boolean>().Value();
     if (is_use_fontpathname) {
       stringExtra.flags |= gdFTEX_RETURNFONTPATHNAME;
-      stringExtra.fontpath = NULL;
+      stringExtra.fontpath = nullptr;
     }
   }
 
@@ -1331,7 +1334,7 @@ Napi::Value Gd::Image::StringFTEx(const Napi::CallbackInfo& info) {
   char *text = &str[0];
 
   if (return_rectangle) {
-    error = gdImageStringFTEx(NULL, &brect[0], color, fontlist, size, angle, x, y, text, &stringExtra);
+    error = gdImageStringFTEx(nullptr, &brect[0], color, fontlist, size, angle, x, y, text, &stringExtra);
     if (error) {
       std::string prefix ("GD Error: ");
       std::string errormsg (error);
@@ -1358,11 +1361,11 @@ Napi::Value Gd::Image::StringFTEx(const Napi::CallbackInfo& info) {
     return info.Env().Null();
   }
 
-  if (is_use_fontpathname && stringExtra.fontpath != NULL) {
+  if (is_use_fontpathname && stringExtra.fontpath != nullptr) {
     (stringExtraParameter).Set(fontpath, Napi::String::New(info.Env(), stringExtra.fontpath));
   }
 
-  if (is_xshow && stringExtra.xshow != NULL) {
+  if (is_xshow && stringExtra.xshow != nullptr) {
     (stringExtraParameter).Set(xshow, Napi::String::New(info.Env(), stringExtra.xshow));
   }
 
@@ -1905,7 +1908,7 @@ Napi::Value Gd::Image::GifAnimAdd(const Napi::CallbackInfo& info) {
     gdImagePtr prevFrame = _obj_->getGdImagePtr();
     gdImageGifAnimAdd(this->_image, out, LocalCM, LeftOfs, TopOfs, Delay, Disposal, prevFrame);
   } else {
-    gdImageGifAnimAdd(this->_image, out, LocalCM, LeftOfs, TopOfs, Delay, Disposal, NULL);
+    gdImageGifAnimAdd(this->_image, out, LocalCM, LeftOfs, TopOfs, Delay, Disposal, nullptr);
   }
 
   fclose(out);
