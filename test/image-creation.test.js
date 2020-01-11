@@ -14,7 +14,7 @@ var target = __dirname + '/output/';
  * ║│││├─┤│ ┬├┤   │  ├┬┘├┤ ├─┤ │ ││ ││││
  * ╩┴ ┴┴ ┴└─┘└─┘  └─┘┴└─└─┘┴ ┴ ┴ ┴└─┘┘└┘
  */
-describe('Creating a paletted image', function() {
+describe('gd.create - Creating a paletted image', function() {
   it('returns a Promise', () => {
     const imagePromise = gd.create(100,100);
     assert.ok(imagePromise.constructor === Promise);
@@ -102,7 +102,7 @@ describe('Creating a paletted image', function() {
     }
   });
 
-  it('throws an Error when creating an image without width and height - gd.create()', async () => {
+  it('throws an Error when creating an image without width and height', async () => {
     try {
       await gd.create();
     } catch (exception) {
@@ -133,7 +133,7 @@ describe('Creating a paletted image', function() {
 /**
  * gd.createTrueColor and await gd.createTrueColor
  */
-describe('Create a true color image', function() {
+describe('gd.createTrueColor - Create a true color image', function() {
   it('returns a Promise', () => {
     const imagePromise = gd.createTrueColor(101,101);
 

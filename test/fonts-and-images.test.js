@@ -19,7 +19,7 @@ var fontFile = source + 'FreeSans.ttf';
  * ╚  └─┘┘└┘ ┴ └─┘  ┴┘└┘  ┴┴ ┴┴ ┴└─┘└─┘└─┘
  */
 describe('Creating images containing text', function() {
-  it('can create an image with text', async () => {
+  it('gd.Image#stringFT() -- can create an image with text', async () => {
     var img, t, txtColor;
     t = target + 'output-string.png';
 
@@ -35,7 +35,7 @@ describe('Creating images containing text', function() {
     img.destroy();
   });
 
-  it('can create a truecolor image with text', async () => {
+  it('gd.Image#stringFT() -- can create a truecolor image with text', async () => {
     var img, t, txtColor;
     t = target + 'output-truecolor-string.png';
     img = await gd.createTrueColor(120, 20);
@@ -49,7 +49,7 @@ describe('Creating images containing text', function() {
     img.destroy();
   });
 
-  it('can return the coordinates of the bounding box of a string', async () => {
+  it('gd.Image#stringFT() -- can return the coordinates of the bounding box of a string', async () => {
     var t = target + 'output-truecolor-string-2.png';
 
     var img = await gd.createTrueColor(300, 300);
@@ -62,7 +62,7 @@ describe('Creating images containing text', function() {
     img.destroy();
   });
 
-  it('can return the coordinates of the bounding box of a string using a specific function', async () => {
+  it('gd.Image#stringFTBBox() -- can return the coordinates of the bounding box of a string using a specific function', async () => {
     var t = target + 'output-truecolor-string-2.png';
 
     var img = await gd.createTrueColor(300, 300);
@@ -74,7 +74,7 @@ describe('Creating images containing text', function() {
     img.destroy();
   });
 
-  it('throws an error when gd.Image#stringFTEx() does not receive an object', async () => {
+  it('gd.Image#stringFTEx() -- throws an error when gd.Image#stringFTEx() does not receive an object', async () => {
     var t = target + 'noob.png';
     var image = await gd.createTrueColor(100, 100);
     var txtColor = image.colorAllocate(255, 255, 0);
@@ -88,7 +88,7 @@ describe('Creating images containing text', function() {
     }
   });
 
-  it('can consume an object with font extras', async () => {
+  it('gd.Image#stringFTEx() -- can consume an object with font extras', async () => {
     var t = target + 'output-truecolor-string-3.png';
 
     var image = await gd.createTrueColor(300, 300);
@@ -113,7 +113,7 @@ describe('Creating images containing text', function() {
     image.destroy();
   });
 
-  it('can set the dpi of an image using a font extras object', async () => {
+  it('gd.Image#stringFTEx() -- can set the dpi of an image using a font extras object', async () => {
     var t = target + 'output-truecolor-string-300dpi.png';
 
     var image = await gd.createTrueColor(300, 300);
@@ -128,7 +128,7 @@ describe('Creating images containing text', function() {
     image.destroy();
   });
 
-  it('can set the linespacing of text in an image using a font extras object', async () => {
+  it('gd.Image#stringFTEx() -- can set the linespacing of text in an image using a font extras object', async () => {
     var t = target + 'output-truecolor-string-linespacing.png';
 
     var image = await gd.createTrueColor(300, 300);
@@ -143,7 +143,7 @@ describe('Creating images containing text', function() {
     image.destroy();
   });
 
-  it('can request the kerning table of text in an image using a font extras object', async () => {
+  it('gd.Image#stringFTEx() -- can request the kerning table of text in an image using a font extras object', async () => {
     var t = target + 'output-truecolor-string-xshow.png';
 
     var image = await gd.createTrueColor(300, 300);
@@ -160,7 +160,7 @@ describe('Creating images containing text', function() {
     image.destroy();
   });
 
-  it('can disable the use of kerning of text in an image using a font extras object', async () => {
+  it('gd.Image#stringFTEx() -- can disable the use of kerning of text in an image using a font extras object', async () => {
     var t = target + 'output-truecolor-string-disable-kerning.png';
 
     var image = await gd.createTrueColor(300, 300);
@@ -175,7 +175,7 @@ describe('Creating images containing text', function() {
     image.destroy();
   });
 
-  it('can return the font path using font extras', async () => {
+  it('gd.Image#stringFTEx() -- can return the font path using font extras', async () => {
     var t = target + 'output-truecolor-string-3.png';
 
     var image = await gd.createTrueColor(300, 300);
@@ -192,7 +192,7 @@ describe('Creating images containing text', function() {
     image.destroy();
   });
 
-  it('can use a specified charmap to render a font with font extras', async () => {
+  it('gd.Image#stringFTEx() -- can use a specified charmap to render a font with font extras', async () => {
     var t = target + 'output-truecolor-string-charmap.png';
 
     var image = await gd.createTrueColor(300, 300);
@@ -207,7 +207,7 @@ describe('Creating images containing text', function() {
     image.destroy();
   });
 
-  it('throws an error when an unknown charmap is given with font extras', async () => {
+  it('gd.Image#stringFTEx() -- throws an error when an unknown charmap is given with font extras', async () => {
     var t = target + 'bogus.png';
 
     var image = await gd.createTrueColor(300, 300);
@@ -224,7 +224,7 @@ describe('Creating images containing text', function() {
     }
   });
 
-  it('returns an array of coordinates of the bounding box when an 8th boolean parameter is given to gd.Image#stringFTEx', async () => {
+  it('gd.Image#stringFTEx() -- returns an array of coordinates of the bounding box when an 8th boolean parameter is given to', async () => {
     var t = target + 'bogus.png';
     var image = await gd.createTrueColor(300, 300);
     var extras = {
@@ -241,7 +241,7 @@ describe('Creating images containing text', function() {
     image.destroy();
   });
 
-  it('can put text on a circle', async () => {
+  it('gd.Image#stringFTCircle() -- can put text on a circle', async () => {
     var t = target + 'output-truecolor-string-circle.png';
 
     var image = await gd.createTrueColor(300, 300);

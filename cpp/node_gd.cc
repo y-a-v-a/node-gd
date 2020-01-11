@@ -1241,7 +1241,8 @@ Napi::Value Gd::Image::StringFTEx(const Napi::CallbackInfo& info) {
   // linespacing
   if (stringExtraParameter.Has(linespacing)) {
     stringExtra.flags |= gdFTEX_LINESPACE;
-    stringExtra.linespacing = stringExtraParameter.Get(linespacing).As<Napi::Number>().DoubleValue();
+    stringExtra.linespacing = stringExtraParameter.Get(linespacing)
+      .As<Napi::Number>().DoubleValue();
   }
 
   // charmap
@@ -1261,7 +1262,8 @@ Napi::Value Gd::Image::StringFTEx(const Napi::CallbackInfo& info) {
     } else if (!std::strcmp(chmap, "adobe_custom")) {
       stringExtra.charmap = gdFTEX_Adobe_Custom;
     } else {
-      Napi::Error::New(info.Env(), "Unknown value for charmap. Should be one of: unicode, shift_jis, big5, adobe_custom").ThrowAsJavaScriptException();
+      Napi::Error::New(info.Env(),
+        "Unknown value for charmap. Should be one of: unicode, shift_jis, big5, adobe_custom").ThrowAsJavaScriptException();
 
     }
     stringExtra.flags |= gdFTEX_CHARMAP;
@@ -1306,7 +1308,8 @@ Napi::Value Gd::Image::StringFTEx(const Napi::CallbackInfo& info) {
 
   // fontpathname
   if (stringExtraParameter.Has(fontpath)) {
-    std::string localFontpathname = stringExtraParameter.Get(fontpath).As<Napi::String>().Utf8Value();
+    std::string localFontpathname = stringExtraParameter.Get(fontpath)
+      .As<Napi::String>().Utf8Value();
     stringExtra.flags |= gdFTEX_FONTPATHNAME;
     stringExtra.fontpath = &localFontpathname[0];
   }
@@ -1322,7 +1325,8 @@ Napi::Value Gd::Image::StringFTEx(const Napi::CallbackInfo& info) {
   // return_fontpathname
   bool is_use_fontpathname = false;
   if (stringExtraParameter.Has(return_fontpathname)) {
-    is_use_fontpathname = stringExtraParameter.Get(return_fontpathname).As<Napi::Boolean>().Value();
+    is_use_fontpathname = stringExtraParameter.Get(return_fontpathname)
+      .As<Napi::Boolean>().Value();
     if (is_use_fontpathname) {
       stringExtra.flags |= gdFTEX_RETURNFONTPATHNAME;
       stringExtra.fontpath = nullptr;
@@ -1390,7 +1394,8 @@ Napi::Value Gd::Image::StringFTCircle(const Napi::CallbackInfo& info) {
   char *topp = &top[0];
   char *bottomm = &bottom[0];
 
-  error = gdImageStringFTCircle(this->_image, cx, cy, radius, textRadius, fillPortion, fontlist, size, topp, bottomm, color);
+  error = gdImageStringFTCircle(this->_image, cx, cy, radius, textRadius, fillPortion, fontlist,
+    size, topp, bottomm, color);
   if (error) {
     Napi::Error::New(info.Env(), error).ThrowAsJavaScriptException();
     return info.Env().Null();
@@ -1597,12 +1602,14 @@ Napi::Value Gd::Image::ColorReplaceArray(const Napi::CallbackInfo& info) {
   }
 
   if (_flen != _tlen) {
-    Napi::Error::New(info.Env(), "Color arrays should have same length.").ThrowAsJavaScriptException();
+    Napi::Error::New(info.Env(), "Color arrays should have same length.")
+      .ThrowAsJavaScriptException();
     return info.Env().Null();
   }
 
   Napi::Number result =
-    Napi::Number::New(info.Env(), gdImageColorReplaceArray(this->_image, _flen, fromColors, toColors));
+    Napi::Number::New(info.Env(),
+    gdImageColorReplaceArray(this->_image, _flen, fromColors, toColors));
 
   return result;
 }
@@ -1687,7 +1694,8 @@ Napi::Value Gd::Image::CropAuto(const Napi::CallbackInfo& info) {
   REQ_INT_ARG(0, mode);
 
   if (mode > 4) {
-    Napi::RangeError::New(info.Env(), "Crop mode should be between 0 and 5").ThrowAsJavaScriptException();
+    Napi::RangeError::New(info.Env(), "Crop mode should be between 0 and 5")
+      .ThrowAsJavaScriptException();
     return info.Env().Null();
   }
 

@@ -10,7 +10,7 @@ var target = __dirname + '/output/';
 
 const s = source + '/input.jpg';
 
-describe('Creating image from Buffer', function() {
+describe('gd.createFromJpegPtr - Creating image from Buffer', function() {
   it('should not accept a String', function(done) {
     const imageAsString = fs.readFile(s, function(error, data) {
       if (error) {

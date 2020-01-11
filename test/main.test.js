@@ -30,22 +30,22 @@ before(function() {
 
 describe('Node.js GD Graphics Library', function() {
 
-  describe('Version information', function() {
-    it('will return a version number of format x.y.z - gd.getGDVersion()', function(done) {
+  describe('Meta information', function() {
+    it('gd.getGDVersion() -- will return a version number of format x.y.z', function(done) {
       var version = gd.getGDVersion();
       assert.ok(/[0-9]\.[0-9]\.[0-9]+/.test(version));
       return done();
     });
 
-    it('will have built in GIF support', function() {
+    it('gd.GD_GIF -- will have built in GIF support', function() {
       assert.equal(gd.GD_GIF, 1, 'No GIF support for libgd is impossible!');
     });
 
-    it('will have built in GIF animation support', function() {
+    it('gd.GD_GIFANIM -- will have built in GIF animation support', function() {
       assert.equal(gd.GD_GIFANIM, 1, 'No GIF animation support for libgd is impossible!');
     });
 
-    it('will have built in open polygon support', function() {
+    it('gd.GD_OPENPOLYGON -- will have built in open polygon support', function() {
       assert.equal(gd.GD_OPENPOLYGON, 1, 'No open polygon support for libgd is impossible!');
     });
 
@@ -54,21 +54,21 @@ describe('Node.js GD Graphics Library', function() {
   describe('GD color functions', function() {
     // it('', function(done) {});
 
-    it('can return an integer representation of rgb color values', function(done) {
+    it('gd.trueColor() -- can return an integer representation of rgb color values', function(done) {
       var red = gd.trueColor(255, 0, 0);
       assert.ok(16711680 === red);
       return done();
     });
 
-    it('can return an integer representation of rgba color values', function(done) {
+    it('gd.trueColorAlpha() -- can return an integer representation of rgba color values', function(done) {
       var transparentRed = gd.trueColorAlpha(255, 0, 0, 63);
       assert.ok(1073676288 === transparentRed);
       return done();
     });
   });
 
-  describe('From the gd.Image query functions,', function() {
-    it('getBoundsSafe should return 0 if the coordinate [-10, 1000] is checked against the image bounds.', async function() {
+  describe('Image query functions', function() {
+    it('gd.Image#getBoundsSafe() -- getBoundsSafe should return 0 if the coordinate [-10, 1000] is checked against the image bounds', async function() {
       var s = source + 'input.png';
       var coord = [-10, 1000];
       const image = await gd.openPng(s);
@@ -77,7 +77,7 @@ describe('Node.js GD Graphics Library', function() {
       image.destroy();
     });
 
-    it('getBoundsSafe should return 1 if the coordinate [10, 10] is checked against the image bounds.', async function() {
+    it('gd.Image#getBoundsSafe() -- getBoundsSafe should return 1 if the coordinate [10, 10] is checked against the image bounds', async function() {
       var s = source + 'input.png';
       var coord = [10, 10];
       const image = await gd.openPng(s);
@@ -86,7 +86,7 @@ describe('Node.js GD Graphics Library', function() {
       image.destroy();
     });
 
-    it('getTrueColorPixel should return "e6e6e6" when queried for coordinate [10, 10].', async function() {
+    it('gd.Image#getTrueColorPixel() -- getTrueColorPixel should return "e6e6e6" when queried for coordinate [10, 10]', async function() {
       var s = source + 'input.png';
       var coord = [10, 10];
       const image = await gd.openPng(s);
@@ -96,7 +96,7 @@ describe('Node.js GD Graphics Library', function() {
       assert.ok(color.toString(16) === 'e6e6e6');
     });
 
-    it('getTrueColorPixel should return 0 when queried for coordinate [101, 101].', async function() {
+    it('gd.Image#getTrueColorPixel() -- getTrueColorPixel should return 0 when queried for coordinate [101, 101]', async function() {
       var s = source + 'input.png';
       var coord = [101, 101];
       const image = await gd.openPng(s);
@@ -106,7 +106,7 @@ describe('Node.js GD Graphics Library', function() {
       assert.ok(color === 0);
     });
 
-    it('imageColorAt should return "be392e" when queried for coordinate [50, 50].', async function() {
+    it('gd.Image#imageColorAt() -- imageColorAt should return "be392e" when queried for coordinate [50, 50]', async function() {
       var s = source + 'input.png';
       var coord = [50, 50];
       const image = await gd.openPng(s);
@@ -116,7 +116,7 @@ describe('Node.js GD Graphics Library', function() {
       assert.ok(color.toString(16) === 'be392e');;
     });
 
-    it('imageColorAt should throw an error when queried for coordinate [101, 101].', async function() {
+    it('gd.Image#imageColorAt() -- imageColorAt should throw an error when queried for coordinate [101, 101]', async function() {
       const s = source + 'input.png';
       const coord = [101, 101];
       const image = await gd.openPng(s);
@@ -129,7 +129,7 @@ describe('Node.js GD Graphics Library', function() {
     });
   });
 
-  it('can scale-down (resize) an image', async () => {
+  it('gd.Image#copyResampled() -- can scale-down (resize) an image', async () => {
     var s, t;
     s = source + 'input.png';
     t = target + 'output-scale.png';
@@ -149,7 +149,7 @@ describe('Node.js GD Graphics Library', function() {
   });
 
 
-  it('can rotate an image', async function() {
+  it('gd.Image#copyRotated() -- can rotate an image', async function() {
     var s, t;
     s = source + 'input.png';
     t = target + 'output-rotate.png';
@@ -166,7 +166,7 @@ describe('Node.js GD Graphics Library', function() {
     canvas.destroy();
   });
 
-  it('can convert to grayscale', async function() {
+  it('gd.Image#grayscale() -- can convert to grayscale', async function() {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
       return this.skip();
@@ -180,7 +180,7 @@ describe('Node.js GD Graphics Library', function() {
     img.destroy();
   });
 
-  it('can add gaussian blur to an image', async function() {
+  it('gd.Image#gaussianBlur() -- can add gaussian blur to an image', async function() {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
       return this.skip();
@@ -198,7 +198,7 @@ describe('Node.js GD Graphics Library', function() {
     img.destroy();
   });
 
-  it('can negate an image', async function() {
+  it('gd.Image#negate() -- can negate an image', async function() {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
       return this.skip();
@@ -213,7 +213,7 @@ describe('Node.js GD Graphics Library', function() {
     img.destroy();
   });
 
-  it('can change brightness of an image', async function() {
+  it('gd.Image#brightness() -- can change brightness of an image', async function() {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
       return this.skip();
@@ -229,7 +229,7 @@ describe('Node.js GD Graphics Library', function() {
     img.destroy();
   });
 
-  it('can change contrast of an image', async function() {
+  it('gd.Image#contrast() -- can change contrast of an image', async function() {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
       return this.skip();
@@ -244,7 +244,7 @@ describe('Node.js GD Graphics Library', function() {
     img.destroy();
   });
 
-  it('can emboss an image', async function() {
+  it('gd.Image#emboss() -- can emboss an image', async function() {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
       return this.skip();
@@ -258,7 +258,7 @@ describe('Node.js GD Graphics Library', function() {
     img.destroy();
   });
 
-  it('can apply selective blur to an image', async function() {
+  it('gd.Image#selectiveBlur() -- can apply selective blur to an image', async function() {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
       return this.skip();
@@ -273,7 +273,7 @@ describe('Node.js GD Graphics Library', function() {
     img.destroy();
   });
 
-  it('can replace a color to another color', async function() {
+  it('gd.Image#colorReplace() -- can replace a color to another color', async function() {
     var img, s, t;
     s = source + 'input.png';
     t = target + 'output-replaced.png';
@@ -299,7 +299,7 @@ describe('Node.js GD Graphics Library', function() {
     image.destroy();
   });
 
-  it('can create a truecolor BMP image with text', async function() {
+  it('gd.Image#stringFT() -- can create a truecolor BMP image with text', async function() {
     var f, img, t, txtColor;
     if (gd.getGDVersion() < '2.1.1') {
       return this.skip();

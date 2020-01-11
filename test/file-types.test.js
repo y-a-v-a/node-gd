@@ -9,7 +9,7 @@ var source = __dirname + '/fixtures/';
 var target = __dirname + '/output/';
 
 describe('Section Handling file types', function() {
-  it('can copy a png into a jpeg - gd.Image#saveJpeg()', async () => {
+  it('gd.Image#saveJpeg() -- can copy a png into a jpeg', async () => {
     var s, t;
     s = source + 'input.png';
     t = target + 'output.jpg';
@@ -24,7 +24,7 @@ describe('Section Handling file types', function() {
     canvas.destroy();
   });
 
-  it('can copy a png into gif - gd.Image#saveGif()', async () => {
+  it('gd.Image#saveGif() -- can copy a png into gif', async () => {
     var s, t;
     s = source + 'input.png';
     t = target + 'output.gif';
@@ -38,7 +38,7 @@ describe('Section Handling file types', function() {
     canvas.destroy();
   });
 
-  it('can copy a png into gd - gd.Image#saveGd()', async () => {
+  it('gd.Image#saveGd() -- can copy a png into gd', async () => {
     var s, t;
     s = source + 'input.png';
     t = target + 'output.gd';
@@ -53,7 +53,7 @@ describe('Section Handling file types', function() {
     canvas.destroy();
   });
 
-  it('can copy a png into WBMP - gd.Image#saveWBMP()', async function() {
+  it('gd.Image#saveWBMP() -- can copy a png into WBMP', async function() {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
       this.skip();
@@ -72,7 +72,7 @@ describe('Section Handling file types', function() {
     canvas.destroy();
   });
 
-  it('can open a jpeg file and save it as png - gd.Image#savePng()', async function() {
+  it('gd.Image#savePng() -- can open a jpeg file and save it as png', async function() {
     var s, t;
     s = source + 'input.jpg';
     t = target + 'output-from-jpeg.png';
@@ -83,7 +83,7 @@ describe('Section Handling file types', function() {
     img.destroy();
   });
 
-  it('can open a bmp and save it as png - gd.Image#savePng()', async function() {
+  it('gd.Image#savePng() -- can open a bmp and save it as png', async function() {
     var s;
     var t;
     if (gd.getGDVersion() < '2.1.1') {

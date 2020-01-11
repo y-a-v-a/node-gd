@@ -9,7 +9,7 @@ var source = __dirname + '/fixtures/';
 var target = __dirname + '/output/';
 
 describe('Section Handling TIFF files', function() {
-  it('can open a tiff and save it as a jpg', async function() {
+  it('gd.openTiff() -- can open a tiff and save it as a jpg', async function() {
     var s;
     var t;
     if (gd.getGDVersion() < '2.2.4') {
@@ -24,7 +24,7 @@ describe('Section Handling TIFF files', function() {
     img.destroy();
   });
 
-  it('can open a jpg file and save it as a tiff', async function() {
+  it('gd.Image#saveTiff() -- can open a jpg file and save it as a tiff', async function() {
     var s;
     var t;
     if (gd.getGDVersion() < '2.2.4') {
@@ -39,7 +39,7 @@ describe('Section Handling TIFF files', function() {
     img.destroy();
   });
 
-  it('can open a tiff and save it as a tiff', async function() {
+  it('gd.createFromTiff() -- can open a tiff and save it as a tiff', async function() {
     var s;
     var t;
     if (gd.getGDVersion() < '2.2.4') {
@@ -54,7 +54,7 @@ describe('Section Handling TIFF files', function() {
     image.destroy();
   });
 
-  it('can open a tif and store it in a pointer and save a tiff from the pointer', async function() {
+  it('gd.createFromTiffPtr() -- can open a tif and store it in a pointer and save a tiff from the pointer', async function() {
     if (gd.getGDVersion() < '2.2.4') {
       return this.skip();
     }
@@ -68,7 +68,7 @@ describe('Section Handling TIFF files', function() {
     image.destroy();
   });
 
-  it('can create a truecolor Tiff image with text', async function() {
+  it('gd.Image#saveTiff() -- can create a truecolor Tiff image with text', async function() {
     var f, img, t, txtColor;
     if (gd.getGDVersion() < '2.2.4' || !gd.GD_TIFF) {
       return this.skip();

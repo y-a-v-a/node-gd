@@ -16,7 +16,7 @@
   "bugs": "https://github.com/y-a-v-a/node-gd/issues",
   "scripts": {
     "pretest": "node-gyp build",
-    "test": "mocha --reporter spec --bail --ui bdd --colors -- test/*.test.js",
+    "test": "mocha --reporter spec --bail --ui bdd --colors",
     "install": "node-gyp rebuild",
     "update-contributors": "git shortlog -sen | sed 's/^  /*/' > CONTRIBUTORS.md"
   },

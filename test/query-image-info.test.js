@@ -6,8 +6,8 @@ var assert = require('chai').assert;
 var source = __dirname + '/fixtures/';
 var target = __dirname + '/output/';
 
-describe('Section Querying image information', function() {
-  it('can query true color alpha values of a color', async () => {
+describe('Section querying image information', function() {
+  it('gd.trueColorAlpha() -- can query true color alpha values of a color', async () => {
     var image = await gd.createTrueColor(100, 100);
     var someColor = gd.trueColorAlpha(63, 255, 191, 63);
 
@@ -17,7 +17,7 @@ describe('Section Querying image information', function() {
     assert.equal(image.alpha(someColor), 63);
   });
 
-  it('can query true color values of a color', async () => {
+  it('gd.trueColor() -- can query true color values of a color', async () => {
     var image = await gd.createTrueColor(100, 100);
     var someColor = gd.trueColor(63, 255, 191, 63);
 
@@ -26,7 +26,7 @@ describe('Section Querying image information', function() {
     assert.equal(image.blue(someColor), 191);
   });
 
-  it('can query palette color values of a color with alpha', async () => {
+  it('gd.Image#colorAllocateAlpha() -- can query palette color values of a color with alpha', async () => {
     var image = await gd.create(100, 100);
     var someColor = image.colorAllocateAlpha(63, 255, 191, 63);
 
@@ -36,7 +36,7 @@ describe('Section Querying image information', function() {
     assert.equal(image.alpha(someColor), 63);
   });
 
-  it('can query palette color values of a color', async () => {
+  it('gd.Image#colorAllocate() -- can query palette color values of a color', async () => {
     var image = await gd.create(100, 100);
     var someColor = image.colorAllocate(63, 255, 191);
 
@@ -45,14 +45,14 @@ describe('Section Querying image information', function() {
     assert.equal(image.blue(someColor), 191);
   });
 
-  it('can query the color of a pixel within image bounds', async function() {
+  it('gd.Image#getTrueColorPixel() -- can query the color of a pixel within image bounds', async function() {
     var s = source + 'input.png';
     const image = await gd.openPng(s);
     var color = image.getTrueColorPixel(0,0);
     assert.isNumber(color, 'got Number for getTrueColorPixel');
   });
 
-  it('will throw an error when quering the color of a pixel outside of image bounds', async function() {
+  it('gd.Image#getTrueColorPixel() -- will throw an error when quering the color of a pixel outside of image bounds', async function() {
     var s = source + 'input.png';
     const image = await gd.openPng(s);
     assert.throws(function() {

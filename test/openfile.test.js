@@ -5,7 +5,7 @@ var source = __dirname + '/fixtures';
 var target = __dirname + '/output';
 
 
-describe("gd#openFile", () => {
+describe("gd.openFile", () => {
   it('returns a Promise', () => {
     const imagePromise = gd.openFile(`${source}/input.jpg`);
 
@@ -30,7 +30,7 @@ describe("gd#openFile", () => {
   });
 });
 
-describe("gd#file", () => {
+describe("gd.file", () => {
   it('returns a Promise', async () => {
     const img = await gd.openFile(`${source}/input.jpg`);
 
@@ -46,7 +46,7 @@ describe("gd#file", () => {
     assert.isTrue(a === true);
   });
 
-  it('fails', async function() {
+  it('saves files of different extensions', async function() {
     const image = await gd.openFile(`${source}/input.jpg`);
 
     const success1 = await image.file(`${target}/test.bmp`);

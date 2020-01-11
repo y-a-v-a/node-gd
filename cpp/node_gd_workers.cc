@@ -64,7 +64,8 @@ class CreateFromJpegWorker : public CreateFromWorker {
     static Value DoWork(const CallbackInfo& info) {
       REQ_STR_ARG(0, path);
 
-      CreateFromJpegWorker* worker = new CreateFromJpegWorker(info.Env(), "CreateFromJpegWorkerResource");
+      CreateFromJpegWorker* worker = new CreateFromJpegWorker(info.Env(),
+        "CreateFromJpegWorkerResource");
 
       worker->path = path;
       worker->Queue();
@@ -94,7 +95,8 @@ class CreateFromPngWorker : public CreateFromWorker {
     static Value DoWork(const CallbackInfo& info) {
       REQ_STR_ARG(0, path);
 
-      CreateFromPngWorker* worker = new CreateFromPngWorker(info.Env(), "CreateFromPngWorkerResource");
+      CreateFromPngWorker* worker = new CreateFromPngWorker(info.Env(),
+        "CreateFromPngWorkerResource");
 
       worker->path = path;
       worker->Queue();
@@ -124,7 +126,8 @@ class CreateFromGifWorker : public CreateFromWorker {
     static Value DoWork(const CallbackInfo& info) {
       REQ_STR_ARG(0, path);
 
-      CreateFromGifWorker* worker = new CreateFromGifWorker(info.Env(), "CreateFromGifWorkerResource");
+      CreateFromGifWorker* worker = new CreateFromGifWorker(info.Env(),
+        "CreateFromGifWorkerResource");
 
       worker->path = path;
       worker->Queue();
@@ -154,7 +157,8 @@ class CreateFromGd2Worker : public CreateFromWorker {
     static Value DoWork(const CallbackInfo& info) {
       REQ_STR_ARG(0, path);
 
-      CreateFromGd2Worker* worker = new CreateFromGd2Worker(info.Env(), "CreateFromGd2WorkerResource");
+      CreateFromGd2Worker* worker = new CreateFromGd2Worker(info.Env(),
+        "CreateFromGd2WorkerResource");
 
       worker->path = path;
       worker->Queue();
@@ -184,7 +188,8 @@ class CreateFromWBMPWorker : public CreateFromWorker {
     static Value DoWork(const CallbackInfo& info) {
       REQ_STR_ARG(0, path);
 
-      CreateFromWBMPWorker* worker = new CreateFromWBMPWorker(info.Env(), "CreateFromWBMPWorkerResource");
+      CreateFromWBMPWorker* worker = new CreateFromWBMPWorker(info.Env(),
+        "CreateFromWBMPWorkerResource");
 
       worker->path = path;
       worker->Queue();
@@ -214,7 +219,8 @@ class CreateFromWebpWorker : public CreateFromWorker {
     static Value DoWork(const CallbackInfo& info) {
       REQ_STR_ARG(0, path);
 
-      CreateFromWebpWorker* worker = new CreateFromWebpWorker(info.Env(), "CreateFromWebpWorkerResource");
+      CreateFromWebpWorker* worker = new CreateFromWebpWorker(info.Env(),
+        "CreateFromWebpWorkerResource");
 
       worker->path = path;
       worker->Queue();
@@ -244,7 +250,8 @@ class CreateFromBmpWorker : public CreateFromWorker {
     static Value DoWork(const CallbackInfo& info) {
       REQ_STR_ARG(0, path);
 
-      CreateFromBmpWorker* worker = new CreateFromBmpWorker(info.Env(), "CreateFromBmpWorkerResource");
+      CreateFromBmpWorker* worker = new CreateFromBmpWorker(info.Env(),
+        "CreateFromBmpWorkerResource");
 
       worker->path = path;
       worker->Queue();
@@ -274,7 +281,8 @@ class CreateFromTiffWorker : public CreateFromWorker {
     static Value DoWork(const CallbackInfo& info) {
       REQ_STR_ARG(0, path);
 
-      CreateFromTiffWorker* worker = new CreateFromTiffWorker(info.Env(), "CreateFromTiffWorkerResource");
+      CreateFromTiffWorker* worker = new CreateFromTiffWorker(info.Env(),
+        "CreateFromTiffWorkerResource");
 
       worker->path = path;
       worker->Queue();
@@ -375,7 +383,8 @@ class CreateFromFileWorker : public AsyncWorker {
     static Value DoWork(const CallbackInfo& info) {
       REQ_STR_ARG(0, path);
 
-      CreateFromFileWorker* worker = new CreateFromFileWorker(info.Env(), "CreateFromFileWorkerResource");
+      CreateFromFileWorker* worker = new CreateFromFileWorker(info.Env(),
+        "CreateFromFileWorkerResource");
 
       worker->path = path;
       worker->Queue();
@@ -416,7 +425,8 @@ class CreateFromFileWorker : public AsyncWorker {
 class CreateWorker : public AsyncWorker {
   public:
     CreateWorker(napi_env env, const char* resource_name, int width, int height, int trueColor)
-    : AsyncWorker(env, resource_name), _deferred(Promise::Deferred::New(env)), _width(width), _height(height), _trueColor(trueColor) {
+    : AsyncWorker(env, resource_name), _deferred(Promise::Deferred::New(env)),
+      _width(width), _height(height), _trueColor(trueColor) {
     }
 
     Promise::Deferred _deferred;
