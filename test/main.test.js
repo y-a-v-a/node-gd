@@ -1,6 +1,12 @@
 /**
  * Note to self: when skipping a test with `this.skip()`, do not use an arrow function,
  * since Mocha appears to try to bind `this` to the test function.
+ * @see https://mochajs.org/#arrow-functions
+ *
+ * This file is explicitly run first by mocha using the `--file` directive
+ * in package.json to let it clean the output directory first.
+ *
+ * @author Vincent Bruijn <vebruijn@gmail.com>
  */
 var fs = require('fs');
 

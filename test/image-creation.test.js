@@ -102,6 +102,15 @@ describe('gd.create - Creating a paletted image', function() {
     }
   });
 
+  it('throws a RangeError when the height parameter is a fraction value', async () => {
+    var img;
+    try {
+      img = await gd.create(100.5, 101.6);
+    } catch (e) {
+      assert.ok(e instanceof RangeError);
+    }
+  });
+
   it('throws an Error when creating an image without width and height', async () => {
     try {
       await gd.create();
