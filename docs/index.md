@@ -3,13 +3,29 @@ layout: default
 title: Node-gd Documentation
 ---
 
-## API
+# API
 
-### Opening and creating graphic images
+## Version information
 
-#### gd.create(width, height)
+This is the documentation for the 2.x version. The 2.x version dropped support for `gd.createSync` and `gd.createTrueColorSync`. Also, all functions that used to accept a callback are changed. They return a Promise now. Effort is put into respecting Node's asynchronous nature by implementing N-API's AsyncWorker classes for all gd functions that utilize file I/O.
 
-Create a new image in memory of specified size and returns a Promise for an instance of `gd.Image`. This is a paletted image, thus has a white background and a limited color range of at most 256 colors.
+# Creating and opening graphic images
+
+### gd.create(width, height)
+
+#### Parameters
+
+- `width`
+  - desired width of the image to create, expects a `Number` without a fraction, e.g. `200`.
+- `height`
+  - desired height of the image, expects a `Number` without a fraction.
+
+#### Return value
+
+- `Promise`
+  - The resolved `Promise` contains an instance of `gd.Image`
+
+Create a new image in memory of specified size and returns a `Promise` for an instance of `gd.Image`. This is a paletted image, thus has a white background and a limited color range of at most 256 colors.
 
 ```javascript
 const gd = require('node-gd');
@@ -19,7 +35,19 @@ await img.saveJpeg('./test.jpg', 100)
 img.destroy();
 ```
 
-#### gd.createTrueColor(width, height)
+### gd.createTrueColor(width, height)
+
+#### Parameters
+
+- `width`
+  - desired width of the image to create. Expects a `Number` without fraction, e.g. `Math.round(100 / 6)`
+- `height`
+  - desired height of the image
+
+#### Return value
+
+- `Promise`
+  - The resolved `Promise` contains an instance of `gd.Image`
 
 This is a true color image, and thus has a black background and a palette of millions of colors.
 
@@ -32,7 +60,17 @@ await img.saveJpeg('./test.jpg', 100);
 img.destroy();
 ```
 
-#### gd.openJpeg(path)
+### gd.openJpeg(path)
+
+#### Parameters
+
+- `path`
+  - A string referencing the JPEG image to open. Expects a `String`, e.g. `/path/to/image.jpg`
+
+#### Return type
+
+- `Promise`
+  - The resolved `Promise` contains an instance of `gd.Image`
 
 Open a JPG file. It will return a Promise which will resolve with an instance of `gd.Image`. This is a short hand of `gd.createFromJpeg`.
 
@@ -47,9 +85,19 @@ await image.savePng('/path/to/file.png', 0);
 img.destroy();
 ```
 
-#### gd.createFromJpeg(path)
+### gd.createFromJpeg(path)
 
-Asynchronously load an image from disk. Returns a Promise.
+#### Parameters
+
+- `path`
+  - A string referencing the JPEG image to open, e.g. `/path/to/image.jpg`
+
+#### Return value
+
+- `Promise`
+  - Promise resolving to an instance of `gd.Image`
+
+Asynchronously load an image from disk.
 
 ```javascript
 const gd = require('node-gd');
@@ -60,66 +108,79 @@ var img = await gd.createFromJpeg('./path/to/image.jpg');
 img.destroy();
 ```
 
-#### gd.createFromJpegPtr(data)
-Load an image from a resource which is either a `String` or a `Buffer`.
+### gd.createFromJpegPtr(data)
 
-#### gd.openPng(path)
+Load an image from a resource which is an instance of `Buffer`.
+
+### gd.openPng(path)
 Open a PNG file. Returns a Promise.
 
-#### gd.createFromPng(path)
+### gd.createFromPng(path)
 Asynchronously load a Png from disk. Returns a Promise.
 
-#### gd.createFromPngPtr(data)
+### gd.createFromPngPtr(data)
 Load an image from a resource.
 
-#### gd.openGif(path)
+### gd.openGif(path)
 Open a GIF file asynchronously. Returns a Promise.
 
-#### gd.createFromGif(path)
+### gd.createFromGif(path)
 Asynchronously load a Gif from disk. Returns a Promise.
 
-#### gd.createFromGifPtr(data)
+### gd.createFromGifPtr(data)
 
-#### gd.openGd2(path)
+### gd.openGd2(path)
 Returns a Promise.
 
-#### gd.createFromGd2(path)
+### gd.createFromGd2(path)
 Asynchronously load a Gd2 from disk. Returns a Promise.
 
-#### gd.createFromGd2Ptr(data)
+### gd.createFromGd2Ptr(data)
 
-#### gd.openGd2Part(path, srcX, srcY, width, height[, callback])
+### gd.openGd2Part(path, srcX, srcY, width, height[, callback])
 
-#### gd.createFromGd2Part(path, srcX, srcY, width, height)
+### gd.createFromGd2Part(path, srcX, srcY, width, height)
 
-#### gd.createFromGd2PartPtr(data, srcX, srcY, width, height)
+### gd.createFromGd2PartPtr(data, srcX, srcY, width, height)
 
-#### gd.openWBMP(path)
-Open a WBMP image file. WBMP stands for Wireless Application Protocol Bitmap Format, a monochrome graphics file format. Returns a Promise.
+### gd.openWBMP(path)
 
-#### gd.createFromWBMP(path)
+Open a WBMP image file. [WBMP](https://en.wikipedia.org/wiki/Wireless_Application_Protocol_Bitmap_Format) stands for Wireless Application Protocol Bitmap Format, a monochrome graphics file format. Returns a Promise.
+
+### gd.createFromWBMP(path)
 Asynchronously load a WBMP from disk. Returns a Promise.
 
-#### gd.createFromWBMPPtr(data)
+### gd.createFromWBMPPtr(data)
 
-#### gd.openBmp(path)
+### gd.openBmp(path)
 Open a BMP bitmap image file. Returns a Promise.
 
-#### gd.createFromBmp(path)
+### gd.createFromBmp(path)
 Asynchronously load a Bmp from disk. Returns a Promise.
 
-#### gd.createFromBmpPtr(data)
+### gd.createFromBmpPtr(data)
 
-#### gd.openTiff(path)
+### gd.openTiff(path)
 Returns a Promise.
 
-#### gd.createFromTiff(path)
+### gd.createFromTiff(path)
 Asynchronously load a Tiff from disk. Returns a Promise.
 
-#### gd.createFromTiffPtr(data)
+### gd.createFromTiffPtr(data)
 
-#### gd.openFile(path)
-GD will try to find out of what type the supplied image is, and will open it likewise. This is a quite new convenience method for if you don't exactly know what the type is that you will try to open. Returns a Promise.
+### gd.openFile(path)
+
+#### Parameters
+
+- `path`
+  - `String` referencing a file on disk, e.g. `/path/to/file.png`
+
+#### Return value
+
+- `Promise`
+  - A `Promise` resolving an instance of `gd.Image`.
+
+GD will try to find out of what type the supplied image is, and will open it likewise. This is a quite new convenience method for if you don't exactly know what the type is that you will try to open.
 
 ```javascript
 const gd = require('node-gd');
@@ -133,12 +194,23 @@ const img = await gd.openFile(file);
 img.destroy();
 ```
 
-#### gd.createFromFile(path)
+### gd.createFromFile(path)
 
 Similar to `gd#openFile` but does not check if file exists. This may lead to unclear segmentation fault messages. Returns a Promise.
 
-#### gd.trueColor(red, green, blue)
-Returns an integer representation of the supplied color values.
+### gd.trueColor(red, green, blue)
+
+#### Parameters
+
+- `red`
+- `green`
+- `blue`
+  - All expect a fractionless `Number` or hexadecimal number
+
+#### Return value
+
+- `Number`,
+  - an integer representation of the supplied color values.
 
 ```javascript
 const gd = require('node-gd');
@@ -150,7 +222,7 @@ Alternatively, you can use the hex notation for color values for parameters for 
 var red = 0xff0000; // red
 ```
 
-#### gd.trueColorAlpha(red, green, blue, alpha)
+### gd.trueColorAlpha(red, green, blue, alpha)
 Returns an integer representation of the supplied `rgba` values. Be aware that in libgd the value for `alpha` ranges from `0` to `127`. From its source code:
 
 ```c++
@@ -169,7 +241,13 @@ const gd = require('node-gd');
 var transparentRed = gd.trueColorAlpha(255, 0, 0, 63); // 1073676288
 ```
 
-#### gd.getGDVersion()
+### gd.getGDVersion()
+
+#### Return value
+
+- `String`
+  - Something like `2.1.1`
+
 Will return a string representing the version of your currently installed GD version. Outputs something like `2.1.1`
 
 ```javascript
@@ -184,14 +262,14 @@ if (gd.getGDVersion() >= '2.1.1') {
 }
 ```
 
-## Manipulating graphic images
+# Manipulating graphic images
 
-#### gd.Image#destroy()
+### gd.Image#destroy()
 Free up allocated memory for image data.
 
 ### Drawing
 
-#### gd.Image#setPixel(x, y, color)
+### gd.Image#setPixel(x, y, color)
 Set the color of a certain pixel. Use for color either `0xff00ff` or `gd.trueColor(255, 0, 255)`.
 
 ```javascript
@@ -205,13 +283,13 @@ await image.savePng('./test.png', 0);
 image.destroy();
 ```
 
-#### gd.Image#line(x1, y1, x2, y2, color)
+### gd.Image#line(x1, y1, x2, y2, color)
 Draw a line from a certain point to a next point.
 
-#### gd.Image#dashedLine(x1, y1, x2, y2, color)
+### gd.Image#dashedLine(x1, y1, x2, y2, color)
 Draw a dashed line from a certain point to a next point.
 
-#### gd.Image#polygon(array, color)
+### gd.Image#polygon(array, color)
 Draw a closed polygon. The first parameter shoud be an `Array` of `Object`s containing an x and y property.
 
 ```javascript
@@ -230,13 +308,13 @@ img.bmp('test.bmp', 0);
 img.destroy();
 ```
 
-#### gd.Image#openPolygon(array, color)
+### gd.Image#openPolygon(array, color)
 Same as the above but start and end point will not be connected with a line.
 
-#### gd.Image#filledPolygon(array, color)
+### gd.Image#filledPolygon(array, color)
 Same as the above but color value will be used to fill the polygon.
 
-#### gd.Image#rectangle(x1, y1, x2, y2, color)
+### gd.Image#rectangle(x1, y1, x2, y2, color)
 Create a rectangle. The x and y values indicate upper left and lower right corner respectively.
 
 ```javascript
@@ -251,7 +329,7 @@ await img.file('./test.png');
 img.destroy();
 ```
 
-#### gd.Image#filledRectangle(x1, y1, x2, y2, color)
+### gd.Image#filledRectangle(x1, y1, x2, y2, color)
 Create a filled rectangle i.e. a solid bar.
 
 ```javascript
@@ -267,7 +345,7 @@ await img.file('./test.png');
 img.destroy();
 ```
 
-#### gd.Image#arc(cx, cy, width, height, begin, end, color)
+### gd.Image#arc(cx, cy, width, height, begin, end, color)
 Draw an arc. `cx` and `cy` denote the center of the arc. The `begin` and `end` parameters are in degrees, from 0 to 360.
 
 ```javascript
@@ -284,7 +362,7 @@ await img.file('./test.png');
 img.destroy();
 ```
 
-#### gd.Image#filledArc(cx, cy, width, height, begin, end, color, style)
+### gd.Image#filledArc(cx, cy, width, height, begin, end, color, style)
 Draw a filled arc. The `style` parameter can be an integer generated by a bitwise OR of values 0, 1, 2, 4. These values stand for `arc`, `chord`, `noFill` and `edged`. A combination is possible, but `arc` and `chord` are mutually exclusive (see also the libgd documentation).
 
 ```javascript
@@ -300,13 +378,13 @@ await image.saveGif('test.gif');
 image.destroy();
 ```
 
-#### gd.Image#ellipse(cx, cy, width, height, color)
+### gd.Image#ellipse(cx, cy, width, height, color)
 Draw an ellipse.
 
-#### gd.Image#filledEllipse(cx, cy, width, height, color)
+### gd.Image#filledEllipse(cx, cy, width, height, color)
 Draw a filled ellipse.
 
-#### gd.Image#fillToBorder(x, y, border, color)
+### gd.Image#fillToBorder(x, y, border, color)
 Fill a drawn form up until its border.
 
 ```javascript
@@ -323,7 +401,7 @@ await img.file('./test.png');
 img.destroy();
 ```
 
-#### gd.Image#fill(x, y, color)
+### gd.Image#fill(x, y, color)
 
 Create a white true color image
 
@@ -346,17 +424,17 @@ await img.file('./result.png');
 img.destroy();
 ```
 
-#### gd.Image#setAntiAliased(color)
+### gd.Image#setAntiAliased(color)
 
-#### gd.Image#setAntiAliasedDontBlend(color, dontblend)
+### gd.Image#setAntiAliasedDontBlend(color, dontblend)
 
-#### gd.Image#setBrush(image)
+### gd.Image#setBrush(image)
 
-#### gd.Image#setTile(image)
+### gd.Image#setTile(image)
 
-#### gd.Image#setStyle(array)
+### gd.Image#setStyle(array)
 
-#### gd.Image#setThickness(thickness)
+### gd.Image#setThickness(thickness)
 Set the thickness for lines.
 
 ```javascript
@@ -373,7 +451,7 @@ await img.file('./test.png');
 img.destroy();
 ```
 
-#### gd.Image#alphaBlending(blending)
+### gd.Image#alphaBlending(blending)
 Turn on (`1`) or off (`0`) alphablending for what is being drawn next. This switch can be switched on or off during a drawing process in order to let some layer or drawn form blend or not with former drawn elements.
 
 A newly created truecolor image for example has a black background. If you want to start out with a transparent canvas, you will first need to draw a non-blending fully transparent rectangle the size of that image. For example:
@@ -405,7 +483,7 @@ await img.savePng('output.png', 0);
 img.destroy();
 ```
 
-#### gd.Image#saveAlpha(saveFlag)
+### gd.Image#saveAlpha(saveFlag)
 When set to `1`, the alpha information will be saved as a separate channel within the image. If turned off (`0`), all transparency will be handled within the image. Compare these two examples to see the difference:
 ```javascript
 const gd = require('node-gd');
@@ -457,18 +535,18 @@ img.destroy();
 ```
 
 
-#### gd.Image#setClip(x1, y1, x2, y2)
+### gd.Image#setClip(x1, y1, x2, y2)
 Set the clipping area.
 
-#### gd.Image#getClip()
+### gd.Image#getClip()
 Returns an object containing the coordinates of the clipping area.
 
-#### gd.Image#setResolution(res_x, res_y)
+### gd.Image#setResolution(res_x, res_y)
 Unsigned integers should be used for `res_x` and `res_y`.
 
 ### Query image information
 
-#### gd.Image#getPixel(x, y)
+### gd.Image#getPixel(x, y)
 For paletted images, this will return the palette index of the color for that pixel. For true color images, it will return the color value as `Number`.
 
 ```javascript
@@ -485,7 +563,7 @@ trueColorImage.destroy();
 paletteImage.destroy();
 ```
 
-#### gd.Image#getTrueColorPixel(x, y)
+### gd.Image#getTrueColorPixel(x, y)
 This will return the color integer representation.
 
 ```javascript
@@ -504,15 +582,15 @@ await img.file('./test.png');
 img.destroy();
 ```
 
-#### gd.Image#imageColorAt(x, y)
+### gd.Image#imageColorAt(x, y)
 This is the implementation of the PHP-GD specific method imagecolorat.
 
-#### gd.Image#getBoundsSafe(x, y)
+### gd.Image#getBoundsSafe(x, y)
 Returns `0` if either x or y are out of the bounds of the image canvas, or `1` when within the bounds. Note that the pixel range starts at `0` for both x-axis and y-axis.
 
-### Font and text
+# Font and text
 
-#### gd.Image#stringFTBBox(color, font, size, angle, x, y, string)
+### gd.Image#stringFTBBox(color, font, size, angle, x, y, string)
 `BBox` in this function name refers to the _bounding box_ of the supplied `string` parameter when it would be rendered on the image. This might be handy in case you want to check wether the text fits the image bounds. The return value of this function is an array of 8 elements, weirdly ordered: [xll, yll, xlr, ylr, xur, yur, xul, yul]. In ascii-art:
 ```
    xul           xur
@@ -529,108 +607,108 @@ ylr = y lower right
 
 The font color can be allocated with `img.colorAllocate(r, g, b)`. The `font` parameter should be an absolute path to a `ttf` font file.
 
-#### gd.Image#stringFT(color, font, size, angle, x, y, string, boundingbox)
+### gd.Image#stringFT(color, font, size, angle, x, y, string, boundingbox)
 `FT` refers to FreeType. Add text to the image. When the `boundingbox` parameter is set to be `true`, the return of this function is identical to `gd.Image#stringFTBBox`.
 
 ### Color handling
 
-#### gd.Image#colorAllocate(r, g, b)
+### gd.Image#colorAllocate(r, g, b)
 Allocate a color in the color table.
 
-#### gd.Image#colorAllocateAlpha(r, g, b, a)
+### gd.Image#colorAllocateAlpha(r, g, b, a)
 Allocate a color in the color table with transparency value.
 
-#### gd.Image#colorClosest(r, g, b)
+### gd.Image#colorClosest(r, g, b)
 
-#### gd.Image#colorClosestAlpha(r, g, b, a)
+### gd.Image#colorClosestAlpha(r, g, b, a)
 
-#### gd.Image#colorClosestHWB(r, g, b)
+### gd.Image#colorClosestHWB(r, g, b)
 
-#### gd.Image#colorExact(r, g, b)
+### gd.Image#colorExact(r, g, b)
 
-#### gd.Image#colorResolve(r, g, b)
+### gd.Image#colorResolve(r, g, b)
 
-#### gd.Image#colorResolveAlpha(r, g, b, a)
+### gd.Image#colorResolveAlpha(r, g, b, a)
 
-#### gd.Image#red(r)
+### gd.Image#red(r)
 
-#### gd.Image#green(g)
+### gd.Image#green(g)
 
-#### gd.Image#blue(b)
+### gd.Image#blue(b)
 
-#### gd.Image#alpha(color)
+### gd.Image#alpha(color)
 Get the alpha value of a color. *Note* after version node-gd@1.3.1 this method has ben renamed to *lower case* `alpha` to reflect its function in comparison with the `gd.Image#red()`, `gd.Image#green()` and `gd.Image#blue()` methods.
 
-#### gd.Image#getTransparent()
+### gd.Image#getTransparent()
 
-#### gd.Image#colorDeallocate(color)
+### gd.Image#colorDeallocate(color)
 
 ### Color Manipulation
 
-#### gd.Image#colorTransparent(color)
+### gd.Image#colorTransparent(color)
 Specifies a color index (if a palette image) or an RGB color (if a truecolor image) which should be considered 100% transparent. For truecolor images, this is ignored if an alpha channel is being saved. Use `gd.Image#saveAlpha(0)` to turn off the saving of a full alpha channel in a truecolor image.
 
-#### gd.Image#colorReplace(fromColor, toColor)
+### gd.Image#colorReplace(fromColor, toColor)
 Replace one color with another. This returns the amount of changes pixels.
 
-#### gd.Image#colorReplaceThreshold(fromColor, toColor, threshold)
+### gd.Image#colorReplaceThreshold(fromColor, toColor, threshold)
 Replace one color with another. The `threshold` will broaden the range of replaced colors and is a decimal `Number` between `0` and `100`.
 
-#### gd.Image#colorReplaceArray(fromColors, toColors)
+### gd.Image#colorReplaceArray(fromColors, toColors)
 Replace colors in `fromColors` array to `toColors` array. The arrays should be of equal length.
 
-### Effects
+# Effects
 
-#### gd.Image#grayscale()
+### gd.Image#grayscale()
 Remove all color from an image and create a grayscaled image. Only available from libgd2 version 2.1.x.
 
-#### gd.Image#gaussianBlur()
+### gd.Image#gaussianBlur()
 Apply gaussian blur. Can by applied multiple times to an image to get more blur.
 
-#### gd.Image#negate()
+### gd.Image#negate()
 Invert the colors of the image.
 
-#### gd.Image#brightness(brightness)
+### gd.Image#brightness(brightness)
 Supply an integer between `0` and `100`.
 
-#### gd.Image#contrast(contrast)
+### gd.Image#contrast(contrast)
 The value for contrast is a bit weird. A value of `100` wil return a complete grey image, with gray being exactly `rgb(127, 127, 127)`. For best results, the range applied should be between `-900` and `1100` (so actually `100 + 1000` and `100 - 1000`).
 
-#### gd.Image#selectiveBlur()
+### gd.Image#selectiveBlur()
 
-#### gd.Image#emboss()
+### gd.Image#emboss()
 
-#### gd.Image#flipHorizontal()
+### gd.Image#flipHorizontal()
 Flip the image on the canvas over the vertical axis. This means that what's at the right side of the images will be reflected to the left side: pixels move only horizontally.
 
-#### gd.Image#flipVertical()
+### gd.Image#flipVertical()
 Flip the image on the canvas over the horizontal axis, the oposite of the above.
 
-#### gd.Image#flipBoth()
+### gd.Image#flipBoth()
 Flip the image on the canvas over both axes.
 
-#### gd.Image#crop(x, y, width, height)
+### gd.Image#crop(x, y, width, height)
 Crop the supplied image from a certain point to a certain size. Will return a new instance of `gd.Image`. Negative numbers, i.e. when going out of the image bounds, can result in images with black parts. Cropping transparent images currently does not work due to a bug in libgd. An alternative is to create the destination image first with a transparent background and then copy a portion of the source image on top of it.
 
-#### gd.Image#cropAuto(mode)
+### gd.Image#cropAuto(mode)
 The mode parameter is a value from 0 to 4, so there are 5 modes: `0`: default: 4 corners or background, `1`: crop using the transparent color, `2`: crop black borders, `3`: crop white borders, `4`: crop using colors of the 4 corners.
 
-#### gd.Image#cropThreshold(color, threshold)
+### gd.Image#cropThreshold(color, threshold)
 Crop by color, with a threshold. Use for color an integer and for threshold a number.
 
-#### gd.Image#sharpen(pct)
+### gd.Image#sharpen(pct)
 Does not work on non-true color images. A value lower than 0 for `pct` is ignored.
 
-#### gd.Image#createPaletteFromTrueColor(ditherFlag, colorsWanted)
+### gd.Image#createPaletteFromTrueColor(ditherFlag, colorsWanted)
 Create and return a new palette based image instance of gd.Image. The `ditherFlag` is either `0` or `1` (a `Number`, not a `Boolean`), `colorsWanted` a value between 1 and 256.
 
-#### gd.Image#trueColorToPalette(ditherFlag, colorsWanted)
+### gd.Image#trueColorToPalette(ditherFlag, colorsWanted)
 Modify the current image into a palette based image. The `ditherFlag` is either `0` or `1` (a `Number`, not a `Boolean`), `colorsWanted` a value between 1 and 256.
 
-#### gd.Image#paletteToTrueColor()
+### gd.Image#paletteToTrueColor()
 Modify the current image, if it is a palette based image, into a true color image. From libgd version `2.1.0` this returns either `0` or `1`, in version `2.0.26` it is void.
 
-#### gd.Image#colorMatch(gd.Image)
+### gd.Image#colorMatch(gd.Image)
 The parameter should be a palette based image, which will be modified and which can be saved afterwards. The return value is a `Number`. This method tries to better match the colors from the palette based image to those of its true color original.
 
 ```javascript
@@ -650,7 +728,7 @@ await palette.file('/path/to/result.gif');
 palette.destroy();
 ```
 
-#### gd.Image#gifAnimBegin(anim, useGlobalColorMap, loops)
+### gd.Image#gifAnimBegin(anim, useGlobalColorMap, loops)
 Create an animated GIF.
 
 * `anim` is a `String` referencing a filename to be created, like `./anim.gif`
@@ -658,7 +736,7 @@ Create an animated GIF.
 * The value for `loops` can be `-1` for no looping, `0` means infinite looping, any other value the amount of loops the animation should run.
 
 
-#### gd.Image#gifAnimAdd(anim, localColorMap, leftOffset, topOffset, delay, disposal, prevFrame)
+### gd.Image#gifAnimAdd(anim, localColorMap, leftOffset, topOffset, delay, disposal, prevFrame)
 
 
 * Add current image to the specified `anim`.
@@ -669,7 +747,7 @@ Create an animated GIF.
 * `prevFrame` should refer to the previous frame. If the current image is the first frame, supply `null`.
 
 
-#### gd.Image#gifAnimEnd(anim)
+### gd.Image#gifAnimEnd(anim)
 Write and close the GIF animation. A complete working example could look like this:
 
 ```javascript
@@ -706,9 +784,10 @@ totalFrames.forEach(async (i, idx, arr) => {
 firstFrame.gifAnimEnd(anim);
 firstFrame.destroy();
 ```
-### Copying and resizing
 
-#### gd.Image#copy(dest, dx, dy, sx, sy, width, height)
+# Copying and resizing
+
+### gd.Image#copy(dest, dx, dy, sx, sy, width, height)
 Copy an image onto a destination image: `dest`. You'll have to save the destination image to see the resulting image. This method returns _the image on which it is called_ in order to be able to chain methods.
 
 ```javascript
@@ -752,23 +831,23 @@ await input2.savePng(output2, 0);
 ```
 
 
-#### gd.Image#copyResized(dest, dx, dy, sx, sy, dw, dh, sw, sh)
+### gd.Image#copyResized(dest, dx, dy, sx, sy, dw, dh, sw, sh)
 
-#### gd.Image#copyResampled(dest, dx, dy, sx, sy, dw, dh, sw, sh)
+### gd.Image#copyResampled(dest, dx, dy, sx, sy, dw, dh, sw, sh)
 
-#### gd.Image#copyRotated(dest, dx, dy, sx, sy, sw, sh, angle)
+### gd.Image#copyRotated(dest, dx, dy, sx, sy, sw, sh, angle)
 
-#### gd.Image#copyMerge(dest, dx, dy, sx, sy, width, height, pct)
+### gd.Image#copyMerge(dest, dx, dy, sx, sy, width, height, pct)
 
-#### gd.Image#copyMergeGray(dest, dx, dy, sx, sy, width, height pct)
+### gd.Image#copyMergeGray(dest, dx, dy, sx, sy, width, height pct)
 
-#### gd.Image#paletteCopy(dest)
+### gd.Image#paletteCopy(dest)
 
-#### gd.Image#squareToCircle(radius)
+### gd.Image#squareToCircle(radius)
 
-### Misc
+# Misc
 
-#### gd.Image#compare(image)
+### gd.Image#compare(image)
 
 ### Saving graphic images
 The functions `gd.Image#savePng`, `gd.Image#saveJpeg`, `gd.Image#saveGif`, etc. are convenience functions which will be processed asynchronously when a callback is supplied. All of the following have a counterpart like `gd.Image#png` and `gd.Image#pngPtr` which write to disk synchronously or store the image data in a memory pointer respectively. `gd.Image#jpeg` will return the instance of `gd.Image`, `gd.Image#jpgPtr` will return the newly created image data.
@@ -797,31 +876,31 @@ gd.openPng('/path/to/input.png', async function(err, img) {
 ```
 The above example shows how to create a JPEG and GIF file from a PNG file.
 
-#### gd.Image#savePng(path, level[, callback])
+### gd.Image#savePng(path, level[, callback])
 Save image data as a PNG file. The callback will receive an error object as a parameter, only if an error occurred. When a callback is supplied, the image will be written asynchronously by `fs.writeFile()`, using `gd.Image#pngPtr()` to first write it to memory in the given format. `level` can be value between `0` and `9` and refers to a zlib compression level. A level of `-1` will let libpng12 decide what the default is.
 
-#### gd.Image#saveJpeg(path, quality[, callback])
+### gd.Image#saveJpeg(path, quality[, callback])
 Save image data as a JPEG file. The callback will receive an error object as a parameter. Quality can be a `Number` between `0` and `100`.
 
-#### gd.Image#saveGif(path[, callback])
+### gd.Image#saveGif(path[, callback])
 Save image data as a GIF file.
 
-#### gd.Image#saveGd(path[, callback])
+### gd.Image#saveGd(path[, callback])
 Save image data as a GD file.
 
-#### gd.Image#saveGd2(path, chunkSize[, format][, callback])
+### gd.Image#saveGd2(path, chunkSize[, format][, callback])
 Save image data as a GD2 file.
 
-#### gd.Image#saveWBMP(path, foreground[, callback])
+### gd.Image#saveWBMP(path, foreground[, callback])
 Save image as a 2 color WBMP file. `foreground` is an integer value or `0x000000` value which defines the dark color of the image. All other colors will be changed into white.
 
-#### gd.Image#saveBmp(path, compression[, callback])
+### gd.Image#saveBmp(path, compression[, callback])
 Only available from GD version 2.1.1. The compression parameter is eiterh `0` for no compression and `1` for compression. This value only affects paletted images.
 
-#### gd.Image#saveTiff(path[, callback])
+### gd.Image#saveTiff(path[, callback])
 As per libgd 2.2.4, opening TIFF files appears to be fixed, and saving image data as TIFF worked already fine. Therefore, `gd.openTiff()` is available again. Only available from GD version 2.1.1.
 
-#### gd.Image#file(path)
+### gd.Image#file(path)
 Lets GD decide in which format the image should be stored to disk, based on the supplied file name extension. Only available from GD version 2.1.1. Returns a Promise.
 
 ### Image properties
@@ -846,10 +925,10 @@ Will yield to something like:
 }
 ```
 
-#### gd.Image#colorsTotal
+### gd.Image#colorsTotal
 For paletted images, returns the amount of colors in the palette.
 
-#### gd.Image#interlace
+### gd.Image#interlace
 `Boolean` value for if the image is interlaced or not. This property can also be set. When set to `true` for Jpeg images, GD will save it as a progressive Jpeg image.
 
 ```javascript
@@ -862,16 +941,16 @@ await img.saveJpeg('/path/to/output.jpg', 100);
 img.destroy();
 ```
 
-#### gd.Image#height
+### gd.Image#height
 Returns the height of the image as `Number`.
 
-#### gd.Image#width
+### gd.Image#width
 Returns the width of the image as `Number`.
 
-#### gd.Image#trueColor
+### gd.Image#trueColor
 Returns nonzero if the image is a truecolor image, zero for a palette image.
 
-## libgd2 version information
+# libgd2 version information
 Be aware that since `node-gd` version 0.3.x libgd2 version 2.1.x is mostly supported. `node-gd` version 0.2.x is backed at best with libgd2 version 2.0.x. Run `gdlib-config --version` to check the version of libgd2 on your system. `node-gd` should build successfully for both libgd2 version 2.0.x as wel as for 2.1.x. The main difference is that some functions will not be available. These include:
 
 * `toGrayscale()`
@@ -900,7 +979,7 @@ var version = gd.getGDVersion();
 console.log(version); // 2.0.1 or 2.1.1 or the like
 ```
 
-## Test
+# Test
 
 ```bash
 $ npm test
@@ -908,7 +987,7 @@ $ npm test
 The `test/output/` directory contains the resulting images of the test script. The tests use, in some cases, a GNU Freefont font, which is licensed under the GNU General Public License v3.
 
 
-## Related
+# Related
 
 * [Original author's repo](https://github.com/taggon/node-gd)
 * [node-canvas](https://github.com/LearnBoost/node-canvas) uses libcairo to emulate browser HTML5 Canvas' image manipulation abilities within Node.js
