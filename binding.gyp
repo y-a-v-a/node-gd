@@ -17,7 +17,7 @@
     {
       "target_name": "node_gd",
       "sources": [
-        "cpp/addon.cc"
+        "src/addon.cc"
       ],
       "libraries": ["-lgd"],
       "include_dirs": [
