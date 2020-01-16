@@ -1,4 +1,4 @@
-const gd = require('../js/node-gd');
+const gd = require('../index');
 const assert = require('chai').assert;
 
 describe("Image destroy", function() {

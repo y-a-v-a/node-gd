@@ -10,7 +10,7 @@
  */
 var fs = require('fs');
 
-var gd = require('../js/node-gd.js');
+const gd = require('../index');
 var assert = require('chai').assert;
 
 var source = __dirname + '/fixtures/';
@@ -34,107 +34,106 @@ before(function() {
   });
 });
 
-describe('Node.js GD Graphics Library', function() {
-
-  describe('Meta information', function() {
-    it('gd.getGDVersion() -- will return a version number of format x.y.z', function(done) {
-      var version = gd.getGDVersion();
-      assert.ok(/[0-9]\.[0-9]\.[0-9]+/.test(version));
-      return done();
-    });
-
-    it('gd.GD_GIF -- will have built in GIF support', function() {
-      assert.equal(gd.GD_GIF, 1, 'No GIF support for libgd is impossible!');
-    });
-
-    it('gd.GD_GIFANIM -- will have built in GIF animation support', function() {
-      assert.equal(gd.GD_GIFANIM, 1, 'No GIF animation support for libgd is impossible!');
-    });
-
-    it('gd.GD_OPENPOLYGON -- will have built in open polygon support', function() {
-      assert.equal(gd.GD_OPENPOLYGON, 1, 'No open polygon support for libgd is impossible!');
-    });
-
+describe('Meta information', function() {
+  it('gd.getGDVersion() -- will return a version number of format x.y.z', function(done) {
+    var version = gd.getGDVersion();
+    assert.ok(/[0-9]\.[0-9]\.[0-9]+/.test(version));
+    return done();
   });
 
-  describe('GD color functions', function() {
-    // it('', function(done) {});
-
-    it('gd.trueColor() -- can return an integer representation of rgb color values', function(done) {
-      var red = gd.trueColor(255, 0, 0);
-      assert.ok(16711680 === red);
-      return done();
-    });
-
-    it('gd.trueColorAlpha() -- can return an integer representation of rgba color values', function(done) {
-      var transparentRed = gd.trueColorAlpha(255, 0, 0, 63);
-      assert.ok(1073676288 === transparentRed);
-      return done();
-    });
+  it('gd.GD_GIF -- will have built in GIF support', function() {
+    assert.equal(gd.GD_GIF, 1, 'No GIF support for libgd is impossible!');
   });
 
-  describe('Image query functions', function() {
-    it('gd.Image#getBoundsSafe() -- getBoundsSafe should return 0 if the coordinate [-10, 1000] is checked against the image bounds', async function() {
-      var s = source + 'input.png';
-      var coord = [-10, 1000];
-      const image = await gd.openPng(s);
+  it('gd.GD_GIFANIM -- will have built in GIF animation support', function() {
+    assert.equal(gd.GD_GIFANIM, 1, 'No GIF animation support for libgd is impossible!');
+  });
 
-      assert.ok(image.getBoundsSafe(coord[0], coord[1]) === 0);
-      image.destroy();
-    });
+  it('gd.GD_OPENPOLYGON -- will have built in open polygon support', function() {
+    assert.equal(gd.GD_OPENPOLYGON, 1, 'No open polygon support for libgd is impossible!');
+  });
 
-    it('gd.Image#getBoundsSafe() -- getBoundsSafe should return 1 if the coordinate [10, 10] is checked against the image bounds', async function() {
-      var s = source + 'input.png';
-      var coord = [10, 10];
-      const image = await gd.openPng(s);
+});
 
-      assert.ok(image.getBoundsSafe(coord[0], coord[1]) === 1);
-      image.destroy();
-    });
+describe('GD color functions', function() {
+  // it('', function(done) {});
 
-    it('gd.Image#getTrueColorPixel() -- getTrueColorPixel should return "e6e6e6" when queried for coordinate [10, 10]', async function() {
-      var s = source + 'input.png';
-      var coord = [10, 10];
-      const image = await gd.openPng(s);
-      var color;
-      color = image.getTrueColorPixel(coord[0], coord[1]);
+  it('gd.trueColor() -- can return an integer representation of rgb color values', function(done) {
+    var red = gd.trueColor(255, 0, 0);
+    assert.ok(16711680 === red);
+    return done();
+  });
 
-      assert.ok(color.toString(16) === 'e6e6e6');
-    });
+  it('gd.trueColorAlpha() -- can return an integer representation of rgba color values', function(done) {
+    var transparentRed = gd.trueColorAlpha(255, 0, 0, 63);
+    assert.ok(1073676288 === transparentRed);
+    return done();
+  });
+});
 
-    it('gd.Image#getTrueColorPixel() -- getTrueColorPixel should return 0 when queried for coordinate [101, 101]', async function() {
-      var s = source + 'input.png';
-      var coord = [101, 101];
-      const image = await gd.openPng(s);
-      var color;
-      color = image.getTrueColorPixel(coord[0], coord[1]);
+describe('Image query functions', function() {
+  it('gd.Image#getBoundsSafe() -- getBoundsSafe should return 0 if the coordinate [-10, 1000] is checked against the image bounds', async function() {
+    var s = source + 'input.png';
+    var coord = [-10, 1000];
+    const image = await gd.openPng(s);
 
-      assert.ok(color === 0);
-    });
+    assert.ok(image.getBoundsSafe(coord[0], coord[1]) === 0);
+    image.destroy();
+  });
 
-    it('gd.Image#imageColorAt() -- imageColorAt should return "be392e" when queried for coordinate [50, 50]', async function() {
-      var s = source + 'input.png';
-      var coord = [50, 50];
-      const image = await gd.openPng(s);
-      var color;
+  it('gd.Image#getBoundsSafe() -- getBoundsSafe should return 1 if the coordinate [10, 10] is checked against the image bounds', async function() {
+    var s = source + 'input.png';
+    var coord = [10, 10];
+    const image = await gd.openPng(s);
+
+    assert.ok(image.getBoundsSafe(coord[0], coord[1]) === 1);
+    image.destroy();
+  });
+
+  it('gd.Image#getTrueColorPixel() -- getTrueColorPixel should return "e6e6e6" when queried for coordinate [10, 10]', async function() {
+    var s = source + 'input.png';
+    var coord = [10, 10];
+    const image = await gd.openPng(s);
+    var color;
+    color = image.getTrueColorPixel(coord[0], coord[1]);
+
+    assert.ok(color.toString(16) === 'e6e6e6');
+  });
+
+  it('gd.Image#getTrueColorPixel() -- getTrueColorPixel should return 0 when queried for coordinate [101, 101]', async function() {
+    var s = source + 'input.png';
+    var coord = [101, 101];
+    const image = await gd.openPng(s);
+    var color;
+    color = image.getTrueColorPixel(coord[0], coord[1]);
+
+    assert.ok(color === 0);
+  });
+
+  it('gd.Image#imageColorAt() -- imageColorAt should return "be392e" when queried for coordinate [50, 50]', async function() {
+    var s = source + 'input.png';
+    var coord = [50, 50];
+    const image = await gd.openPng(s);
+    var color;
+    color = image.imageColorAt(coord[0], coord[1]);
+
+    assert.ok(color.toString(16) === 'be392e');;
+  });
+
+  it('gd.Image#imageColorAt() -- imageColorAt should throw an error when queried for coordinate [101, 101]', async function() {
+    const s = source + 'input.png';
+    const coord = [101, 101];
+    const image = await gd.openPng(s);
+    let color;
+    try {
       color = image.imageColorAt(coord[0], coord[1]);
-
-      assert.ok(color.toString(16) === 'be392e');;
-    });
-
-    it('gd.Image#imageColorAt() -- imageColorAt should throw an error when queried for coordinate [101, 101]', async function() {
-      const s = source + 'input.png';
-      const coord = [101, 101];
-      const image = await gd.openPng(s);
-      let color;
-      try {
-        color = image.imageColorAt(coord[0], coord[1]);
-      } catch (exception) {
-        assert.ok(exception instanceof Error);
-      }
-    });
+    } catch (exception) {
+      assert.ok(exception instanceof Error);
+    }
   });
+});
 
+describe('Image filter functions', function() {
   it('gd.Image#copyResampled() -- can scale-down (resize) an image', async () => {
     var s, t;
     s = source + 'input.png';

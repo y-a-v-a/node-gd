@@ -2,7 +2,7 @@
 
 var fs = require('fs');
 
-var gd = require('../js/node-gd.js');
+const gd = require('../index');
 var assert = require('chai').assert;
 
 var source = __dirname + '/fixtures';

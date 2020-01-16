@@ -2,13 +2,40 @@
 
 var fs = require('fs');
 
-var gd = require('../js/node-gd.js');
+const gd = require('../index');
 var assert = require('chai').assert;
 
 var source = __dirname + '/fixtures/';
 var target = __dirname + '/output/';
 
 describe('Section Handling file types', function() {
+  it('gd.Image#jpeg() -- returns a Promise', async function() {
+    const s = `${source}input.png`;
+    const t = `${target}output-gd.Image.jpeg.jpg`;
+    const img = await gd.openPng(s);
+    const successPromise = img.jpeg(t, 0);
+
+    assert.ok(successPromise.constructor === Promise);
+  });
+
+  it('gd.Image#jpeg() -- returns true when save is succesfull', async function() {
+    const s = `${source}input.png`;
+    const t = `${target}output-success-gd.Image.jpeg.jpg`;
+    const img = await gd.openPng(s);
+    const success = await img.jpeg(t, 0);
+
+    assert.ok(success === true);
+  });
+
+  it('gd.Image#jpeg() -- returns "Cannot save JPEG file" in catch when failing', async function() {
+    const s = `${source}input.png`;
+    const img = await gd.openPng(s);
+
+    img.jpeg('', 100).catch(function(reason) {
+      assert.ok(reason === 'Cannot save JPEG file');
+    });
+  });
+
   it('gd.Image#saveJpeg() -- can copy a png into a jpeg', async () => {
     var s, t;
     s = source + 'input.png';
