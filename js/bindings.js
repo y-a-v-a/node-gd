@@ -11,7 +11,7 @@
 const path = require('path');
 
 const libPaths = [
-  path.normalize(`${__dirname}/../build/Debug/node_gd.node`),
+  path.normalize(`${__dirname}/../build/Release/node_gd.node`),
   path.normalize(`${__dirname}/../build/default/node_gd.node`)
 ];
 
