@@ -202,6 +202,12 @@
   delete[] data;                                                        \
   return result;
 
+#define CHECK_IMAGE_DESTROYED                                           \
+  if (this->_isDestroyed) {                                             \
+    Napi::Error::New(info.Env(), "Image is already destroyed.")         \
+      .ThrowAsJavaScriptException();                                    \
+    return info.Env().Undefined();                                      \
+  }
 
 class Gd : public Napi::ObjectWrap<Gd> {
 public:
@@ -219,6 +225,8 @@ public:
     gdImagePtr getGdImagePtr() const { return _image; }
   private:
     gdImagePtr _image;
+
+    bool _isDestroyed{false};
 
     operator gdImagePtr () const { return _image; }
 

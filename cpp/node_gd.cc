@@ -460,6 +460,8 @@ Gd::Image::Image(const Napi::CallbackInfo& info)
 Gd::Image::~Image() {
   if(this->_image) {
     gdImageDestroy(this->_image);
+
+    this->_isDestroyed = true;
     this->_image = nullptr;
   }
 }
@@ -473,6 +475,7 @@ Napi::Value Gd::Image::Destroy(const Napi::CallbackInfo& info) {
     this->_image = nullptr;
   }
 
+  this->_isDestroyed = true;
   this->_image = nullptr;
   return info.Env().Undefined();
 }
@@ -1118,16 +1121,22 @@ Napi::Value Gd::Image::GetBoundsSafe(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::WidthGetter(const Napi::CallbackInfo& info) {
+  CHECK_IMAGE_DESTROYED;
+
   Napi::Number result = Napi::Number::New(info.Env(), gdImageSX(this->_image));
   return result;
 }
 
 Napi::Value Gd::Image::HeightGetter(const Napi::CallbackInfo& info) {
+  CHECK_IMAGE_DESTROYED;
+
   Napi::Number result = Napi::Number::New(info.Env(), gdImageSY(this->_image));
   return result;
 }
 
 Napi::Value Gd::Image::TrueColorGetter(const Napi::CallbackInfo& info) {
+  CHECK_IMAGE_DESTROYED;
+
   Napi::Number result = Napi::Number::New(info.Env(), gdImageTrueColor(this->_image));
   return result;
 }
@@ -1484,6 +1493,8 @@ Napi::Value Gd::Image::ColorResolveAlpha(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::ColorsTotalGetter(const Napi::CallbackInfo& info) {
+  CHECK_IMAGE_DESTROYED;
+
   Napi::Number result = Napi::Number::New(info.Env(), gdImageColorsTotal(this->_image));
   return result;
 }
@@ -1517,6 +1528,8 @@ Napi::Value Gd::Image::Alpha(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::InterlaceGetter(const Napi::CallbackInfo& info) {
+  CHECK_IMAGE_DESTROYED;
+
   bool interlaced = (gdImageGetInterlaced(this->_image) != 0);
   Napi::Boolean result;
   if (interlaced) {
@@ -1529,6 +1542,11 @@ Napi::Value Gd::Image::InterlaceGetter(const Napi::CallbackInfo& info) {
 }
 
 void Gd::Image::InterlaceSetter(const Napi::CallbackInfo& info, const Napi::Value& value) {
+  if (this->_isDestroyed) {
+    Napi::Error::New(info.Env(), "Image is already destroyed.")
+      .ThrowAsJavaScriptException();
+  }
+
   if (value.IsBoolean()) {
     bool interlace = value.As<Napi::Boolean>().Value();
 
