@@ -77,7 +77,7 @@ class CreateFromJpegWorker : public CreateFromWorker {
       // execute the task
       FILE *in; in = fopen(path.c_str(), "rb");
       if (in == nullptr) {
-        SetError("Cannot open JPEG file");
+        return SetError("Cannot open JPEG file");
       }
       image = gdImageCreateFromJpeg(in);
       fclose(in);
@@ -108,7 +108,7 @@ class CreateFromPngWorker : public CreateFromWorker {
       // execute the async task
       FILE *in; in = fopen(path.c_str(), "rb");
       if (in == nullptr) {
-        SetError("Cannot open PNG file");
+        return SetError("Cannot open PNG file");
       }
       image = gdImageCreateFromPng(in);
       fclose(in);
@@ -139,7 +139,7 @@ class CreateFromGifWorker : public CreateFromWorker {
       // execute the async task
       FILE *in; in = fopen(path.c_str(), "rb");
       if (in == nullptr) {
-        SetError("Cannot open GIF file");
+        return SetError("Cannot open GIF file");
       }
       image = gdImageCreateFromGif(in);
       fclose(in);
@@ -170,7 +170,7 @@ class CreateFromGd2Worker : public CreateFromWorker {
       // execute the async task
       FILE *in; in = fopen(path.c_str(), "rb");
       if (in == nullptr) {
-        SetError("Cannot open GD2 file");
+        return SetError("Cannot open GD2 file");
       }
       image = gdImageCreateFromGd2(in);
       fclose(in);
@@ -209,7 +209,7 @@ class CreateFromGd2PartWorker : public CreateFromWorker {
       // execute the async task
       FILE *in; in = fopen(path.c_str(), "rb");
       if (in == nullptr) {
-        SetError("Cannot open GD2 file to read part of it");
+        return SetError("Cannot open GD2 file to read part of it");
       }
       image = gdImageCreateFromGd2Part(in, srcX, srcY, width, height);
 
@@ -249,7 +249,7 @@ class CreateFromWBMPWorker : public CreateFromWorker {
       // execute the async task
       FILE *in; in = fopen(path.c_str(), "rb");
       if (in == nullptr) {
-        SetError("Cannot open WBMP file");
+        return SetError("Cannot open WBMP file");
       }
       image = gdImageCreateFromWBMP(in);
       fclose(in);
@@ -280,7 +280,7 @@ class CreateFromWebpWorker : public CreateFromWorker {
       // execute the async task
       FILE *in; in = fopen(path.c_str(), "rb");
       if (in == nullptr) {
-        SetError("Cannot open WEBP file");
+        return SetError("Cannot open WEBP file");
       }
       image = gdImageCreateFromWebp(in);
       fclose(in);
@@ -311,7 +311,7 @@ class CreateFromBmpWorker : public CreateFromWorker {
       // execute the async task
       FILE *in; in = fopen(path.c_str(), "rb");
       if (in == nullptr) {
-        SetError("Cannot open BMP file");
+        return SetError("Cannot open BMP file");
       }
       image = gdImageCreateFromBmp(in);
       fclose(in);
@@ -342,7 +342,7 @@ class CreateFromTiffWorker : public CreateFromWorker {
       // execute the async task
       FILE *in; in = fopen(path.c_str(), "rb");
       if (in == nullptr) {
-        SetError("Cannot open TIFF file");
+        return SetError("Cannot open TIFF file");
       }
       image = gdImageCreateFromTiff(in);
       fclose(in);
@@ -377,7 +377,7 @@ class FileWorker : public AsyncWorker {
       _success = gdImageFile(*_gdImage, path.c_str());
 
       if (!_success) {
-        SetError("Cannot save file");
+        return SetError("Cannot save file");
       }
     }
 
@@ -474,7 +474,7 @@ class CreateWorker : public AsyncWorker {
         image = gdImageCreateTrueColor(_width, _height);
       }
       if (!image) {
-        SetError("No image created!");
+        return SetError("No image created!");
       }
     }
 
@@ -552,7 +552,7 @@ class SaveJpegWorker : public SaveWorker {
     void Execute() override {
       FILE *out = fopen(path.c_str(), "wb");
       if (out == nullptr) {
-        SetError("Cannot save JPEG file");
+        return SetError("Cannot save JPEG file");
       }
       gdImageJpeg(*_gdImage, out, quality);
       fclose(out);
@@ -582,7 +582,7 @@ class SaveGifWorker : public SaveWorker {
     void Execute() override {
       FILE *out = fopen(path.c_str(), "wb");
       if (out == nullptr) {
-        SetError("Cannot save GIF file");
+        return SetError("Cannot save GIF file");
       }
       gdImageGif(*_gdImage, out);
       fclose(out);
@@ -614,7 +614,7 @@ class SavePngWorker : public SaveWorker {
     void Execute() override {
       FILE *out = fopen(path.c_str(), "wb");
       if (out == nullptr) {
-        SetError("Cannot save PNG file");
+        return SetError("Cannot save PNG file");
       }
       gdImagePngEx(*_gdImage, out, level);
       fclose(out);
@@ -646,7 +646,7 @@ class SaveWBMPWorker : public SaveWorker {
     void Execute() override {
       FILE *out = fopen(path.c_str(), "wb");
       if (out == nullptr) {
-        SetError("Cannot save WBMP file");
+        return SetError("Cannot save WBMP file");
       }
       gdImageWBMP(*_gdImage, foreground, out);
       fclose(out);
@@ -678,7 +678,7 @@ class SaveWebpWorker : public SaveWorker {
     void Execute() override {
       FILE *out = fopen(path.c_str(), "wb");
       if (out == nullptr) {
-        SetError("Cannot save WEBP file");
+        return SetError("Cannot save WEBP file");
       }
       gdImageWebpEx(*_gdImage, out, level);
       fclose(out);
@@ -709,7 +709,7 @@ class SaveGdWorker : public SaveWorker {
     void Execute() override {
       FILE *out = fopen(path.c_str(), "wb");
       if (out == nullptr) {
-        SetError("Cannot save GD file");
+        return SetError("Cannot save GD file");
       }
       gdImageGd(*_gdImage, out);
       fclose(out);
@@ -743,7 +743,7 @@ class SaveGd2Worker : public SaveWorker {
     void Execute() override {
       FILE *out = fopen(path.c_str(), "wb");
       if (out == nullptr) {
-        SetError("Cannot save GD2 file");
+        return SetError("Cannot save GD2 file");
       }
       gdImageGd2(*_gdImage, out, chunkSize, format);
       fclose(out);
@@ -780,7 +780,7 @@ class SaveBmpWorker : public SaveWorker {
     void Execute() override {
       FILE *out = fopen(path.c_str(), "wb");
       if (out == nullptr) {
-        SetError("Cannot save BMP file");
+        return SetError("Cannot save BMP file");
       }
       gdImageBmp(*_gdImage, out, compression);
       fclose(out);
@@ -812,7 +812,7 @@ class SaveTiffWorker : public SaveWorker {
     void Execute() override {
       FILE *out = fopen(path.c_str(), "wb");
       if (out == nullptr) {
-        SetError("Cannot save TIFF file");
+        return SetError("Cannot save TIFF file");
       }
       gdImageTiff(*_gdImage, out);
       fclose(out);

@@ -16,7 +16,7 @@ Have environment-specific build tools available. Next to that: to take full adva
 ### On Debian/Ubuntu
 
 ```bash
-$ sudo apt-get install libgd2-dev # libgd
+$ sudo apt-get install libgd-dev # libgd
 $ npm install node-gd
 ```
 
