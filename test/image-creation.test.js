@@ -17,7 +17,7 @@ var target = __dirname + '/output/';
 describe('gd.create - Creating a paletted image', function() {
   it('returns a Promise', () => {
     const imagePromise = gd.create(100,100);
-    assert.strictEqual(imagePromise.constructor === Promise);
+    assert.strictEqual(imagePromise.constructor, Promise);
 
     imagePromise.then(image => image.destroy());
   });
