@@ -15,6 +15,7 @@
   "homepage": "https://github.com/y-a-v-a/node-gd",
   "bugs": "https://github.com/y-a-v-a/node-gd/issues",
   "scripts": {
+    "clean": "rm -rf test/output/* build/",
     "pretest": "node-gyp build",
     "test": "mocha --reporter spec --bail --ui bdd --colors --file ./test/main.test.js",
     "install": "node-gyp rebuild",

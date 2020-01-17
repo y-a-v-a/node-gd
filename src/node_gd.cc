@@ -412,7 +412,7 @@ Gd::Image::Image(const Napi::CallbackInfo& info)
 }
 
 Gd::Image::~Image() {
-  if(this->_image) {
+  if(this->_image != nullptr) {
     gdImageDestroy(this->_image);
 
     this->_isDestroyed = true;
@@ -424,9 +424,8 @@ Gd::Image::~Image() {
  * Destruction, Loading and Saving Functions
  */
 Napi::Value Gd::Image::Destroy(const Napi::CallbackInfo& info) {
-  if(this->_image){
+  if(this->_image != nullptr){
     gdImageDestroy(this->_image);
-    this->_image = nullptr;
   }
 
   this->_isDestroyed = true;

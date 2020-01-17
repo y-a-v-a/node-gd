@@ -122,6 +122,7 @@
     Napi::TypeError::New(info.Env(),                                    \
       "Argument " #I " invalid")                                        \
       .ThrowAsJavaScriptException();                                    \
+    return;                                           \
   }                                                                     \
   Napi::External<gdImagePtr> VAR =                                      \
     info[I].As<Napi::External<gdImagePtr>>();

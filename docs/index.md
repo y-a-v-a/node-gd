@@ -265,7 +265,14 @@ if (gd.getGDVersion() >= '2.1.1') {
 # Manipulating graphic images
 
 ### gd.Image#destroy()
-Free up allocated memory for image data.
+
+Free up allocated memory for image data, that is on the GD-level. The instance of gd.Image is not disposed of by this call. This is done by v8's garbage collection. In case you call any gd.Image function _after_ destroying the image, an `Error` is thrown telling you that the image has been destroyed.
+
+```javascript
+const image = await gd.create(100, 100);
+image.destroy();
+image.getPixel(50, 50); // will throw an error
+```
 
 ### Drawing
 

@@ -17,7 +17,7 @@ var target = __dirname + '/output/';
 describe('gd.create - Creating a paletted image', function() {
   it('returns a Promise', () => {
     const imagePromise = gd.create(100,100);
-    assert.ok(imagePromise.constructor === Promise);
+    assert.strictEqual(imagePromise.constructor === Promise);
 
     imagePromise.then(image => image.destroy());
   });
@@ -119,7 +119,7 @@ describe('gd.create - Creating a paletted image', function() {
     }
   });
 
-  it('throws a Error when the height parameter is 0 async', async () => {
+  it('throws a Error when the height parameter is 0', async () => {
     var img;
     try {
       await gd.create(100, 0);
