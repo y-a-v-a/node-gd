@@ -919,9 +919,10 @@ Napi::Value Gd::Image::SetTile(const Napi::CallbackInfo& info) {
 Napi::Value Gd::Image::SetStyle(const Napi::CallbackInfo& info) {
   CHECK_IMAGE_DESTROYED;
 
-  if (info.Length() < 1 || !info[0].IsArray())
+  if (info.Length() < 1 || !info[0].IsArray()) {
     Napi::TypeError::New(info.Env(), "Arguments 0 must be an array").ThrowAsJavaScriptException();
     return info.Env().Null();
+  }
 
   Napi::Array array = info[0].As<Napi::Array>();
   unsigned int len = array.Length(), _len = 0;

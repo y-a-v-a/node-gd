@@ -694,7 +694,6 @@ class SaveGdWorker : public SaveWorker {
   public:
     static Value DoWork(const CallbackInfo& info, gdImagePtr& gdImage) {
       REQ_STR_ARG(0, path);
-      OPT_INT_ARG(1, level, -1);
 
       SaveGdWorker* worker = new SaveGdWorker(info.Env(),
         "SaveGdWorkerResource");
