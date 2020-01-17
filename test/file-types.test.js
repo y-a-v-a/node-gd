@@ -22,6 +22,8 @@ describe('Section Handling file types', function() {
     const s = `${source}input.png`;
     const t = `${target}output-success-gd.Image.jpeg.jpg`;
     const img = await gd.openPng(s);
+
+    assert.ok(img instanceof gd.Image);
     const success = await img.jpeg(t, 0);
 
     assert.ok(success === true);
@@ -30,6 +32,7 @@ describe('Section Handling file types', function() {
   it('gd.Image#jpeg() -- returns "Cannot save JPEG file" in catch when failing', async function() {
     const s = `${source}input.png`;
     const img = await gd.openPng(s);
+    assert.ok(img instanceof gd.Image);
 
     img.jpeg('', 100).catch(function(reason) {
       assert.ok(reason === 'Cannot save JPEG file');
