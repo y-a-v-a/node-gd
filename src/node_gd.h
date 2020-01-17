@@ -199,7 +199,7 @@
 #define RETURN_DATA                                                     \
   Napi::Buffer<char> result =                                           \
     Napi::Buffer<char>::Copy(info.Env(), data, size);                   \
-  gdFree(data);                                                        \
+  delete[] data;                                                        \
   return result;
 
 #define CHECK_IMAGE_DESTROYED                                           \
