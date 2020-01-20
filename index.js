@@ -7,8 +7,8 @@
  * MIT Licensed
  */
 
-const bindings = require('./js/node-gd');
-const GifAnim = require('./js/GifAnim');
+const bindings = require('./lib/node-gd');
+const GifAnim = require('./lib/GifAnim');
 
 bindings.GifAnim = GifAnim;
 
