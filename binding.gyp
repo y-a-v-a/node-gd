@@ -26,6 +26,10 @@
       'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
       'defines': [ 'NAPI_CPP_EXCEPTIONS' ],
       "conditions": [
+	[ "OS=='linux'", {
+	  "cflags!": [ '-fno-exceptions' ],
+	  "cflags_cc!": [ "-fno-exceptions" ],
+	}],
         [ "OS=='freebsd'", {
           "libraries": ["-L/usr/local/lib"],
           "include_dirs": ["/usr/local/include"]
