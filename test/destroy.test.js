@@ -40,6 +40,18 @@ describe("Image destroy", function() {
     }
   });
 
+  it("gd.Image#destroy() -- accessing 'trueColor' property after destroy throws an Error", async function() {
+    const img = await gd.create(200,200);
+    assert.strictEqual(img.trueColor, 0);
+    img.destroy();
+
+    try {
+      img.getPixel(1, 1);
+    } catch(e) {
+      assert.ok(e instanceof Error);
+    }
+  });
+
   // it("gd.Image#destroy() -- ", async function() {
 
   // });

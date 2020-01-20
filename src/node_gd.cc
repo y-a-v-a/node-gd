@@ -416,11 +416,11 @@ Napi::Object Gd::Image::Init(Napi::Env env, Napi::Object exports) {
       /**
        * Instance getters and setters
        */
-      InstanceAccessor("trueColor", &Gd::Image::TrueColorGetter, 0, napi_default, nullptr),
-      InstanceAccessor("width", &Gd::Image::WidthGetter, 0, napi_default, nullptr),
-      InstanceAccessor("height", &Gd::Image::HeightGetter, 0, napi_default, nullptr),
-      InstanceAccessor("interlace", &Gd::Image::InterlaceGetter, &Gd::Image::InterlaceSetter, napi_default, nullptr),
-      InstanceAccessor("colorsTotal", &Gd::Image::ColorsTotalGetter, 0, napi_default, nullptr)
+      InstanceAccessor("trueColor", &Gd::Image::TrueColorGetter, nullptr, napi_default, nullptr),
+      InstanceAccessor("width", &Gd::Image::WidthGetter, nullptr, napi_default, nullptr),
+      InstanceAccessor("height", &Gd::Image::HeightGetter, nullptr, napi_default, nullptr),
+      InstanceAccessor("interlace", &Gd::Image::InterlaceGetter, &Gd::Image::InterlaceSetter, napi_writable, nullptr),
+      InstanceAccessor("colorsTotal", &Gd::Image::ColorsTotalGetter, nullptr, napi_default, nullptr)
   });
 
 
@@ -437,6 +437,7 @@ Gd::Image::Image(const Napi::CallbackInfo& info)
   gdImagePtr *imgPtr = image.Data();
 
   this->_image = *imgPtr;
+  this->_isDestroyed = false;
 }
 
 Gd::Image::~Image() {
@@ -462,13 +463,13 @@ Napi::Value Gd::Image::Destroy(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::Jpeg(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   return SaveJpegWorker::DoWork(info, this->_image);
 }
 
 Napi::Value Gd::Image::JpegPtr(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
   OPT_INT_ARG(0, quality, -1);
 
   int size;
@@ -478,13 +479,13 @@ Napi::Value Gd::Image::JpegPtr(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::Gif(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   return SaveGifWorker::DoWork(info, this->_image);
 }
 
 Napi::Value Gd::Image::GifPtr(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   int size;
   char *data = (char*)gdImageGifPtr(this->_image, &size);
@@ -493,13 +494,13 @@ Napi::Value Gd::Image::GifPtr(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::Png(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   return SavePngWorker::DoWork(info, this->_image);
 }
 
 Napi::Value Gd::Image::PngPtr(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   OPT_INT_ARG(0, level, -1);
 
@@ -510,13 +511,13 @@ Napi::Value Gd::Image::PngPtr(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::WBMP(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   return SaveWBMPWorker::DoWork(info, this->_image);
 }
 
 Napi::Value Gd::Image::WBMPPtr(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, foreground);
 
@@ -528,13 +529,13 @@ Napi::Value Gd::Image::WBMPPtr(const Napi::CallbackInfo& info) {
 
 #if HAS_LIBWEBP
 Napi::Value Gd::Image::Webp(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   return SaveWebpWorker::DoWork(info, this->_image);
 }
 
 Napi::Value Gd::Image::WebpPtr(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   OPT_INT_ARG(0, level, -1);
 
@@ -546,13 +547,13 @@ Napi::Value Gd::Image::WebpPtr(const Napi::CallbackInfo& info) {
 #endif
 
 Napi::Value Gd::Image::Gd(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   return SaveGdWorker::DoWork(info, this->_image);
 }
 
 Napi::Value Gd::Image::GdPtr(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   int size;
   char *data = (char*)gdImageGdPtr(this->_image, &size);
@@ -561,13 +562,13 @@ Napi::Value Gd::Image::GdPtr(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::Gd2(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   return SaveGd2Worker::DoWork(info, this->_image);
 }
 
 Napi::Value Gd::Image::Gd2Ptr(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, chunkSize);
   OPT_INT_ARG(1, format, GD2_FMT_RAW);
@@ -580,13 +581,13 @@ Napi::Value Gd::Image::Gd2Ptr(const Napi::CallbackInfo& info) {
 
 #if SUPPORTS_GD_2_1_0
 Napi::Value Gd::Image::Bmp(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   return SaveBmpWorker::DoWork(info, this->_image);
 }
 
 Napi::Value Gd::Image::BmpPtr(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   OPT_INT_ARG(0, compression, 0);
 
@@ -599,13 +600,13 @@ Napi::Value Gd::Image::BmpPtr(const Napi::CallbackInfo& info) {
 
 #if HAS_LIBTIFF
 Napi::Value Gd::Image::Tiff(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   return SaveTiffWorker::DoWork(info, this->_image);
 }
 
 Napi::Value Gd::Image::TiffPtr(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   int size;
   char *data = (char*)gdImageTiffPtr(this->_image, &size);
@@ -616,7 +617,7 @@ Napi::Value Gd::Image::TiffPtr(const Napi::CallbackInfo& info) {
 
 #if SUPPORTS_GD_2_1_1
 Napi::Value Gd::Image::File(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   return FileWorker::DoWork(info, this->_image);
 }
@@ -626,7 +627,7 @@ Napi::Value Gd::Image::File(const Napi::CallbackInfo& info) {
  * Drawing Functions
  */
 Napi::Value Gd::Image::SetPixel(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(3);
   REQ_INT_ARG(0, x);
@@ -639,7 +640,7 @@ Napi::Value Gd::Image::SetPixel(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::Line(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(5);
   REQ_INT_ARG(0, x1);
@@ -654,7 +655,7 @@ Napi::Value Gd::Image::Line(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::DashedLine(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(5);
   REQ_INT_ARG(0, x1);
@@ -669,7 +670,7 @@ Napi::Value Gd::Image::DashedLine(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::Polygon(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(2);
   REQ_INT_ARG(1, color);
@@ -706,7 +707,7 @@ Napi::Value Gd::Image::Polygon(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::OpenPolygon(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(2);
   REQ_INT_ARG(1, color);
@@ -743,7 +744,7 @@ Napi::Value Gd::Image::OpenPolygon(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::FilledPolygon(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(2);
   REQ_INT_ARG(1, color);
@@ -780,7 +781,7 @@ Napi::Value Gd::Image::FilledPolygon(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::Rectangle(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(5);
   REQ_INT_ARG(0, x1);
@@ -795,7 +796,7 @@ Napi::Value Gd::Image::Rectangle(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::FilledRectangle(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(5);
   REQ_INT_ARG(0, x1);
@@ -810,7 +811,7 @@ Napi::Value Gd::Image::FilledRectangle(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::Arc(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(7);
   REQ_INT_ARG(0, cx);
@@ -827,7 +828,7 @@ Napi::Value Gd::Image::Arc(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::FilledArc(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(8);
   REQ_INT_ARG(0, cx);
@@ -846,7 +847,7 @@ Napi::Value Gd::Image::FilledArc(const Napi::CallbackInfo& info) {
 
 #if SUPPORTS_GD_2_1_0
 Napi::Value Gd::Image::Ellipse(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(5);
   REQ_INT_ARG(0, cx);
@@ -862,7 +863,7 @@ Napi::Value Gd::Image::Ellipse(const Napi::CallbackInfo& info) {
 #endif
 
 Napi::Value Gd::Image::FilledEllipse(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(5);
   REQ_INT_ARG(0, cx);
@@ -877,7 +878,7 @@ Napi::Value Gd::Image::FilledEllipse(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::FillToBorder(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(4);
   REQ_INT_ARG(0, x);
@@ -891,7 +892,7 @@ Napi::Value Gd::Image::FillToBorder(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::Fill(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(3);
   REQ_INT_ARG(0, x);
@@ -904,7 +905,7 @@ Napi::Value Gd::Image::Fill(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::SetAntiAliased(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, color);
 
@@ -914,7 +915,7 @@ Napi::Value Gd::Image::SetAntiAliased(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::SetAntiAliasedDontBlend(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(2);
   REQ_INT_ARG(0, color);
@@ -926,7 +927,7 @@ Napi::Value Gd::Image::SetAntiAliasedDontBlend(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::SetBrush(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_IMG_ARG(0, brush)
   gdImageSetBrush(this->_image, brush);
@@ -935,7 +936,7 @@ Napi::Value Gd::Image::SetBrush(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::SetTile(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_IMG_ARG(0, tile)
   gdImageSetTile(this->_image, tile);
@@ -944,7 +945,7 @@ Napi::Value Gd::Image::SetTile(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::SetStyle(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   if (info.Length() < 1 || !info[0].IsArray()) {
     Napi::TypeError::New(info.Env(), "Arguments 0 must be an array").ThrowAsJavaScriptException();
@@ -971,7 +972,7 @@ Napi::Value Gd::Image::SetStyle(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::SetThickness(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, thickness)
 
@@ -981,7 +982,7 @@ Napi::Value Gd::Image::SetThickness(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::AlphaBlending(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, blending)
   gdImageAlphaBlending(this->_image, blending);
@@ -990,7 +991,7 @@ Napi::Value Gd::Image::AlphaBlending(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::SaveAlpha(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, saveFlag)
   gdImageSaveAlpha(this->_image, saveFlag);
@@ -999,7 +1000,7 @@ Napi::Value Gd::Image::SaveAlpha(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::SetClip(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(4);
   REQ_INT_ARG(0, x1);
@@ -1013,7 +1014,7 @@ Napi::Value Gd::Image::SetClip(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::GetClip(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   int x1, y1, x2, y2;
   gdImageGetClip(this->_image, &x1, &y1, &x2, &y2);
@@ -1029,7 +1030,7 @@ Napi::Value Gd::Image::GetClip(const Napi::CallbackInfo& info) {
 
 #if SUPPORTS_GD_2_1_0
 Napi::Value Gd::Image::SetResolution(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(2);
   REQ_INT_ARG(0, res_x);
@@ -1045,7 +1046,7 @@ Napi::Value Gd::Image::SetResolution(const Napi::CallbackInfo& info) {
  * Query Functions
  */
 Napi::Value Gd::Image::GetPixel(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(2);
   REQ_INT_ARG(0, x);
@@ -1070,7 +1071,7 @@ Napi::Value Gd::Image::GetPixel(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::GetTrueColorPixel(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(2);
   REQ_INT_ARG(0, x);
@@ -1098,7 +1099,7 @@ Napi::Value Gd::Image::GetTrueColorPixel(const Napi::CallbackInfo& info) {
 
 // This is implementation of the PHP-GD specific method imagecolorat
 Napi::Value Gd::Image::ImageColorAt(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(2);
   REQ_INT_ARG(0, x);
@@ -1125,7 +1126,7 @@ Napi::Value Gd::Image::ImageColorAt(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::GetBoundsSafe(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(2);
   REQ_INT_ARG(0, x);
@@ -1136,21 +1137,21 @@ Napi::Value Gd::Image::GetBoundsSafe(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::WidthGetter(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageSX(this->_image));
   return result;
 }
 
 Napi::Value Gd::Image::HeightGetter(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageSY(this->_image));
   return result;
 }
 
 Napi::Value Gd::Image::TrueColorGetter(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageTrueColor(this->_image));
   return result;
@@ -1160,7 +1161,7 @@ Napi::Value Gd::Image::TrueColorGetter(const Napi::CallbackInfo& info) {
  * Font and Text Handling Functions
  */
 Napi::Value Gd::Image::StringFTBBox(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(7);
   REQ_INT_ARG(0, color);
@@ -1192,7 +1193,7 @@ Napi::Value Gd::Image::StringFTBBox(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::StringFT(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(7);
   REQ_INT_ARG(0, color);
@@ -1234,7 +1235,7 @@ Napi::Value Gd::Image::StringFT(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::StringFTEx(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(8);
   REQ_INT_ARG(0, color);
@@ -1407,7 +1408,7 @@ Napi::Value Gd::Image::StringFTEx(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::StringFTCircle(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(9);
   REQ_INT_ARG(0, cx);
@@ -1440,7 +1441,7 @@ Napi::Value Gd::Image::StringFTCircle(const Napi::CallbackInfo& info) {
  * Color Handling Functions
  */
 Napi::Value Gd::Image::ColorAllocate(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(3);
   OPT_INT_ARG(0, r, 0);
@@ -1452,7 +1453,7 @@ Napi::Value Gd::Image::ColorAllocate(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::ColorAllocateAlpha(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   OPT_INT_ARG(0, r, 0);
   OPT_INT_ARG(1, g, 0);
@@ -1464,7 +1465,7 @@ Napi::Value Gd::Image::ColorAllocateAlpha(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::ColorClosest(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   OPT_INT_ARG(0, r, 0);
   OPT_INT_ARG(1, g, 0);
@@ -1475,7 +1476,7 @@ Napi::Value Gd::Image::ColorClosest(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::ColorClosestAlpha(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   OPT_INT_ARG(0, r, 0);
   OPT_INT_ARG(1, g, 0);
@@ -1487,7 +1488,7 @@ Napi::Value Gd::Image::ColorClosestAlpha(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::ColorClosestHWB(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   OPT_INT_ARG(0, r, 0);
   OPT_INT_ARG(1, g, 0);
@@ -1498,7 +1499,7 @@ Napi::Value Gd::Image::ColorClosestHWB(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::ColorExact(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   OPT_INT_ARG(0, r, 0);
   OPT_INT_ARG(1, g, 0);
@@ -1509,7 +1510,7 @@ Napi::Value Gd::Image::ColorExact(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::ColorResolve(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   OPT_INT_ARG(0, r, 0);
   OPT_INT_ARG(1, g, 0);
@@ -1520,7 +1521,7 @@ Napi::Value Gd::Image::ColorResolve(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::ColorResolveAlpha(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   OPT_INT_ARG(0, r, 0);
   OPT_INT_ARG(1, g, 0);
@@ -1532,14 +1533,14 @@ Napi::Value Gd::Image::ColorResolveAlpha(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::ColorsTotalGetter(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageColorsTotal(this->_image));
   return result;
 }
 
 Napi::Value Gd::Image::Red(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, color);
 
@@ -1548,7 +1549,7 @@ Napi::Value Gd::Image::Red(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::Blue(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, color);
 
@@ -1557,7 +1558,7 @@ Napi::Value Gd::Image::Blue(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::Green(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, color);
 
@@ -1566,7 +1567,7 @@ Napi::Value Gd::Image::Green(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::Alpha(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, color);
 
@@ -1575,7 +1576,7 @@ Napi::Value Gd::Image::Alpha(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::InterlaceGetter(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   bool interlaced = (gdImageGetInterlaced(this->_image) != 0);
   Napi::Boolean result;
@@ -1602,14 +1603,14 @@ void Gd::Image::InterlaceSetter(const Napi::CallbackInfo& info, const Napi::Valu
 }
 
 Napi::Value Gd::Image::GetTransparent(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageGetTransparent(this->_image));
   return result;
 }
 
 Napi::Value Gd::Image::ColorDeallocate(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, color);
   gdImageColorDeallocate(this->_image, color);
@@ -1618,7 +1619,7 @@ Napi::Value Gd::Image::ColorDeallocate(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::ColorTransparent(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, color);
   gdImageColorTransparent(this->_image, color);
@@ -1628,7 +1629,7 @@ Napi::Value Gd::Image::ColorTransparent(const Napi::CallbackInfo& info) {
 
 #if SUPPORTS_GD_2_1_0
 Napi::Value Gd::Image::ColorReplace(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(2);
   REQ_INT_ARG(0, fromColor);
@@ -1640,7 +1641,7 @@ Napi::Value Gd::Image::ColorReplace(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::ColorReplaceThreshold(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(3);
   REQ_INT_ARG(0, fromColor);
@@ -1654,7 +1655,7 @@ Napi::Value Gd::Image::ColorReplaceThreshold(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::ColorReplaceArray(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(2);
 
@@ -1692,7 +1693,7 @@ Napi::Value Gd::Image::ColorReplaceArray(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::GrayScale(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   gdImageGrayScale(this->_image);
 
@@ -1700,7 +1701,7 @@ Napi::Value Gd::Image::GrayScale(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::GaussianBlur(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   gdImageGaussianBlur(this->_image);
 
@@ -1708,7 +1709,7 @@ Napi::Value Gd::Image::GaussianBlur(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::Negate(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   gdImageNegate(this->_image);
 
@@ -1716,7 +1717,7 @@ Napi::Value Gd::Image::Negate(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::Brightness(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, brightness);
 
@@ -1726,7 +1727,7 @@ Napi::Value Gd::Image::Brightness(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::Contrast(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_DOUBLE_ARG(0, contrast);
 
@@ -1736,35 +1737,35 @@ Napi::Value Gd::Image::Contrast(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::SelectiveBlur(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   gdImageSelectiveBlur(this->_image);
   return info.This();
 }
 
 Napi::Value Gd::Image::FlipHorizontal(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   gdImageFlipHorizontal(this->_image);
   return info.This();
 }
 
 Napi::Value Gd::Image::FlipVertical(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   gdImageFlipVertical(this->_image);
   return info.This();
 }
 
 Napi::Value Gd::Image::FlipBoth(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   gdImageFlipBoth(this->_image);
   return info.This();
 }
 
 Napi::Value Gd::Image::Crop(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(4);
   REQ_INT_ARG(0, x);
@@ -1785,7 +1786,7 @@ Napi::Value Gd::Image::Crop(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::CropAuto(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, mode);
 
@@ -1801,7 +1802,7 @@ Napi::Value Gd::Image::CropAuto(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::CropThreshold(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, color);
   REQ_DOUBLE_ARG(1, threshold);
@@ -1813,7 +1814,7 @@ Napi::Value Gd::Image::CropThreshold(const Napi::CallbackInfo& info) {
 
 #if SUPPORTS_GD_2_1_1
 Napi::Value Gd::Image::Emboss(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   gdImageEmboss(this->_image);
   return info.This();
@@ -1824,7 +1825,7 @@ Napi::Value Gd::Image::Emboss(const Napi::CallbackInfo& info) {
  * Copying and Resizing Functions
  */
 Napi::Value Gd::Image::Copy(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(7);
   REQ_IMG_ARG(0, dest);
@@ -1841,7 +1842,7 @@ Napi::Value Gd::Image::Copy(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::CopyResized(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(9);
   REQ_IMG_ARG(0, dest);
@@ -1860,7 +1861,7 @@ Napi::Value Gd::Image::CopyResized(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::CopyResampled(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(9);
   REQ_IMG_ARG(0, dest);
@@ -1879,7 +1880,7 @@ Napi::Value Gd::Image::CopyResampled(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::CopyRotated(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(8);
   REQ_IMG_ARG(0, dest);
@@ -1897,7 +1898,7 @@ Napi::Value Gd::Image::CopyRotated(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::CopyMerge(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(8);
   REQ_IMG_ARG(0, dest);
@@ -1915,7 +1916,7 @@ Napi::Value Gd::Image::CopyMerge(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::CopyMergeGray(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(8);
   REQ_IMG_ARG(0, dest);
@@ -1934,7 +1935,7 @@ Napi::Value Gd::Image::CopyMergeGray(const Napi::CallbackInfo& info) {
 
 
 Napi::Value Gd::Image::PaletteCopy(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_IMG_ARG(0, dest);
 
@@ -1944,7 +1945,7 @@ Napi::Value Gd::Image::PaletteCopy(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::SquareToCircle(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, radius);
 
@@ -1954,7 +1955,7 @@ Napi::Value Gd::Image::SquareToCircle(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::Sharpen(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, pct);
 
@@ -1964,7 +1965,7 @@ Napi::Value Gd::Image::Sharpen(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::CreatePaletteFromTrueColor(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   OPT_INT_ARG(0, ditherFlag, 0);
   OPT_INT_ARG(1, colorsWanted, 256);
@@ -1975,7 +1976,7 @@ Napi::Value Gd::Image::CreatePaletteFromTrueColor(const Napi::CallbackInfo& info
 }
 
 Napi::Value Gd::Image::TrueColorToPalette(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   OPT_INT_ARG(0, ditherFlag, 0);
   OPT_INT_ARG(1, colorsWanted, 256);
@@ -1992,7 +1993,7 @@ Napi::Value Gd::Image::TrueColorToPalette(const Napi::CallbackInfo& info) {
 
 #if SUPPORTS_GD_2_1_0
 Napi::Value Gd::Image::PaletteToTrueColor(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImagePaletteToTrueColor(this->_image));
 
@@ -2000,7 +2001,7 @@ Napi::Value Gd::Image::PaletteToTrueColor(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::ColorMatch(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_IMG_ARG(0, palette);
 
@@ -2011,7 +2012,7 @@ Napi::Value Gd::Image::ColorMatch(const Napi::CallbackInfo& info) {
 #endif
 
 Napi::Value Gd::Image::GifAnimBegin(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(2);
   REQ_INT_ARG(0, GlobalCM); // global color map
@@ -2029,7 +2030,7 @@ Napi::Value Gd::Image::GifAnimBegin(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Gd::Image::GifAnimAdd(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(5);
   REQ_INT_ARG(0, LocalCM);
@@ -2074,7 +2075,7 @@ Napi::Value Gd::Image::GifAnimEnd(const Napi::CallbackInfo& info) {
  * Miscellaneous Functions
  */
 Napi::Value Gd::Image::Compare(const Napi::CallbackInfo& info) {
-  CHECK_IMAGE_DESTROYED;
+  CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(1);
   if (!info[0].IsObject()) {

@@ -36,6 +36,28 @@ describe('gd.create - Creating a paletted image', function() {
     img.destroy();
   });
 
+  it('throws Error when accessing instance getter via __proto__', async () => {
+    var img = gd.createSync(100, 100);
+
+    try {
+      img.__proto__.width;
+    } catch(e) {
+      assert.ok(e instanceof Error);
+    }
+    img.destroy();
+  });
+
+  it('throws TypeError when accessing prototype function via __proto__', async () => {
+    var img = gd.createSync(100, 100);
+
+    try {
+      img.__proto__.getPixel(1,1);
+    } catch(e) {
+      assert.ok(e instanceof TypeError);
+    }
+    img.destroy();
+  });
+
   it('throws an Error when too few arguments are supplied', async () => {
     var img;
     try {

@@ -203,10 +203,15 @@
   gdFree(data);                                                         \
   return result;
 
-#define CHECK_IMAGE_DESTROYED                                           \
-  if (this->_isDestroyed) {                                             \
-    Napi::Error::New(info.Env(), "Image is already destroyed.")         \
-      .ThrowAsJavaScriptException();                                    \
+#define CHECK_IMAGE_EXISTS                                              \
+  if (_isDestroyed) {                                                   \
+    Napi::Error::New(info.Env(), "Image is already destroyed")          \
+            .ThrowAsJavaScriptException();                              \
+    return info.Env().Undefined();                                      \
+  }                                                                     \
+  if (_image == nullptr) {                                              \
+    Napi::Error::New(info.Env(), "Image does not exist")                \
+            .ThrowAsJavaScriptException();                              \
     return info.Env().Undefined();                                      \
   }
 
@@ -225,9 +230,9 @@ public:
 
     gdImagePtr getGdImagePtr() const { return _image; }
   private:
-    gdImagePtr _image;
+    gdImagePtr _image{nullptr};
 
-    bool _isDestroyed{false};
+    bool _isDestroyed{true};
 
     operator gdImagePtr () const { return _image; }
 
