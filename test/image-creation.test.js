@@ -29,6 +29,13 @@ describe('gd.create - Creating a paletted image', function() {
     img.destroy();
   });
 
+  it('can be done sync', async () => {
+    var img = gd.createSync(100, 100);
+
+    assert.ok(img instanceof gd.Image);
+    img.destroy();
+  });
+
   it('throws an Error when too few arguments are supplied', async () => {
     var img;
     try {

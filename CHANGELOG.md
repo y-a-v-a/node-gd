@@ -25,7 +25,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- Removed `gd.createSync` and `gd.createTrueColorSync` functions.
 - No longer supports image creation from `String`, only from `Buffer` from now on.
 
 ### Breaking

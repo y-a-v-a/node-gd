@@ -60,6 +60,14 @@ await img.saveJpeg('./test.jpg', 100);
 img.destroy();
 ```
 
+### gd.createSync(width, height)
+
+Synchronous version of `gd.create()`.
+
+### gd.createTrueColorSync(width, height)
+
+Synchronous version of `gd.createCreateTrueColor()`.
+
 ### gd.openJpeg(path)
 
 #### Parameters

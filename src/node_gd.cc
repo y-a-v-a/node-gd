@@ -77,6 +77,8 @@ Napi::Object Gd::Init(Napi::Env env, Napi::Object exports) {
   // Image creation, loading and saving
   exports.Set(Napi::String::New(env, "create"), Napi::Function::New(env, ImageCreate));
   exports.Set(Napi::String::New(env, "createTrueColor"), Napi::Function::New(env, ImageCreateTrueColor));
+  exports.Set(Napi::String::New(env, "createSync"), Napi::Function::New(env, ImageCreateSync));
+  exports.Set(Napi::String::New(env, "createTrueColorSync"), Napi::Function::New(env, ImageCreateTrueColorSync));
   exports.Set(Napi::String::New(env, "createFromJpeg"), Napi::Function::New(env, CreateFromJpeg));
   exports.Set(Napi::String::New(env, "createFromJpegPtr"), Napi::Function::New(env, CreateFromJpegPtr));
   exports.Set(Napi::String::New(env, "createFromPng"), Napi::Function::New(env, CreateFromPng));
@@ -141,6 +143,32 @@ Napi::Value Gd::ImageCreateTrueColor(const Napi::CallbackInfo& info) {
   worker->Queue();
 
   return worker->_deferred.Promise();
+}
+
+Napi::Value Gd::ImageCreateSync(const Napi::CallbackInfo& info) {
+  REQ_ARGS(2);
+  REQ_INT_ARG(0, width);
+  REQ_INT_ARG(1, height);
+
+  INT_ARG_RANGE(width, "width");
+  INT_ARG_RANGE(height, "height");
+
+  gdImagePtr img = gdImageCreate(width, height);
+
+  RETURN_IMAGE(img);
+}
+
+Napi::Value Gd::ImageCreateTrueColorSync(const Napi::CallbackInfo& info) {
+  REQ_ARGS(2);
+  REQ_INT_ARG(0, width);
+  REQ_INT_ARG(1, height);
+
+  INT_ARG_RANGE(width, "width");
+  INT_ARG_RANGE(height, "height");
+
+  gdImagePtr img = gdImageCreateTrueColor(width, height);
+
+  RETURN_IMAGE(img);
 }
 
 /**

@@ -394,6 +394,8 @@ private:
    */
   static Napi::Value ImageCreate(const Napi::CallbackInfo& info);
   static Napi::Value ImageCreateTrueColor(const Napi::CallbackInfo& info);
+  static Napi::Value ImageCreateSync(const Napi::CallbackInfo& info);
+  static Napi::Value ImageCreateTrueColorSync(const Napi::CallbackInfo& info);
 
   /**
    * Section B - Creation of image in memory from a source (either file or Buffer)
