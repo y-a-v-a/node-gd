@@ -45,6 +45,12 @@ describe('Meta information', function() {
     assert.equal(gd.GD_GIF, 1, 'No GIF support for libgd is impossible!');
   });
 
+  it('gd.GD_GIF -- is not writeble', function() {
+    gd.GD_GIF = 99;
+
+    assert.equal(gd.GD_GIF, 1, 'gd.GD_GIF should not be writeable!');
+  });
+
   it('gd.GD_GIFANIM -- will have built in GIF animation support', function() {
     assert.equal(gd.GD_GIFANIM, 1, 'No GIF animation support for libgd is impossible!');
   });

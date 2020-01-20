@@ -31,48 +31,88 @@ Napi::Object Gd::Init(Napi::Env env, Napi::Object exports) {
   /**
    * Section E - Meta information
    */
-  exports.Set("COLOR_ANTIALIASED", Napi::Number::New(env, COLOR_ANTIALIASED));
-  exports.Set("COLOR_BRUSHED", Napi::Number::New(env, COLOR_BRUSHED));
-  exports.Set("COLOR_STYLED", Napi::Number::New(env, COLOR_STYLED));
-  exports.Set("COLOR_STYLEDBRUSHED", Napi::Number::New(env, COLOR_STYLEDBRUSHED));
-  exports.Set("COLOR_TITLED", Napi::Number::New(env, COLOR_TITLED));
-  exports.Set("COLOR_TRANSPARENT", Napi::Number::New(env, COLOR_TRANSPARENT));
+  Napi::PropertyDescriptor ColorAntialiased = Napi::PropertyDescriptor::Value("COLOR_ANTIALIASED",
+    Napi::Number::New(env, COLOR_ANTIALIASED));
+  Napi::PropertyDescriptor ColorBrushed = Napi::PropertyDescriptor::Value("COLOR_BRUSHED",
+    Napi::Number::New(env, COLOR_BRUSHED));
+  Napi::PropertyDescriptor ColorStyled = Napi::PropertyDescriptor::Value("COLOR_STYLED",
+    Napi::Number::New(env, COLOR_STYLED));
+  Napi::PropertyDescriptor ColorStyledBrushed = Napi::PropertyDescriptor::Value("COLOR_STYLEDBRUSHED",
+    Napi::Number::New(env, COLOR_STYLEDBRUSHED));
+  Napi::PropertyDescriptor ColorTitled = Napi::PropertyDescriptor::Value("COLOR_TITLED",
+    Napi::Number::New(env, COLOR_TITLED));
+  Napi::PropertyDescriptor ColorTransparent = Napi::PropertyDescriptor::Value("COLOR_TRANSPARENT",
+    Napi::Number::New(env, COLOR_TRANSPARENT));
+
+  exports.DefineProperties({
+    ColorAntialiased,
+    ColorBrushed,
+    ColorStyled,
+    ColorStyledBrushed,
+    ColorTitled,
+    ColorTransparent
+  });
 
 #ifdef HAVE_LIBTIFF
-  exports.Set("GD_TIFF", Napi::Number::New(env, GD_TIFF));
+  Napi::PropertyDescriptor GdTiff = Napi::PropertyDescriptor::Value("GD_TIFF",
+    Napi::Number::New(env, GD_TIFF));
+  exports.DefineProperty(GdTiff);
 #endif
 
 #ifdef HAVE_LIBXPM
-  exports.Set("GD_XPM", Napi::Number::New(env, GD_XPM));
+  Napi::PropertyDescriptor GdXpm = Napi::PropertyDescriptor::Value("GD_XPM",
+    Napi::Number::New(env, GD_XPM));
+  exports.DefineProperty(GdXpm);
 #endif
 
 #ifdef HAVE_LIBJPEG
-  exports.Set("GD_JPEG", Napi::Number::New(env, GD_JPEG));
+  Napi::PropertyDescriptor GdJpeg = Napi::PropertyDescriptor::Value("GD_JPEG",
+    Napi::Number::New(env, GD_JPEG));
+  exports.DefineProperty(GdJpeg);
 #endif
 
 #ifdef HAVE_LIBFONTCONFIG
-  exports.Set("GD_FONTCONFIG", Napi::Number::New(env, GD_FONTCONFIG));
+  Napi::PropertyDescriptor GdFontConfig = Napi::PropertyDescriptor::Value("GD_FONTCONFIG",
+    Napi::Number::New(env, GD_FONTCONFIG));
+  exports.DefineProperty(GdFontConfig);
 #endif
 
 #ifdef HAVE_LIBFREETYPE
-  exports.Set("GD_FREETYPE", Napi::Number::New(env, GD_FREETYPE));
+  Napi::PropertyDescriptor GdFreetype = Napi::PropertyDescriptor::Value("GD_FREETYPE",
+    Napi::Number::New(env, GD_FREETYPE));
+  exports.DefineProperty(GdFreetype);
 #endif
 
 #ifdef HAVE_LIBPNG
-  exports.Set("GD_PNG", Napi::Number::New(env, GD_PNG));
+  Napi::PropertyDescriptor GdPng = Napi::PropertyDescriptor::Value("GD_PNG",
+    Napi::Number::New(env, GD_PNG));
+  exports.DefineProperty(GdPng);
 #endif
 
 #ifdef HAVE_LIBWEBP
-  exports.Set("GD_WEBP", Napi::Number::New(env, GD_WEBP));
+  Napi::PropertyDescriptor GdWebp = Napi::PropertyDescriptor::Value("GD_WEBP",
+    Napi::Number::New(env, GD_WEBP));
+  exports.DefineProperty(GdWebp);
 #endif
 
 #ifdef HAVE_LIBVPX
-  exports.Set("GD_VPX", Napi::Number::New(env, GD_VPX));
+  Napi::PropertyDescriptor GdVpx = Napi::PropertyDescriptor::Value("GD_VPX",
+    Napi::Number::New(env, GD_VPX));
+  exports.DefineProperty(GdVpx);
 #endif
 
-  exports.Set("GD_GIF", Napi::Number::New(env, GD_GIF));
-  exports.Set("GD_GIFANIM", Napi::Number::New(env, GD_GIFANIM));
-  exports.Set("GD_OPENPOLYGON", Napi::Number::New(env, GD_OPENPOLYGON));
+  Napi::PropertyDescriptor GdGif = Napi::PropertyDescriptor::Value("GD_GIF",
+    Napi::Number::New(env, GD_GIF));
+  Napi::PropertyDescriptor GdGifAnim = Napi::PropertyDescriptor::Value("GD_GIFANIM",
+    Napi::Number::New(env, GD_GIFANIM));
+  Napi::PropertyDescriptor GdOpenPolygon = Napi::PropertyDescriptor::Value("GD_OPENPOLYGON",
+    Napi::Number::New(env, GD_OPENPOLYGON));
+
+  exports.DefineProperties({
+    GdGif,
+    GdGifAnim,
+    GdOpenPolygon
+  });
 
   // Image creation, loading and saving
   exports.Set(Napi::String::New(env, "create"), Napi::Function::New(env, ImageCreate));

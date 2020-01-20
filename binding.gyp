@@ -26,13 +26,15 @@
       'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
       'defines': [ 'NAPI_CPP_EXCEPTIONS' ],
       "conditions": [
-	[ "OS=='linux'", {
-	  "cflags!": [ '-fno-exceptions' ],
-	  "cflags_cc!": [ "-fno-exceptions" ],
-	}],
+        [ "OS=='linux'", {
+          "cflags!": [ '-fno-exceptions' ],
+          "cflags_cc!": [ "-fno-exceptions" ]
+        }],
         [ "OS=='freebsd'", {
           "libraries": ["-L/usr/local/lib"],
-          "include_dirs": ["/usr/local/include"]
+          "include_dirs": ["/usr/local/include"],
+          "cflags!": [ '-fno-exceptions' ],
+          "cflags_cc!": [ "-fno-exceptions" ]
         }],
         [ "OS=='mac'", {
           'cflags+': ['-fvisibility=hidden'],
@@ -40,7 +42,7 @@
           'cflags_cc!': [ '-fno-exceptions' ],
           'xcode_settings': {
             'GCC_SYMBOLS_PRIVATE_EXTERN': 'YES', # -fvisibility=hidden
-             'GCC_ENABLE_CPP_EXCEPTIONS': 'YES'
+            'GCC_ENABLE_CPP_EXCEPTIONS': 'YES'
           },
           "libraries": ["-L/usr/local/lib", "-L/opt/local/lib"],
           "include_dirs": ["/usr/local/include", "/opt/local/include"]
