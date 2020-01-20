@@ -59,14 +59,12 @@ function openFormatFn(format) {
  * @returns {function}
  */
 function saveFormatFn(format) {
-  format = format.toLowerCase();
-
-  return function() {
+  return {[`save${format}`]() {
     const args = [...arguments];
     const filename = args.shift();
 
     return new Promise((resolve, reject) => {
-      const data = this[`${format}Ptr`].apply(this, args);
+      const data = this[`${format.toLowerCase()}Ptr`].apply(this, args);
 
       fs.writeFile(filename, data, 'latin1', error => {
         if (error) {
@@ -75,7 +73,7 @@ function saveFormatFn(format) {
         resolve(true);
       });
     });
-  };
+  }}[`save${format}`];
 }
 
 /**
@@ -86,7 +84,10 @@ formats.forEach(format => {
   if (format === 'Gd2Part') {
     return;
   }
-  bindings.Image.prototype[`save${format}`] = saveFormatFn(format);
+
+  Object.defineProperty(bindings.Image.prototype, `save${format}`, {
+    value: saveFormatFn(format)
+  });
 });
 
 /**

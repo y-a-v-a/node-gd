@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed `gd.create` and `gd.createTruecolor` and let them return a `Promise`.
 - Moved macros to header file.
 - Updated documentation
+- Changed custom prototype functions unwritable functions with a [proper name](https://stackoverflow.com/questions/9479046/is-there-any-non-eval-way-to-create-a-function-with-a-runtime-determined-name/9479081#9479081)
 
 ### Removed
 
