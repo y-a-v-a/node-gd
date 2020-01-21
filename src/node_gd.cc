@@ -455,12 +455,14 @@ Napi::Object Gd::Image::Init(Napi::Env env, Napi::Object exports) {
 
       /**
        * Instance getters and setters
+       *
+       * static_cast<napi_property_attributes>(napi_default & napi_enumerable)
        */
-      InstanceAccessor("trueColor", &Gd::Image::TrueColorGetter, nullptr, napi_default, nullptr),
-      InstanceAccessor("width", &Gd::Image::WidthGetter, nullptr, napi_default, nullptr),
-      InstanceAccessor("height", &Gd::Image::HeightGetter, nullptr, napi_default, nullptr),
-      InstanceAccessor("interlace", &Gd::Image::InterlaceGetter, &Gd::Image::InterlaceSetter, napi_writable, nullptr),
-      InstanceAccessor("colorsTotal", &Gd::Image::ColorsTotalGetter, nullptr, napi_default, nullptr)
+      InstanceAccessor("trueColor", &Gd::Image::TrueColorGetter, nullptr, napi_enumerable, nullptr),
+      InstanceAccessor("width", &Gd::Image::WidthGetter, nullptr, napi_enumerable, nullptr),
+      InstanceAccessor("height", &Gd::Image::HeightGetter, nullptr, napi_enumerable, nullptr),
+      InstanceAccessor("interlace", &Gd::Image::InterlaceGetter, &Gd::Image::InterlaceSetter, static_cast<napi_property_attributes>(napi_writable | napi_enumerable), nullptr),
+      InstanceAccessor("colorsTotal", &Gd::Image::ColorsTotalGetter, nullptr, napi_enumerable, nullptr)
   });
 
 
