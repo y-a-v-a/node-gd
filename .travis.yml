@@ -12,7 +12,7 @@ node_js:
 
 sudo: required
 
-dist: trusty
+dist: xenial
 
 install:
  - npm install
@@ -32,3 +32,4 @@ addons:
     - g++-5
     - clang
     - libgd2-dev
+    - libtiff5-dev

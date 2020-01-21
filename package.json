@@ -2,18 +2,23 @@
   "name": "node-gd",
   "version": "1.6.0",
   "description": "GD graphics library (libgd) C++ bindings for Node.js",
-  "main": "js/node-gd.js",
+  "main": "index.js",
   "directories": {
     "test": "test"
   },
   "os": [
     "!win32"
   ],
+  "engines": {
+    "node": ">=6"
+  },
   "homepage": "https://github.com/y-a-v-a/node-gd",
   "bugs": "https://github.com/y-a-v-a/node-gd/issues",
   "scripts": {
+    "clean": "rm -rf test/output/* build/",
+    "rebuild": "node-gyp rebuild",
     "pretest": "node-gyp build",
-    "test": "mocha --reporter spec --bail --ui bdd --colors -- test/*.test.js",
+    "test": "mocha --reporter spec --bail --ui bdd --colors --file ./test/main.test.js",
     "install": "node-gyp rebuild",
     "update-contributors": "git shortlog -sen | sed 's/^  /*/' > CONTRIBUTORS.md"
   },
@@ -73,7 +78,7 @@
     "mocha": "^6.1.4"
   },
   "dependencies": {
-    "node-gyp": "5.0.7",
-    "nan": "2.14.0"
+    "node-addon-api": "^2.0.0",
+    "node-gyp": "5.0.7"
   }
 }
