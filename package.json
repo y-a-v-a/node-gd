@@ -2,6 +2,7 @@
   "name": "node-gd",
   "version": "1.6.0",
   "description": "GD graphics library (libgd) C++ bindings for Node.js",
+  "type": "commonjs",
   "main": "index.js",
   "directories": {
     "test": "test"
@@ -10,7 +11,7 @@
     "!win32"
   ],
   "engines": {
-    "node": ">=6"
+    "node": ">=8"
   },
   "homepage": "https://github.com/y-a-v-a/node-gd",
   "bugs": "https://github.com/y-a-v-a/node-gd/issues",

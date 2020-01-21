@@ -473,7 +473,7 @@ A newly created truecolor image for example has a black background. If you want 
 
 ```javascript
 const gd = require('node-gd');
-var img = gd.createTrueColor(100, 100);
+var img = gd.createTrueColorSync(100, 100);
 
 // turn off alpha blending
 // you don't want your first filled rectangle to blend
@@ -500,6 +500,7 @@ img.destroy();
 
 ### gd.Image#saveAlpha(saveFlag)
 When set to `1`, the alpha information will be saved as a separate channel within the image. If turned off (`0`), all transparency will be handled within the image. Compare these two examples to see the difference:
+
 ```javascript
 const gd = require('node-gd');
 var img = await gd.createTrueColor(100, 100);
@@ -652,7 +653,7 @@ Allocate a color in the color table with transparency value.
 ### gd.Image#blue(b)
 
 ### gd.Image#alpha(color)
-Get the alpha value of a color. *Note* after version node-gd@1.3.1 this method has ben renamed to *lower case* `alpha` to reflect its function in comparison with the `gd.Image#red()`, `gd.Image#green()` and `gd.Image#blue()` methods.
+Get the alpha value of a color. *Note* after version node-gd@1.3.1 this method has been renamed to *lower case* `alpha` to reflect its function in comparison with the `gd.Image#red()`, `gd.Image#green()` and `gd.Image#blue()` methods.
 
 ### gd.Image#getTransparent()
 
@@ -664,7 +665,7 @@ Get the alpha value of a color. *Note* after version node-gd@1.3.1 this method h
 Specifies a color index (if a palette image) or an RGB color (if a truecolor image) which should be considered 100% transparent. For truecolor images, this is ignored if an alpha channel is being saved. Use `gd.Image#saveAlpha(0)` to turn off the saving of a full alpha channel in a truecolor image.
 
 ### gd.Image#colorReplace(fromColor, toColor)
-Replace one color with another. This returns the amount of changes pixels.
+Replace one color with another. This returns the amount of changed pixels.
 
 ### gd.Image#colorReplaceThreshold(fromColor, toColor, threshold)
 Replace one color with another. The `threshold` will broaden the range of replaced colors and is a decimal `Number` between `0` and `100`.
@@ -678,7 +679,7 @@ Replace colors in `fromColors` array to `toColors` array. The arrays should be o
 Remove all color from an image and create a grayscaled image. Only available from libgd2 version 2.1.x.
 
 ### gd.Image#gaussianBlur()
-Apply gaussian blur. Can by applied multiple times to an image to get more blur.
+Apply gaussian blur. Can be applied multiple times to an image to get more blur.
 
 ### gd.Image#negate()
 Invert the colors of the image.
@@ -687,7 +688,7 @@ Invert the colors of the image.
 Supply an integer between `0` and `100`.
 
 ### gd.Image#contrast(contrast)
-The value for contrast is a bit weird. A value of `100` wil return a complete grey image, with gray being exactly `rgb(127, 127, 127)`. For best results, the range applied should be between `-900` and `1100` (so actually `100 + 1000` and `100 - 1000`).
+The value for contrast is a bit weird. A value of `100` wil return a complete grey image, with grey being exactly `rgb(127, 127, 127)`. For best results, the range applied should be between `-900` and `1100` (so actually `100 + 1000` and `100 - 1000`).
 
 ### gd.Image#selectiveBlur()
 
