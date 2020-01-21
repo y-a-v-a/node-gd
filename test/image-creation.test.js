@@ -244,4 +244,25 @@ describe('gd.createTrueColor - Create a true color image', function() {
     assert.ok(img.width === 100 && img.height === 100 && img.trueColor === 1);
     img.destroy();
   });
+
+  it('has 5 enumerable properties', async function() {
+    const img = await gd.create(100,100);
+    const props = [
+      'trueColor',
+      'width',
+      'height',
+      'interlace',
+      'colorsTotal'
+    ];
+
+    let i = 0;
+    for (let prop in img) {
+      assert.isTrue(props.includes(prop));
+      i++;
+    }
+
+    assert.equal(i, 5);
+
+    img.destroy();
+  });
 });
