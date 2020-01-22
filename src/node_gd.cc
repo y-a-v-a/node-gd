@@ -2047,7 +2047,26 @@ Napi::Value Gd::Image::ColorMatch(const Napi::CallbackInfo& info) {
 
   REQ_IMG_ARG(0, palette);
 
-  Napi::Number result = Napi::Number::New(info.Env(), gdImageColorMatch(this->_image, palette));
+  int gdResult = gdImageColorMatch(this->_image, palette);
+
+  if (gdResult == -1) {
+    Napi::Error::New(info.Env(), "Image of this should be truecolor")
+      .ThrowAsJavaScriptException();
+  }
+  if (gdResult == -2) {
+    Napi::Error::New(info.Env(), "Image from argument must be palette / indexed")
+      .ThrowAsJavaScriptException();
+  }
+  if (gdResult == -3) {
+    Napi::Error::New(info.Env(), "Images must have same dimensions")
+      .ThrowAsJavaScriptException();
+  }
+  if (gdResult == -4) {
+    Napi::Error::New(info.Env(), "At least 1 color must be allocated")
+      .ThrowAsJavaScriptException();
+  }
+
+  Napi::Number result = Napi::Number::New(info.Env(), gdResult);
 
   return result;
 }

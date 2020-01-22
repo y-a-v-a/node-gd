@@ -725,7 +725,12 @@ Modify the current image into a palette based image. The `ditherFlag` is either 
 Modify the current image, if it is a palette based image, into a true color image. From libgd version `2.1.0` this returns either `0` or `1`, in version `2.0.26` it is void.
 
 ### gd.Image#colorMatch(gd.Image)
-The parameter should be a palette based image, which will be modified and which can be saved afterwards. The return value is a `Number`. This method tries to better match the colors from the palette based image to those of its true color original.
+The parameter should be a palette based image, which will be modified and which can be saved afterwards. The return value is a `Number`. This method tries to better match the colors from the palette based image to those of its true color original. Will throw an `Error` in these cases:
+
+* Images are not of identical dimensions
+* The from image is not truecolor
+* The target image is not a palette image
+* Target image has no colors allocated in the palette
 
 ```javascript
 const gd = require('node-gd');
