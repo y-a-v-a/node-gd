@@ -110,7 +110,7 @@ async function main() {
 
   img.setThickness(4);
   img.polygon(points, 0xff0000);
-  img.saveBmp('test1.bmp', 0);
+  await img.saveBmp('test1.bmp', 0);
   img.destroy();
 }
 
