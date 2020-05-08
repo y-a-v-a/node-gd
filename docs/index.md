@@ -66,7 +66,7 @@ Synchronous version of `gd.create()`.
 
 ### gd.createTrueColorSync(width, height)
 
-Synchronous version of `gd.createCreateTrueColor()`.
+Synchronous version of `gd.createTrueColor()`.
 
 ### gd.openJpeg(path)
 
