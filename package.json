@@ -76,10 +76,10 @@
   "readmeFilename": "README.md",
   "devDependencies": {
     "chai": "4.2.0",
-    "mocha": "^6.1.4"
+    "mocha": "^7.2.0"
   },
   "dependencies": {
-    "node-addon-api": "^2.0.0",
-    "node-gyp": "5.0.7"
+    "node-addon-api": "^3.0.0",
+    "node-gyp": "5.1.1"
   }
 }
