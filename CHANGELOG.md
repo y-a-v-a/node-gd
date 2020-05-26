@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Upgraded dependencies in package.json
+- Typo fixed in documentation (thanks [gabrieledarrigo](https://github.com/gabrieledarrigo))
 
 
 # 2.0.0 - 2020-01-19
