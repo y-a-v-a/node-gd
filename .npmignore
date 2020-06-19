@@ -7,3 +7,5 @@ node_modules
 node-debug.log
 test
 docs
+_test*
+.vscode
