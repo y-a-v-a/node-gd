@@ -21,10 +21,15 @@
 #include <napi.h>
 #include <gd.h>
 
-#define SUPPORTS_GD_2_2_5 (GD_MINOR_VERSION == 2                        \
+#define SUPPORTS_GD_2_3_0 (GD_MINOR_VERSION == 3                        \
+                  && GD_RELEASE_VERSION >= 0)
+
+#define SUPPORTS_GD_2_2_5 (SUPPORTS_GD_2_3_0                            \
+                  || GD_MINOR_VERSION == 2                              \
                   && GD_RELEASE_VERSION >= 5)
 
-#define SUPPORTS_GD_2_2_4 (GD_MINOR_VERSION == 2                        \
+#define SUPPORTS_GD_2_2_4 (SUPPORTS_GD_2_2_5                            \
+                  || GD_MINOR_VERSION == 2                              \
                   && GD_RELEASE_VERSION >= 4)
 
 #define SUPPORTS_GD_2_2_0 (SUPPORTS_GD_2_2_4                            \
@@ -40,7 +45,6 @@
                   && GD_RELEASE_VERSION == 0))
 
 #define SUPPORTS_GD_2_0_36 (SUPPORTS_GD_2_1_0                           \
-                  || SUPPORTS_GD_2_1_0                                  \
                   || (GD_MINOR_VERSION == 0                             \
                   && GD_RELEASE_VERSION <= 36))
 

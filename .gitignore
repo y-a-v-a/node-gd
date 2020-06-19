@@ -1,5 +1,3 @@
 node_modules
 build
-test/fixtures/output.png
-test/dev/*
 .DS_Store

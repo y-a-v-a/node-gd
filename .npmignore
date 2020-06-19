@@ -1,9 +1,0 @@
-.git
-.travis.yml
-.gitignore
-.DS_Store
-build
-node_modules
-node-debug.log
-test
-docs

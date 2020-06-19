@@ -18,7 +18,7 @@ var fontFile = source + 'FreeSans.ttf';
  * ╠╣ │ ││││ │ └─┐  ││││  ││││├─┤│ ┬├┤ └─┐
  * ╚  └─┘┘└┘ ┴ └─┘  ┴┘└┘  ┴┴ ┴┴ ┴└─┘└─┘└─┘
  */
-describe('Creating images containing text', function() {
+describe('Creating images containing text', function () {
   it('gd.Image#stringFT() -- can create an image with text', async () => {
     var img, t, txtColor;
     t = target + 'output-string.png';
@@ -27,7 +27,7 @@ describe('Creating images containing text', function() {
     img.colorAllocate(0, 255, 0);
     txtColor = img.colorAllocate(255, 0, 255);
 
-    img.stringFT(txtColor, fontFile, 24, 0, 10, 60, "Hello world");
+    img.stringFT(txtColor, fontFile, 24, 0, 10, 60, 'Hello world');
 
     await img.savePng(t, 1);
 
@@ -41,7 +41,7 @@ describe('Creating images containing text', function() {
     img = await gd.createTrueColor(120, 20);
     txtColor = img.colorAllocate(255, 255, 0);
 
-    img.stringFT(txtColor, fontFile, 16, 0, 8, 18, "Hello world!");
+    img.stringFT(txtColor, fontFile, 16, 0, 8, 18, 'Hello world!');
 
     await img.savePng(t, 1);
 
@@ -54,10 +54,10 @@ describe('Creating images containing text', function() {
 
     var img = await gd.createTrueColor(300, 300);
     var txtColor = img.colorAllocate(127, 90, 90);
-    var boundingBox = img.stringFT(txtColor, fontFile, 16, 0, 8, 18, "Hello World2!", true);
+    var boundingBox = img.stringFT(txtColor, fontFile, 16, 0, 8, 18, 'Hello World2!', true);
 
     assert.equal(boundingBox.length, 8, 'BoundingBox not eight coordinates?');
-    assert.deepEqual(boundingBox, [ 8, 20, 136, 20, 136, 0, 8, 0 ], 'BoundingBox size changed?');
+    assert.deepEqual(boundingBox, [9, 18, 134, 18, 134, 2, 9, 2], 'BoundingBox size changed?');
 
     img.destroy();
   });
@@ -67,9 +67,9 @@ describe('Creating images containing text', function() {
 
     var img = await gd.createTrueColor(300, 300);
     var txtColor = img.colorAllocate(127, 90, 90);
-    var boundingBox = img.stringFTBBox(txtColor, fontFile, 16, -45, 20, 20, "Hello World2!", true);
+    var boundingBox = img.stringFTBBox(txtColor, fontFile, 16, -45, 20, 20, 'Hello World2!', true);
     assert.equal(boundingBox.length, 8, 'BoundingBox not eight coordinates?');
-    assert.deepEqual(boundingBox, [ 18, 21, 85, 130, 101, 120, 34, 11 ], 'BoundingBox size changed?');
+    assert.deepEqual(boundingBox, [20, 21, 86, 128, 99, 119, 34, 13], 'BoundingBox size changed?');
 
     img.destroy();
   });
@@ -81,8 +81,8 @@ describe('Creating images containing text', function() {
     var extras = '';
 
     try {
-      image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, "Lorem ipsum", extras);
-    } catch(e) {
+      image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, 'Lorem ipsum', extras);
+    } catch (e) {
       assert.ok(e instanceof Error);
       image.destroy();
     }
@@ -101,13 +101,16 @@ describe('Creating images containing text', function() {
       xshow: true,
       return_fontpathname: true,
       use_fontconfig: false,
-      fontpath: ''
+      fontpath: '',
     };
     var txtColor = image.colorAllocate(255, 255, 0);
     image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, "Hello world\nYes we're here", extras);
 
     assert.equal(extras.fontpath, process.cwd() + '/test/fixtures/FreeSans.ttf');
-    assert.equal(extras.xshow, '72 53 21 21 53 25 72 53 33 21 -424 68 53 49 25 72 53 20 33 53 25 54 53 33 53');
+    assert.equal(
+      extras.xshow,
+      '72 53 21 21 53 25 72 53 33 21 -424 68 53 49 25 72 53 20 33 53 25 54 53 33 53'
+    );
 
     await image.savePng(t, 0);
     image.destroy();
@@ -119,10 +122,10 @@ describe('Creating images containing text', function() {
     var image = await gd.createTrueColor(300, 300);
     var extras = {
       hdpi: 300,
-      vdpi: 150
+      vdpi: 150,
     };
     var txtColor = image.colorAllocate(255, 0, 255);
-    image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, "Font extras\ndpi test", extras);
+    image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, 'Font extras\ndpi test', extras);
 
     await image.savePng(t, 0);
     image.destroy();
@@ -133,13 +136,13 @@ describe('Creating images containing text', function() {
 
     var image = await gd.createTrueColor(300, 300);
     var extras = {
-      linespacing: 2.1
+      linespacing: 2.1,
     };
 
     var txtColor = image.colorAllocate(0, 255, 255);
-    image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, "Font extras\nlinespacing", extras);
+    image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, 'Font extras\nlinespacing', extras);
 
-    await image.savePng(t, 0)
+    await image.savePng(t, 0);
     image.destroy();
   });
 
@@ -148,15 +151,18 @@ describe('Creating images containing text', function() {
 
     var image = await gd.createTrueColor(300, 300);
     var extras = {
-      xshow: true
+      xshow: true,
     };
 
     var txtColor = image.colorAllocate(0, 255, 255);
-    image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, "Font extras\nxshow", extras);
+    image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, 'Font extras\nxshow', extras);
 
-    assert.equal(extras.xshow, '19.2 16.96 17.28 8.96 8 16.96 15.36 8.96 10.56 17.28 -139.52 15.36 15.68 17.28 16.96 23.04')
+    assert.equal(
+      extras.xshow,
+      '19.2 16.96 17.28 8.96 8 16.96 15.36 8.96 10.56 17.28 -139.52 15.36 15.68 17.28 16.96 23.04'
+    );
 
-    await image.savePng(t, 0)
+    await image.savePng(t, 0);
     image.destroy();
   });
 
@@ -165,13 +171,13 @@ describe('Creating images containing text', function() {
 
     var image = await gd.createTrueColor(300, 300);
     var extras = {
-      disable_kerning: true
+      disable_kerning: true,
     };
 
     var txtColor = image.colorAllocate(255, 255, 0);
-    image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, "Font extras\nKerning disabled", extras);
+    image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, 'Font extras\nKerning disabled', extras);
 
-    await image.savePng(t, 0)
+    await image.savePng(t, 0);
     image.destroy();
   });
 
@@ -180,11 +186,11 @@ describe('Creating images containing text', function() {
 
     var image = await gd.createTrueColor(300, 300);
     var extras = {
-      return_fontpathname: true
+      return_fontpathname: true,
     };
 
     var txtColor = image.colorAllocate(127, 255, 0);
-    image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, "Font extras\nreturn font path", extras);
+    image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, 'Font extras\nreturn font path', extras);
 
     assert.equal(extras.fontpath, process.cwd() + '/test/fixtures/FreeSans.ttf');
 
@@ -197,11 +203,11 @@ describe('Creating images containing text', function() {
 
     var image = await gd.createTrueColor(300, 300);
     var extras = {
-      charmap: 'unicode'
+      charmap: 'unicode',
     };
 
     var txtColor = image.colorAllocate(255, 255, 0);
-    image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, "Hello world\nUse unicode!", extras);
+    image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, 'Hello world\nUse unicode!', extras);
 
     await image.savePng(t, 0);
     image.destroy();
@@ -212,13 +218,13 @@ describe('Creating images containing text', function() {
 
     var image = await gd.createTrueColor(300, 300);
     var extras = {
-      charmap: 'bogus'
+      charmap: 'bogus',
     };
 
     var txtColor = image.colorAllocate(255, 255, 0);
     try {
-      image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, "Hello world\nUse unicode!", extras);
-    } catch(e) {
+      image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, 'Hello world\nUse unicode!', extras);
+    } catch (e) {
       assert.ok(e instanceof Error);
       image.destroy();
     }
@@ -229,15 +235,29 @@ describe('Creating images containing text', function() {
     var image = await gd.createTrueColor(300, 300);
     var extras = {
       hdpi: 120,
-      vdpi: 120
+      vdpi: 120,
     };
 
     var txtColor = image.colorAllocate(255, 255, 0);
 
-    var boundingBox = image.stringFTEx(txtColor, fontFile, 24, 0, 10, 60, "Hello world\nxshow string!", extras, true);
+    var boundingBox = image.stringFTEx(
+      txtColor,
+      fontFile,
+      24,
+      0,
+      10,
+      60,
+      'Hello world\nxshow string!',
+      extras,
+      true
+    );
 
     assert.equal(boundingBox.length, 8);
-    assert.deepEqual(boundingBox, [ 8, 112, 241, 112, 241, 28, 8, 28 ], 'BoundingBox size changed?');
+    assert.deepEqual(
+      boundingBox,
+      [10, 110, 240, 110, 240, 30, 10, 30],
+      'BoundingBox size changed?'
+    );
     image.destroy();
   });
 
@@ -249,7 +269,7 @@ describe('Creating images containing text', function() {
     var txtColor = image.colorAllocate(255, 255, 0);
     image.stringFTCircle(150, 150, 100, 32, 1, fontFile, 24, 'Hello', 'world!', txtColor);
 
-    await image.savePng(t, 0)
+    await image.savePng(t, 0);
     image.destroy();
   });
 });
