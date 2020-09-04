@@ -4,6 +4,7 @@
   "description": "GD graphics library (libgd) C++ bindings for Node.js",
   "type": "commonjs",
   "main": "index.js",
+  "types": "index.d.ts",
   "directories": {
     "test": "test",
     "doc": "docs"
@@ -14,7 +15,8 @@
     "binding.gyp",
     "util.sh",
     "CONTRIBUTORS",
-    "test"
+    "test",
+    "index.d.ts"
   ],
   "os": [
     "!win32"
