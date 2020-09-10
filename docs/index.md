@@ -556,6 +556,14 @@ Set the clipping area.
 
 ### gd.Image#getClip()
 Returns an object containing the coordinates of the clipping area.
+```js
+{
+  x1: 0,
+  y1: 0,
+  x2: 0,
+  y2: 0
+}
+```
 
 ### gd.Image#setResolution(res_x, res_y)
 Unsigned integers should be used for `res_x` and `res_y`.
@@ -599,7 +607,7 @@ img.destroy();
 ```
 
 ### gd.Image#imageColorAt(x, y)
-This is the implementation of the PHP-GD specific method imagecolorat.
+This is the implementation of the PHP-GD specific method [imagecolorat](https://www.php.net/manual/en/function.imagecolorat.php).
 
 ### gd.Image#getBoundsSafe(x, y)
 Returns `0` if either x or y are out of the bounds of the image canvas, or `1` when within the bounds. Note that the pixel range starts at `0` for both x-axis and y-axis.
@@ -647,10 +655,13 @@ Allocate a color in the color table with transparency value.
 ### gd.Image#colorResolveAlpha(r, g, b, a)
 
 ### gd.Image#red(r)
+Gets the red component value of a given color.
 
 ### gd.Image#green(g)
+Gets the green component value of a given color.
 
 ### gd.Image#blue(b)
+Gets the blue component value of a given color.
 
 ### gd.Image#alpha(color)
 Get the alpha value of a color. *Note* after version node-gd@1.3.1 this method has been renamed to *lower case* `alpha` to reflect its function in comparison with the `gd.Image#red()`, `gd.Image#green()` and `gd.Image#blue()` methods.
@@ -707,7 +718,12 @@ Flip the image on the canvas over both axes.
 Crop the supplied image from a certain point to a certain size. Will return a new instance of `gd.Image`. Negative numbers, i.e. when going out of the image bounds, can result in images with black parts. Cropping transparent images currently does not work due to a bug in libgd. An alternative is to create the destination image first with a transparent background and then copy a portion of the source image on top of it.
 
 ### gd.Image#cropAuto(mode)
-The mode parameter is a value from 0 to 4, so there are 5 modes: `0`: default: 4 corners or background, `1`: crop using the transparent color, `2`: crop black borders, `3`: crop white borders, `4`: crop using colors of the 4 corners.
+The mode parameter is a value from 0 to 4, so there are 5 modes:
+- `0`: default: 4 corners or background;
+- `1`: crop using the transparent color;
+- `2`: crop black borders;
+- `3`: crop white borders;
+- `4`: crop using colors of the 4 corners.
 
 ### gd.Image#cropThreshold(color, threshold)
 Crop by color, with a threshold. Use for color an integer and for threshold a number.
@@ -758,7 +774,6 @@ Create an animated GIF.
 
 
 ### gd.Image#gifAnimAdd(anim, localColorMap, leftOffset, topOffset, delay, disposal, prevFrame)
-
 
 * Add current image to the specified `anim`.
 * `localColorMap` is a flag indicating wether GD should use this image's colorMap
@@ -869,6 +884,16 @@ await input2.savePng(output2, 0);
 # Misc
 
 ### gd.Image#compare(image)
+Returns a bitmask of Image Comparison flags where each set flag signals which attributes of the images are different.
+- `1`: Actual image IS different;
+- `2`: Number of colors in pallette differ;
+- `4`: Image colors differ;
+- `8`: Image width differs;
+- `16`: Image heights differ;
+- `32`: Transparent color differs;
+- `64`: Background color differs;
+- `128`: Interlaced setting differs;
+- `256`: Truecolor vs palette differs.
 
 ### Saving graphic images
 The functions `gd.Image#savePng`, `gd.Image#saveJpeg`, `gd.Image#saveGif`, etc. are convenience functions which will be processed asynchronously when a callback is supplied. All of the following have a counterpart like `gd.Image#png` and `gd.Image#pngPtr` which write to disk synchronously or store the image data in a memory pointer respectively. `gd.Image#jpeg` will return the instance of `gd.Image`, `gd.Image#jpgPtr` will return the newly created image data.
@@ -897,28 +922,28 @@ gd.openPng('/path/to/input.png', async function(err, img) {
 ```
 The above example shows how to create a JPEG and GIF file from a PNG file.
 
-### gd.Image#savePng(path, level[, callback])
+### gd.Image#savePng(path, level)
 Save image data as a PNG file. The callback will receive an error object as a parameter, only if an error occurred. When a callback is supplied, the image will be written asynchronously by `fs.writeFile()`, using `gd.Image#pngPtr()` to first write it to memory in the given format. `level` can be value between `0` and `9` and refers to a zlib compression level. A level of `-1` will let libpng12 decide what the default is.
 
-### gd.Image#saveJpeg(path, quality[, callback])
-Save image data as a JPEG file. The callback will receive an error object as a parameter. Quality can be a `Number` between `0` and `100`.
+### gd.Image#saveJpeg(path, quality)
+Save image data as a JPEG file. Returns Promise which resolves with true. Quality can be a `Number` between `0` and `100`.
 
-### gd.Image#saveGif(path[, callback])
+### gd.Image#saveGif(path)
 Save image data as a GIF file.
 
-### gd.Image#saveGd(path[, callback])
+### gd.Image#saveGd(path)
 Save image data as a GD file.
 
-### gd.Image#saveGd2(path, chunkSize[, format][, callback])
+### gd.Image#saveGd2(path, chunkSize[, format])
 Save image data as a GD2 file.
 
-### gd.Image#saveWBMP(path, foreground[, callback])
+### gd.Image#saveWBMP(path, foreground)
 Save image as a 2 color WBMP file. `foreground` is an integer value or `0x000000` value which defines the dark color of the image. All other colors will be changed into white.
 
-### gd.Image#saveBmp(path, compression[, callback])
+### gd.Image#saveBmp(path, compression)
 Only available from GD version 2.1.1. The compression parameter is eiterh `0` for no compression and `1` for compression. This value only affects paletted images.
 
-### gd.Image#saveTiff(path[, callback])
+### gd.Image#saveTiff(path)
 As per libgd 2.2.4, opening TIFF files appears to be fixed, and saving image data as TIFF worked already fine. Therefore, `gd.openTiff()` is available again. Only available from GD version 2.1.1.
 
 ### gd.Image#file(path)
