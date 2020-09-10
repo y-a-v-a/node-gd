@@ -14,9 +14,10 @@
     "src",
     "binding.gyp",
     "util.sh",
-    "CONTRIBUTORS",
-    "test",
-    "index.d.ts"
+    "CONTRIBUTORS.md",
+    "index.d.ts",
+    "test/*.test.js",
+    "test/fixtures/*"
   ],
   "os": [
     "!win32"

@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# 2.1.0 - 2020-06-19 (current)
+# 2.1.1 - 2020-09-10 (current)
+
+### Added
+
+- TypeScript types file, as mentioned in #81 (thanks to [vladislav805](https://github.com/vladislav805))
+
+### Fixed
+
+- Package size of eventual npm package tgz file by being more specific about what it should contain in `package.json`'s `file` property.
+
+# 2.1.0 - 2020-06-19
 
 ### Added
 

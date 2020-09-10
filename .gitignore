@@ -2,3 +2,5 @@ node_modules
 build
 .DS_Store
 test/fixtures/.DS_Store
+DS_Store
+test/dev/*
