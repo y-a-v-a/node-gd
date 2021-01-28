@@ -251,7 +251,8 @@ Napi::Value Gd::CreateFromGd2PartPtr(const Napi::CallbackInfo& info) {
   REQ_INT_ARG(3, width);
   REQ_INT_ARG(4, height);
 
-  const char *str = info[0].As<Napi::String>().Utf8Value().c_str();
+  std::string strVal = info[0].As<Napi::String>().Utf8Value();
+  const char* str = strVal.c_str();
   ssize_t len = strlen(str);
 
   gdImagePtr im = gdImageCreateFromGd2PartPtr(len, &str, srcX, srcY, width, height);
@@ -1322,7 +1323,8 @@ Napi::Value Gd::Image::StringFTEx(const Napi::CallbackInfo& info) {
   if (stringExtraParameter.Has(charmap)) {
     stringExtra.charmap = 0;
 
-    const char *chmap = stringExtraParameter.Get(charmap).As<Napi::String>().Utf8Value().c_str();
+    std::string str = stringExtraParameter.Get(charmap).As<Napi::String>().Utf8Value();
+    const char* chmap = str.c_str();
 
     // gdFTEX_Unicode, gdFTEX_Shift_JIS, gdFTEX_Big5, gdFTEX_Adobe_Custom
     // unicode, shift_jis, big5, adobe_custom
@@ -1415,7 +1417,8 @@ Napi::Value Gd::Image::StringFTEx(const Napi::CallbackInfo& info) {
     if (error) {
       std::string prefix ("GD Error: ");
       std::string errormsg (error);
-      const char *errorMessage = (prefix + error).c_str();
+      std::string concatenatedStr = (prefix + error);
+      const char* errorMessage = concatenatedStr.c_str();
       Napi::Error::New(info.Env(), errorMessage).ThrowAsJavaScriptException();
       return info.Env().Null();
     }
@@ -1433,7 +1436,8 @@ Napi::Value Gd::Image::StringFTEx(const Napi::CallbackInfo& info) {
   if (error) {
     std::string prefix("GD Error: ");
     std::string errormsg(error);
-    const char *errorMessage = (prefix + error).c_str();
+    std::string concatenatedStr = (prefix + error);
+    const char* errorMessage = concatenatedStr.c_str();
     Napi::Error::New(info.Env(), errorMessage).ThrowAsJavaScriptException();
     return info.Env().Null();
   }
