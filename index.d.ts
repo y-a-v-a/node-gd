@@ -1,5 +1,7 @@
 declare namespace gd {
 
+    type Ptr = Buffer | BufferSource;
+
     // Creating and opening graphic images
 
     function create(width: number, height: number): Promise<gd.Image>;
@@ -14,49 +16,49 @@ declare namespace gd {
 
     function createFromJpeg(path: string): Promise<gd.Image>;
 
-    function createFromJpegPtr(data: BufferSource): Promise<gd.Image>;
+    function createFromJpegPtr(data: Ptr): Promise<gd.Image>;
 
     function openPng(path: string): Promise<gd.Image>;
 
     function createFromPng(path: string): Promise<gd.Image>;
 
-    function createFromPngPtr(path: string): Promise<gd.Image>;
+    function createFromPngPtr(data: Ptr): Promise<gd.Image>;
 
     function openGif(path: string): Promise<gd.Image>;
 
     function createFromGif(path: string): Promise<gd.Image>;
 
-    function createFromGifPtr(data: string): Promise<gd.Image>;
+    function createFromGifPtr(data: Ptr): Promise<gd.Image>;
 
     function openGd2(path: string): Promise<gd.Image>;
 
     function createFromGd2(path: string): Promise<gd.Image>;
 
-    function createFromGd2Ptr(data: string): Promise<gd.Image>;
+    function createFromGd2Ptr(data: Ptr): Promise<gd.Image>;
 
     function openGd2Part(path: string, srcX: number, srcY: number, width: number, height: number): Promise<gd.Image>;
 
     function createFromGd2Part(path: string, srcX: number, srcY: number, width: number, height: number): Promise<gd.Image>;
 
-    function createFromGd2PartPtr(data: string, srcX: number, srcY: number, width: number, height: number): Promise<gd.Image>;
+    function createFromGd2PartPtr(data: Ptr, srcX: number, srcY: number, width: number, height: number): Promise<gd.Image>;
 
     function openWBMP(path: string): Promise<gd.Image>;
 
     function createFromWBMP(path: string): Promise<gd.Image>;
 
-    function createFromWBMPPtr(data: string): Promise<gd.Image>;
+    function createFromWBMPPtr(data: Ptr): Promise<gd.Image>;
 
     function openBmp(path: string): Promise<gd.Image>;
 
     function createFromBmp(path: string): Promise<gd.Image>;
 
-    function createFromBmpPtr(data: string): Promise<gd.Image>;
+    function createFromBmpPtr(data: Ptr): Promise<gd.Image>;
 
     function openTiff(path: string): Promise<gd.Image>;
 
     function createFromTiff(path: string): Promise<gd.Image>;
 
-    function createFromTiffPtr(data: string): Promise<gd.Image>;
+    function createFromTiffPtr(data: Ptr): Promise<gd.Image>;
 
     function openFile(path: string): Promise<gd.Image>;
 
