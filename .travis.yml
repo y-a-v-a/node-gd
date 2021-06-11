@@ -4,18 +4,16 @@ os:
   - linux
 
 node_js:
-  - 8
-  - 10
-  - 11
   - 12
-  - 13
+  - 14
+  - 16
 
 sudo: required
 
 dist: xenial
 
 install:
- - npm install
+  - npm install
 
 notifications:
   email:
@@ -24,12 +22,12 @@ notifications:
 addons:
   apt:
     sources:
-    # add PPAs with more up-to-date toolchains
-    - ubuntu-toolchain-r-test
+      # add PPAs with more up-to-date toolchains
+      - ubuntu-toolchain-r-test
     packages:
-    # install toolchains
-    - gcc-5
-    - g++-5
-    - clang
-    - libgd2-dev
-    - libtiff5-dev
+      # install toolchains
+      - gcc-5
+      - g++-5
+      - clang
+      - libgd2-dev
+      - libtiff5-dev
