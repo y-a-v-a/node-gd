@@ -1,12 +1,13 @@
-'use strict';
+import gd from '../index.js';
+import { assert } from 'chai';
 
-const gd = require('../index');
-var assert = require('chai').assert;
+import dirname from './dirname.mjs';
 
-var source = __dirname + '/fixtures/';
-var target = __dirname + '/output/';
+const currentDir = dirname(import.meta.url);
 
-describe('Section querying image information', function() {
+var source = currentDir + '/fixtures/';
+
+describe('Section querying image information', function () {
   it('gd.trueColorAlpha() -- can query true color alpha values of a color', async () => {
     var image = await gd.createTrueColor(100, 100);
     var someColor = gd.trueColorAlpha(63, 255, 191, 63);
@@ -45,21 +46,25 @@ describe('Section querying image information', function() {
     assert.equal(image.blue(someColor), 191);
   });
 
-  it('gd.Image#getTrueColorPixel() -- can query the color of a pixel within image bounds', async function() {
+  it('gd.Image#getTrueColorPixel() -- can query the color of a pixel within image bounds', async function () {
     var s = source + 'input.png';
     const image = await gd.openPng(s);
-    var color = image.getTrueColorPixel(0,0);
+    var color = image.getTrueColorPixel(0, 0);
     assert.isNumber(color, 'got Number for getTrueColorPixel');
   });
 
-  it('gd.Image#getTrueColorPixel() -- will throw an error when quering the color of a pixel outside of image bounds', async function() {
+  it('gd.Image#getTrueColorPixel() -- will throw an error when quering the color of a pixel outside of image bounds', async function () {
     var s = source + 'input.png';
     const image = await gd.openPng(s);
-    assert.throws(function() {
-      var color = image.getTrueColorPixel(-1,-1);
+    assert.throws(function () {
+      var color = image.getTrueColorPixel(-1, -1);
     }, 'Value for x and y must be greater than 0');
 
-    var color = image.getTrueColorPixel(image.width + 1,1);
-    assert.equal(0, color, '0 should be returned when querying above upper bounds');
+    var color = image.getTrueColorPixel(image.width + 1, 1);
+    assert.equal(
+      0,
+      color,
+      '0 should be returned when querying above upper bounds'
+    );
   });
 });

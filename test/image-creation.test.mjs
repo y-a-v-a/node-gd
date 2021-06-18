@@ -1,12 +1,5 @@
-'use strict';
-
-var fs = require('fs');
-
-const gd = require('../index');
-var assert = require('chai').assert;
-
-var source = __dirname + '/fixtures/';
-var target = __dirname + '/output/';
+import gd from '../index.js';
+import { assert } from 'chai';
 
 /**
  * gd.create
@@ -14,12 +7,12 @@ var target = __dirname + '/output/';
  * ║│││├─┤│ ┬├┤   │  ├┬┘├┤ ├─┤ │ ││ ││││
  * ╩┴ ┴┴ ┴└─┘└─┘  └─┘┴└─└─┘┴ ┴ ┴ ┴└─┘┘└┘
  */
-describe('gd.create - Creating a paletted image', function() {
+describe('gd.create - Creating a paletted image', function () {
   it('returns a Promise', () => {
-    const imagePromise = gd.create(100,100);
+    const imagePromise = gd.create(100, 100);
     assert.strictEqual(imagePromise.constructor, Promise);
 
-    imagePromise.then(image => image.destroy());
+    imagePromise.then((image) => image.destroy());
   });
 
   it('can be done', async () => {
@@ -41,7 +34,7 @@ describe('gd.create - Creating a paletted image', function() {
 
     try {
       img.__proto__.width;
-    } catch(e) {
+    } catch (e) {
       assert.ok(e instanceof Error);
     }
     img.destroy();
@@ -51,8 +44,8 @@ describe('gd.create - Creating a paletted image', function() {
     var img = gd.createSync(100, 100);
 
     try {
-      img.__proto__.getPixel(1,1);
-    } catch(e) {
+      img.__proto__.getPixel(1, 1);
+    } catch (e) {
       assert.ok(e instanceof TypeError);
     }
     img.destroy();
@@ -102,7 +95,6 @@ describe('gd.create - Creating a paletted image', function() {
       assert.ok(e instanceof TypeError);
     }
   });
-
 
   it('throws a RangeError when the width parameter is 0', async () => {
     var img;
@@ -171,19 +163,19 @@ describe('gd.create - Creating a paletted image', function() {
 /**
  * gd.createTrueColor and await gd.createTrueColor
  */
-describe('gd.createTrueColor - Create a true color image', function() {
+describe('gd.createTrueColor - Create a true color image', function () {
   it('returns a Promise', () => {
-    const imagePromise = gd.createTrueColor(101,101);
+    const imagePromise = gd.createTrueColor(101, 101);
 
     assert.ok(imagePromise.constructor === Promise);
 
-    imagePromise.then(image => image.destroy());
+    imagePromise.then((image) => image.destroy());
   });
 
-  it('returns a Promise that resolves to an Image', async function() {
-    const imagePromise = gd.createTrueColor(101,101);
+  it('returns a Promise that resolves to an Image', async function () {
+    const imagePromise = gd.createTrueColor(101, 101);
 
-    imagePromise.then(image => {
+    imagePromise.then((image) => {
       assert.ok(image.constructor === gd.Image);
     });
   });
@@ -245,15 +237,9 @@ describe('gd.createTrueColor - Create a true color image', function() {
     img.destroy();
   });
 
-  it('has 5 enumerable properties', async function() {
-    const img = await gd.create(100,100);
-    const props = [
-      'trueColor',
-      'width',
-      'height',
-      'interlace',
-      'colorsTotal'
-    ];
+  it('has 5 enumerable properties', async function () {
+    const img = await gd.create(100, 100);
+    const props = ['trueColor', 'width', 'height', 'interlace', 'colorsTotal'];
 
     let i = 0;
     for (let prop in img) {

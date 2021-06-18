@@ -1,15 +1,17 @@
-'use strict';
+import fs from 'fs';
 
-var fs = require('fs');
+import gd from '../index.js';
+import { assert } from 'chai';
 
-const gd = require('../index');
-var assert = require('chai').assert;
+import dirname from './dirname.mjs';
 
-var source = __dirname + '/fixtures/';
-var target = __dirname + '/output/';
+const currentDir = dirname(import.meta.url);
 
-describe('Section Handling file types', function() {
-  it('gd.Image#jpeg() -- returns a Promise', async function() {
+var source = currentDir + '/fixtures/';
+var target = currentDir + '/output/';
+
+describe('Section Handling file types', function () {
+  it('gd.Image#jpeg() -- returns a Promise', async function () {
     const s = `${source}input.png`;
     const t = `${target}output-gd.Image.jpeg.jpg`;
     const img = await gd.openPng(s);
@@ -18,7 +20,7 @@ describe('Section Handling file types', function() {
     assert.ok(successPromise.constructor === Promise);
   });
 
-  it('gd.Image#jpeg() -- returns true when save is succesfull', async function() {
+  it('gd.Image#jpeg() -- returns true when save is succesfull', async function () {
     const s = `${source}input.png`;
     const t = `${target}output-success-gd.Image.jpeg.jpg`;
     const img = await gd.openPng(s);
@@ -29,12 +31,12 @@ describe('Section Handling file types', function() {
     assert.ok(success === true);
   });
 
-  it('gd.Image#jpeg() -- returns "Cannot save JPEG file" in catch when failing', async function() {
+  it('gd.Image#jpeg() -- returns "Cannot save JPEG file" in catch when failing', async function () {
     const s = `${source}input.png`;
     const img = await gd.openPng(s);
     assert.ok(img instanceof gd.Image);
 
-    img.jpeg('', 100).catch(function(reason) {
+    img.jpeg('', 100).catch(function (reason) {
       assert.ok(reason === 'Cannot save JPEG file');
     });
   });
@@ -61,7 +63,17 @@ describe('Section Handling file types', function() {
     const img = await gd.openPng(s);
     var canvas;
     canvas = await gd.createTrueColor(img.width, img.height);
-    img.copyResampled(canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height);
+    img.copyResampled(
+      canvas,
+      0,
+      0,
+      0,
+      0,
+      img.width,
+      img.height,
+      img.width,
+      img.height
+    );
     await canvas.saveGif(t);
     assert.ok(fs.existsSync(t));
     img.destroy();
@@ -76,14 +88,24 @@ describe('Section Handling file types', function() {
 
     var canvas;
     canvas = await gd.createTrueColor(img.width, img.height);
-    img.copyResampled(canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height);
+    img.copyResampled(
+      canvas,
+      0,
+      0,
+      0,
+      0,
+      img.width,
+      img.height,
+      img.width,
+      img.height
+    );
     await canvas.saveGd(t);
     assert.ok(fs.existsSync(t));
     img.destroy();
     canvas.destroy();
   });
 
-  it('gd.Image#saveWBMP() -- can copy a png into WBMP', async function() {
+  it('gd.Image#saveWBMP() -- can copy a png into WBMP', async function () {
     var s, t;
     if (gd.getGDVersion() < '2.1.1') {
       this.skip();
@@ -94,7 +116,17 @@ describe('Section Handling file types', function() {
     const img = await gd.openPng(s);
     var canvas, fg;
     canvas = await gd.createTrueColor(img.width, img.height);
-    img.copyResampled(canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height);
+    img.copyResampled(
+      canvas,
+      0,
+      0,
+      0,
+      0,
+      img.width,
+      img.height,
+      img.width,
+      img.height
+    );
     fg = img.getPixel(5, 5);
     await canvas.saveWBMP(t, fg);
     assert.ok(fs.existsSync(t));
@@ -102,7 +134,7 @@ describe('Section Handling file types', function() {
     canvas.destroy();
   });
 
-  it('gd.Image#savePng() -- can open a jpeg file and save it as png', async function() {
+  it('gd.Image#savePng() -- can open a jpeg file and save it as png', async function () {
     var s, t;
     s = source + 'input.jpg';
     t = target + 'output-from-jpeg.png';
@@ -113,7 +145,7 @@ describe('Section Handling file types', function() {
     img.destroy();
   });
 
-  it('gd.Image#savePng() -- can open a bmp and save it as png', async function() {
+  it('gd.Image#savePng() -- can open a bmp and save it as png', async function () {
     var s;
     var t;
     if (gd.getGDVersion() < '2.1.1') {

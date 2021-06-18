@@ -1,15 +1,17 @@
-'use strict';
+import fs from 'fs';
 
-var fs = require('fs');
+import gd from '../index.js';
+import { assert } from 'chai';
 
-const gd = require('../index');
-var assert = require('chai').assert;
+import dirname from './dirname.mjs';
 
-var source = __dirname + '/fixtures/';
-var target = __dirname + '/output/';
+const currentDir = dirname(import.meta.url);
 
-describe('Section Handling TIFF files', function() {
-  it('gd.openTiff() -- can open a tiff and save it as a jpg', async function() {
+var source = currentDir + '/fixtures/';
+var target = currentDir + '/output/';
+
+describe('Section Handling TIFF files', function () {
+  it('gd.openTiff() -- can open a tiff and save it as a jpg', async function () {
     var s;
     var t;
     if (gd.getGDVersion() < '2.2.4') {
@@ -24,7 +26,7 @@ describe('Section Handling TIFF files', function() {
     img.destroy();
   });
 
-  it('gd.Image#saveTiff() -- can open a jpg file and save it as a tiff', async function() {
+  it('gd.Image#saveTiff() -- can open a jpg file and save it as a tiff', async function () {
     var s;
     var t;
     if (gd.getGDVersion() < '2.2.4') {
@@ -39,7 +41,7 @@ describe('Section Handling TIFF files', function() {
     img.destroy();
   });
 
-  it('gd.createFromTiff() -- can open a tiff and save it as a tiff', async function() {
+  it('gd.createFromTiff() -- can open a tiff and save it as a tiff', async function () {
     var s;
     var t;
     if (gd.getGDVersion() < '2.2.4') {
@@ -54,7 +56,7 @@ describe('Section Handling TIFF files', function() {
     image.destroy();
   });
 
-  it('gd.createFromTiffPtr() -- can open a tif and store it in a pointer and save a tiff from the pointer', async function() {
+  it('gd.createFromTiffPtr() -- can open a tif and store it in a pointer and save a tiff from the pointer', async function () {
     if (gd.getGDVersion() < '2.2.4') {
       return this.skip();
     }
@@ -68,7 +70,7 @@ describe('Section Handling TIFF files', function() {
     image.destroy();
   });
 
-  it('gd.Image#saveTiff() -- can create a truecolor Tiff image with text', async function() {
+  it('gd.Image#saveTiff() -- can create a truecolor Tiff image with text', async function () {
     var f, img, t, txtColor;
     if (gd.getGDVersion() < '2.2.4' || !gd.GD_TIFF) {
       return this.skip();
@@ -77,7 +79,7 @@ describe('Section Handling TIFF files', function() {
     t = target + 'output-truecolor-string.tif';
     img = await gd.createTrueColor(120, 20);
     txtColor = img.colorAllocate(255, 255, 0);
-    img.stringFT(txtColor, f, 16, 0, 8, 18, "Hello world!");
+    img.stringFT(txtColor, f, 16, 0, 8, 18, 'Hello world!');
     await img.saveTiff(t);
     assert.ok(fs.existsSync(t));
   });
