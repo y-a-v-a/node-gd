@@ -1,5 +1,5 @@
 name: run-tests
-on: [push]
+on: [push, pull_request]
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -15,5 +15,4 @@ jobs:
       - name: Install packages
         run: apt-get -y install libgd2
       - name: Run npm tasks
-        run: npm install
-        run: npm run test
+        run: npm install && npm run test
