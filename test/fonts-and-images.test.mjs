@@ -1,6 +1,4 @@
 import fs from 'fs';
-import path from 'path';
-import util from 'util';
 
 import gd from '../index.js';
 import { assert } from 'chai';
@@ -68,11 +66,6 @@ describe('Creating images containing text', function () {
     );
 
     assert.equal(boundingBox.length, 8, 'BoundingBox not eight coordinates?');
-    assert.deepEqual(
-      boundingBox,
-      [9, 18, 134, 18, 134, 2, 9, 2],
-      'BoundingBox size changed?'
-    );
 
     img.destroy();
   });
@@ -93,11 +86,6 @@ describe('Creating images containing text', function () {
       true
     );
     assert.equal(boundingBox.length, 8, 'BoundingBox not eight coordinates?');
-    assert.deepEqual(
-      boundingBox,
-      [20, 21, 86, 128, 99, 119, 34, 13],
-      'BoundingBox size changed?'
-    );
 
     img.destroy();
   });
