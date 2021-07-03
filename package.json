@@ -91,7 +91,7 @@
     "mocha": "^9.0.0"
   },
   "dependencies": {
-    "node-addon-api": "^3.2.1",
+    "node-addon-api": "^4.0.0",
     "node-gyp": "8.1.0"
   }
 }

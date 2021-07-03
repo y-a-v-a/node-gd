@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2009-2011, Taegon Kim <gonom9@gmail.com>
- * Copyright (c) 2014-2020, Vincent Bruijn <vebruijn@gmail.com>
+ * Copyright (c) 2014-2021, Vincent Bruijn <vebruijn@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -20,6 +20,9 @@
 
 #include <napi.h>
 #include <gd.h>
+
+#define SUPPORTS_GD_2_3_2 (GD_MINOR_VERSION == 3                        \
+                  && GD_RELEASE_VERSION >= 2)
 
 #define SUPPORTS_GD_2_3_0 (GD_MINOR_VERSION == 3                        \
                   && GD_RELEASE_VERSION >= 0)
