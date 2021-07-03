@@ -13,6 +13,6 @@ jobs:
         with:
           platform: x64
       - name: Install packages
-        run: apt-get -y install libgd2
+        run: sudo apt-get -y install libgd2
       - name: Run npm tasks
         run: npm install && npm run test
