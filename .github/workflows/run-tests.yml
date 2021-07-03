@@ -4,7 +4,16 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-      - run: npm install
-      - run: npm run test
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Node setup
+        uses: actions/setup-node@v1
+      - name: Setup GCC
+        uses: egor-tensin/setup-gcc@v1
+        with:
+          platform: x64
+      - name: Install packages
+        run: apt-get -y install libgd2
+      - name: Run npm tasks
+        run: npm install
+        run: npm run test
