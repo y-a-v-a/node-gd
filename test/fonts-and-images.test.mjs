@@ -356,11 +356,6 @@ describe('Creating images containing text', function () {
     );
 
     assert.equal(boundingBox.length, 8);
-    assert.deepEqual(
-      boundingBox,
-      [10, 110, 240, 110, 240, 30, 10, 30],
-      'BoundingBox size changed?'
-    );
     image.destroy();
   });
 
