@@ -21,7 +21,11 @@
 #include <napi.h>
 #include <gd.h>
 
-#define SUPPORTS_GD_2_3_0 (GD_MINOR_VERSION == 3                        \
+#define SUPPORTS_GD_2_3_2 (GD_MINOR_VERSION == 3                        \
+                  && GD_RELEASE_VERSION >= 2)
+
+#define SUPPORTS_GD_2_3_0 (SUPPORTS_GD_2_3_2                            \
+                  || GD_MINOR_VERSION == 3                              \
                   && GD_RELEASE_VERSION >= 0)
 
 #define SUPPORTS_GD_2_2_5 (SUPPORTS_GD_2_3_0                            \
@@ -51,6 +55,8 @@
 #define SUPPORTS_UNTIL_GD_2_0_36 (GD_MINOR_VERSION == 0                 \
                   && GD_RELEASE_VERSION <= 36)
 
+#define HAS_LIBHEIF (HAVE_LIBHEIF && SUPPORTS_GD_2_3_2)
+#define HAS_LIBAVIF (HAVE_LIBAVIF && SUPPORTS_GD_2_3_2)
 #define HAS_LIBTIFF (HAVE_LIBTIFF && SUPPORTS_GD_2_2_4)
 #define HAS_LIBWEBP (HAVE_LIBWEBP && SUPPORTS_GD_2_1_0)
 
@@ -264,6 +270,14 @@ public:
     Napi::Value Bmp(const Napi::CallbackInfo& info);
     Napi::Value BmpPtr(const Napi::CallbackInfo& info);
 #endif
+#if HAS_LIBHEIF
+    Napi::Value Heif(const Napi::CallbackInfo& info);
+    Napi::Value HeifPtr(const Napi::CallbackInfo& info);
+#endif
+#if HAS_LIBAVIF
+    Napi::Value Avif(const Napi::CallbackInfo& info);
+    Napi::Value AvifPtr(const Napi::CallbackInfo& info);
+#endif
 
 #if HAS_LIBTIFF
     Napi::Value Tiff(const Napi::CallbackInfo& info);
@@ -427,6 +441,14 @@ private:
 #if SUPPORTS_GD_2_1_0
   static Napi::Value CreateFromBmp(const Napi::CallbackInfo& info);
   static Napi::Value CreateFromBmpPtr(const Napi::CallbackInfo& info);
+#endif
+#if HAS_LIBHEIF
+  static Napi::Value CreateFromHeif(const Napi::CallbackInfo& info);
+  static Napi::Value CreateFromHeifPtr(const Napi::CallbackInfo& info);
+#endif
+#if HAS_LIBAVIF
+  static Napi::Value CreateFromAvif(const Napi::CallbackInfo& info);
+  static Napi::Value CreateFromAvifPtr(const Napi::CallbackInfo& info);
 #endif
 #if HAS_LIBTIFF
   static Napi::Value CreateFromTiff(const Napi::CallbackInfo& info);

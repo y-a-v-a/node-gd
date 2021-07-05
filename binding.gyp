@@ -2,6 +2,8 @@
   "conditions": [
     ['OS!="win"', {
       'variables': {
+        'with_avif%': '<!(./util.sh avif)',
+        'with_heif%': '<!(./util.sh heif)',
         'with_tiff%': '<!(./util.sh tiff)',
         'with_xpm%': '<!(./util.sh xpm)',
         'with_jpeg%': '<!(./util.sh jpeg)',
@@ -46,6 +48,18 @@
           },
           "libraries": ["-L/usr/local/lib", "-L/opt/local/lib"],
           "include_dirs": ["/usr/local/include", "/opt/local/include"]
+        }],
+        ["with_heif=='true'", {
+          'defines': [
+            'HAVE_LIBHEIF',
+            'GD_HEIF'
+          ]
+        }],
+        ["with_avif=='true'", {
+          'defines': [
+            'HAVE_LIBAVIF',
+            'GD_AVIF'
+          ]
         }],
         ["with_tiff=='true'", {
           'defines': [

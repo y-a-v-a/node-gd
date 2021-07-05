@@ -53,6 +53,18 @@ Napi::Object Gd::Init(Napi::Env env, Napi::Object exports) {
     ColorTransparent
   });
 
+#ifdef HAVE_LIBHEIF
+  Napi::PropertyDescriptor GdHeif = Napi::PropertyDescriptor::Value("GD_HEIF",
+    Napi::Number::New(env, GD_HEIF));
+  exports.DefineProperty(GdHeif);
+#endif
+
+#ifdef HAVE_LIBAVIF
+  Napi::PropertyDescriptor GdAvif = Napi::PropertyDescriptor::Value("GD_AVIF",
+    Napi::Number::New(env, GD_AVIF));
+  exports.DefineProperty(GdAvif);
+#endif
+
 #ifdef HAVE_LIBTIFF
   Napi::PropertyDescriptor GdTiff = Napi::PropertyDescriptor::Value("GD_TIFF",
     Napi::Number::New(env, GD_TIFF));
@@ -140,6 +152,14 @@ Napi::Object Gd::Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "createFromBmp"), Napi::Function::New(env, CreateFromBmp));
   exports.Set(Napi::String::New(env, "createFromBmpPtr"), Napi::Function::New(env, CreateFromBmpPtr));
 #endif
+#if HAS_LIBHEIF
+  exports.Set(Napi::String::New(env, "createFromHeif"), Napi::Function::New(env, CreateFromHeif));
+  exports.Set(Napi::String::New(env, "createFromHeifPtr"), Napi::Function::New(env, CreateFromHeifPtr));
+#endif
+#if HAS_LIBAVIF
+  exports.Set(Napi::String::New(env, "createFromAvif"), Napi::Function::New(env, CreateFromAvif));
+  exports.Set(Napi::String::New(env, "createFromAvifPtr"), Napi::Function::New(env, CreateFromAvifPtr));
+#endif
 #if HAS_LIBTIFF
   exports.Set(Napi::String::New(env, "createFromTiff"), Napi::Function::New(env, CreateFromTiff));
   exports.Set(Napi::String::New(env, "createFromTiffPtr"), Napi::Function::New(env, CreateFromTiffPtr));
@@ -226,6 +246,12 @@ DECLARE_CREATE_FROM(Webp);
 
 #if SUPPORTS_GD_2_1_0
 DECLARE_CREATE_FROM(Bmp);
+#endif
+#if HAS_LIBHEIF
+DECLARE_CREATE_FROM(Heif);
+#endif
+#if HAS_LIBAVIF
+DECLARE_CREATE_FROM(Avif);
 #endif
 #if HAS_LIBTIFF
 DECLARE_CREATE_FROM(Tiff);
@@ -322,6 +348,14 @@ Napi::Object Gd::Image::Init(Napi::Env env, Napi::Object exports) {
 #if SUPPORTS_GD_2_1_0
       InstanceMethod("bmp", &Gd::Image::Bmp),
       InstanceMethod("bmpPtr", &Gd::Image::BmpPtr),
+#endif
+#if HAS_LIBHEIF
+      InstanceMethod("heif", &Gd::Image::Heif),
+      InstanceMethod("heifPtr", &Gd::Image::HeifPtr),
+#endif
+#if HAS_LIBAVIF
+      InstanceMethod("avif", &Gd::Image::Avif),
+      InstanceMethod("avifPtr", &Gd::Image::AvifPtr),
 #endif
 #if HAS_LIBTIFF
       InstanceMethod("tiff", &Gd::Image::Tiff),
@@ -653,6 +687,45 @@ Napi::Value Gd::Image::TiffPtr(const Napi::CallbackInfo& info) {
 
   int size;
   char *data = (char*)gdImageTiffPtr(this->_image, &size);
+
+  RETURN_DATA
+}
+#endif
+
+#if HAS_LIBHEIF
+Napi::Value Gd::Image::Heif(const Napi::CallbackInfo& info) {
+  CHECK_IMAGE_EXISTS;
+
+  return SaveHeifWorker::DoWork(info, this->_image);
+}
+
+Napi::Value Gd::Image::HeifPtr(const Napi::CallbackInfo& info) {
+  CHECK_IMAGE_EXISTS;
+  OPT_INT_ARG(0, quality, -1);
+  OPT_INT_ARG(1, codec, 2);
+  OPT_INT_ARG(2, chroma, "444");
+
+  int size;
+  char *data = (char*)gdImageHeifPtrEx(this->_image, &size, quality, codec, chroma);
+
+  RETURN_DATA
+}
+#endif
+
+#if HAS_LIBAVIF
+Napi::Value Gd::Image::Avif(const Napi::CallbackInfo& info) {
+  CHECK_IMAGE_EXISTS;
+
+  return SaveAvifWorker::DoWork(info, this->_image);
+}
+
+Napi::Value Gd::Image::AvifPtr(const Napi::CallbackInfo& info) {
+  CHECK_IMAGE_EXISTS;
+  OPT_INT_ARG(0, quality, -1);
+  OPT_INT_ARG(1, speed, -1);
+
+  int size;
+  char *data = (char*)gdImageAvifPtrEx(this->_image, &size, quality, speed);
 
   RETURN_DATA
 }
