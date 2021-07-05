@@ -885,6 +885,54 @@ class SaveTiffWorker : public SaveWorker {
       }
 };
 
+class SaveHeifWorker : public SaveWorker {
+  public:
+    static Value DoWork(const CallbackInfo& info, gdImagePtr& gdImage) {
+      REQ_STR_ARG(0, path);
+      OPT_INT_ARG(1, quality, -1);
+      OPT_INT_ARG(2, codec_param, 1);
+      OPT_STR_ARG(3, chroma_param,  "444");
+
+      const char* chroma = chroma_param.c_str();
+
+      SaveHeifWorker* worker = new SaveHeifWorker(info.Env(),
+        "SaveHeifWorkerResource");
+
+      worker->path = path;
+      worker->_gdImage = &gdImage;
+      worker->quality = quality;
+      if (codec_param == 1) {
+        worker->codec = GD_HEIF_CODEC_HEVC;
+      } else if (codec_param == 4) {
+        worker->codec = GD_HEIF_CODEC_AV1;
+      } else {
+        worker->codec = GD_HEIF_CODEC_UNKNOWN;
+      }
+      worker->chroma = chroma;
+      worker->Queue();
+      return worker->_deferred.Promise();
+    }
+
+  protected:
+    void Execute() override {
+      FILE *out = fopen(path.c_str(), "wb");
+      if (out == nullptr) {
+        return SetError("Cannot save Heif file");
+      }
+      gdImageHeifEx(*_gdImage, out, quality, codec, chroma);
+      fclose(out);
+    }
+
+    gdHeifCodec codec;
+
+    const char* chroma;
+
+  private:
+    SaveHeifWorker(napi_env env, const char* resource_name)
+      : SaveWorker(env, resource_name) {
+      }
+};
+
 class SaveAvifWorker : public SaveWorker {
   public:
     static Value DoWork(const CallbackInfo& info, gdImagePtr& gdImage) {

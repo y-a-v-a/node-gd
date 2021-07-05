@@ -702,11 +702,32 @@ Napi::Value Gd::Image::Heif(const Napi::CallbackInfo& info) {
 Napi::Value Gd::Image::HeifPtr(const Napi::CallbackInfo& info) {
   CHECK_IMAGE_EXISTS;
   OPT_INT_ARG(0, quality, -1);
-  OPT_INT_ARG(1, codec, 2);
-  OPT_INT_ARG(2, chroma, "444");
+  OPT_INT_ARG(1, codec_param, 1);
+  OPT_STR_ARG(2, chroma, "444");
+
+  gdHeifCodec codec;
+  const char* chroma_str = chroma.c_str();
+
+  if (codec_param == 1) {
+    codec = GD_HEIF_CODEC_HEVC;
+  } else if (codec_param == 4) {
+    codec = GD_HEIF_CODEC_AV1;
+  } else {
+    codec = GD_HEIF_CODEC_UNKNOWN;
+  }
+
+  if (quality < -1 || quality > 200) {
+    Napi::RangeError::New(info.Env(), "Value for quality must be greater than or equal to 0 and less than or equal to 200").ThrowAsJavaScriptException();
+    return info.Env().Null();
+  }
+
+  if (chroma.compare("444") != 0 && chroma.compare("422") != 0 && chroma.compare("420") != 0) {
+    Napi::RangeError::New(info.Env(), "Value for chroma must be one of '420', '422' or '444' (default)").ThrowAsJavaScriptException();
+    return info.Env().Null();
+  }
 
   int size;
-  char *data = (char*)gdImageHeifPtrEx(this->_image, &size, quality, codec, chroma);
+  char *data = (char*)gdImageHeifPtrEx(this->_image, &size, quality, codec, chroma_str);
 
   RETURN_DATA
 }

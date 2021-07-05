@@ -161,6 +161,19 @@
     return info.Env().Null();                                           \
   }
 
+#define OPT_STR_ARG(I, VAR, DEFAULT)                                    \
+  std::string VAR;                                                              \
+  if (info.Length() <= (I)) {                                           \
+    VAR = (DEFAULT);                                                    \
+  } else if (info[I].IsString()) {                                      \
+    VAR = info[I].As<Napi::String>().Utf8Value().c_str();               \
+  } else {                                                              \
+    Napi::TypeError::New(info.Env(),                                    \
+      "Optional argument " #I " must be a string")                      \
+      .ThrowAsJavaScriptException();                                    \
+    return info.Env().Null();                                           \
+  }
+
 #define OPT_BOOL_ARG(I, VAR, DEFAULT)                                   \
   bool VAR;                                                             \
   if (info.Length() <= (I)) {                                           \
