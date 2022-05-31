@@ -23,7 +23,7 @@
     "!win32"
   ],
   "engines": {
-    "node": ">=8"
+    "node": ">=14"
   },
   "homepage": "https://github.com/y-a-v-a/node-gd",
   "bugs": "https://github.com/y-a-v-a/node-gd/issues",
@@ -88,11 +88,11 @@
   "gypfile": true,
   "readmeFilename": "README.md",
   "devDependencies": {
-    "chai": "4.3.4",
-    "mocha": "^9.0.0"
+    "chai": "4.3.6",
+    "mocha": "^10.0.0"
   },
   "dependencies": {
-    "node-addon-api": "^4.0.0",
-    "node-gyp": "8.1.0"
+    "node-addon-api": "^5.0.0",
+    "node-gyp": "9.0.0"
   }
 }
