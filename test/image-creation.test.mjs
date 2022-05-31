@@ -1,12 +1,5 @@
-'use strict';
-
-var fs = require('fs');
-
-const gd = require('../index');
-var assert = require('chai').assert;
-
-var source = __dirname + '/fixtures/';
-var target = __dirname + '/output/';
+import gd from '../index.js';
+import { assert } from 'chai';
 
 /**
  * gd.create
@@ -244,7 +237,7 @@ describe('gd.createTrueColor - Create a true color image', function () {
     img.destroy();
   });
 
-  it('has 6 enumerable properties', async function () {
+  it('has 5 enumerable properties', async function () {
     const img = await gd.createTrueColor(100, 100);
     const props = ['trueColor', 'width', 'height', 'interlace', 'colorsTotal', 'toString'];
 

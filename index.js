@@ -5,9 +5,9 @@
  * MIT Licensed
  */
 
-const gd = require('./lib/node-gd');
-const GifAnim = require('./lib/GifAnim');
+import gd from './lib/node-gd.js';
+import GifAnim from './lib/GifAnim.js';
 
 gd.GifAnim = GifAnim;
 
-module.exports = gd;
+export default gd;

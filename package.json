@@ -2,9 +2,9 @@
   "name": "node-gd",
   "version": "2.1.1",
   "description": "GD graphics library (libgd) C++ bindings for Node.js",
-  "type": "commonjs",
   "main": "index.js",
   "types": "index.d.ts",
+  "type": "module",
   "directories": {
     "test": "test",
     "doc": "docs"
@@ -31,7 +31,7 @@
     "clean": "rm -rf test/output/* build/",
     "rebuild": "node-gyp rebuild",
     "pretest": "node-gyp build",
-    "test": "mocha --reporter spec --bail --ui bdd --colors --file ./test/main.test.js",
+    "test": "./node_modules/.bin/mocha --reporter spec --bail --ui bdd --colors --file ./test/main.test.mjs",
     "install": "node-gyp rebuild",
     "update-contributors": "git shortlog -sen | sed 's/^  /*/' > CONTRIBUTORS.md",
     "docker-run": "docker run -it -v $PWD:/usr/src yava:node-gd"
@@ -92,7 +92,7 @@
     "mocha": "^9.0.0"
   },
   "dependencies": {
-    "node-addon-api": "^3.2.1",
+    "node-addon-api": "^4.0.0",
     "node-gyp": "8.1.0"
   }
 }
