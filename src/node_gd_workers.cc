@@ -28,797 +28,922 @@ using namespace Napi;
  * This worker class contains recurring code. The CreateFromJpegWorker and others
  * are decendants of this class. Returns a Promise.
  */
-class CreateFromWorker : public AsyncWorker {
-  public:
-    CreateFromWorker(napi_env env, const char* resource_name)
-      : AsyncWorker(env, resource_name), _deferred(Promise::Deferred::New(env)) {
-      }
+class CreateFromWorker : public AsyncWorker
+{
+public:
+  CreateFromWorker(napi_env env, const char *resource_name)
+      : AsyncWorker(env, resource_name), _deferred(Promise::Deferred::New(env))
+  {
+  }
 
-  protected:
-    virtual void OnOK() override {
-      // create new instance of Gd::Image with resulting image
-      Napi::Value argv = Napi::External<gdImagePtr>::New(Env(), &image);
-      Napi::Object instance = Gd::Image::constructor.New({argv});
+protected:
+  virtual void OnOK() override
+  {
+    // create new instance of Gd::Image with resulting image
+    Napi::Value argv = Napi::External<gdImagePtr>::New(Env(), &image);
+    Napi::Object instance = Gd::Image::constructor.New({argv});
 
-      // resolve Promise with instance of Gd::Image
-      _deferred.Resolve(instance);
-    }
+    // resolve Promise with instance of Gd::Image
+    _deferred.Resolve(instance);
+  }
 
-    virtual void OnError(const Napi::Error& e) override {
-      // reject Promise with error message
-      _deferred.Reject(Napi::String::New(Env(), e.Message()));
-    }
+  virtual void OnError(const Napi::Error &e) override
+  {
+    // reject Promise with error message
+    _deferred.Reject(Napi::String::New(Env(), e.Message()));
+  }
 
-    gdImagePtr image;
+  gdImagePtr image;
 
-    Promise::Deferred _deferred;
+  Promise::Deferred _deferred;
 
-    std::string path;
+  std::string path;
 };
 
 /**
  * CreateFromJpegWorker for Jpeg files
  */
-class CreateFromJpegWorker : public CreateFromWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info) {
-      REQ_STR_ARG(0, path);
+class CreateFromJpegWorker : public CreateFromWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path to the JPEG file to load.");
 
-      CreateFromJpegWorker* worker = new CreateFromJpegWorker(info.Env(),
-        "CreateFromJpegWorkerResource");
+    CreateFromJpegWorker *worker = new CreateFromJpegWorker(info.Env(),
+                                                            "CreateFromJpegWorkerResource");
 
-      worker->path = path;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    // execute the task
+    FILE *in;
+    in = fopen(path.c_str(), "rb");
+    if (in == nullptr)
+    {
+      return SetError("Cannot open JPEG file");
     }
+    image = gdImageCreateFromJpeg(in);
+    fclose(in);
+  }
 
-  protected:
-    void Execute() override {
-      // execute the task
-      FILE *in; in = fopen(path.c_str(), "rb");
-      if (in == nullptr) {
-        return SetError("Cannot open JPEG file");
-      }
-      image = gdImageCreateFromJpeg(in);
-      fclose(in);
-    }
-
-  private:
-    CreateFromJpegWorker(napi_env env, const char* resource_name)
-        : CreateFromWorker(env, resource_name) {
-        }
+private:
+  CreateFromJpegWorker(napi_env env, const char *resource_name)
+      : CreateFromWorker(env, resource_name)
+  {
+  }
 };
 
 // PNG
-class CreateFromPngWorker : public CreateFromWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info) {
-      REQ_STR_ARG(0, path);
+class CreateFromPngWorker : public CreateFromWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path to the PNG file to load.");
 
-      CreateFromPngWorker* worker = new CreateFromPngWorker(info.Env(),
-        "CreateFromPngWorkerResource");
+    CreateFromPngWorker *worker = new CreateFromPngWorker(info.Env(),
+                                                          "CreateFromPngWorkerResource");
 
-      worker->path = path;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    // execute the async task
+    FILE *in;
+    in = fopen(path.c_str(), "rb");
+    if (in == nullptr)
+    {
+      return SetError("Cannot open PNG file");
     }
+    image = gdImageCreateFromPng(in);
+    fclose(in);
+  }
 
-  protected:
-    void Execute() override {
-      // execute the async task
-      FILE *in; in = fopen(path.c_str(), "rb");
-      if (in == nullptr) {
-        return SetError("Cannot open PNG file");
-      }
-      image = gdImageCreateFromPng(in);
-      fclose(in);
-    }
-
-  private:
-    CreateFromPngWorker(napi_env env, const char* resource_name)
-        : CreateFromWorker(env, resource_name) {
-        }
+private:
+  CreateFromPngWorker(napi_env env, const char *resource_name)
+      : CreateFromWorker(env, resource_name)
+  {
+  }
 };
 
 // GIF
-class CreateFromGifWorker : public CreateFromWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info) {
-      REQ_STR_ARG(0, path);
+class CreateFromGifWorker : public CreateFromWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path to the Gif file to load.");
 
-      CreateFromGifWorker* worker = new CreateFromGifWorker(info.Env(),
-        "CreateFromGifWorkerResource");
+    CreateFromGifWorker *worker = new CreateFromGifWorker(info.Env(),
+                                                          "CreateFromGifWorkerResource");
 
-      worker->path = path;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    // execute the async task
+    FILE *in;
+    in = fopen(path.c_str(), "rb");
+    if (in == nullptr)
+    {
+      return SetError("Cannot open GIF file");
     }
+    image = gdImageCreateFromGif(in);
+    fclose(in);
+  }
 
-  protected:
-    void Execute() override {
-      // execute the async task
-      FILE *in; in = fopen(path.c_str(), "rb");
-      if (in == nullptr) {
-        return SetError("Cannot open GIF file");
-      }
-      image = gdImageCreateFromGif(in);
-      fclose(in);
-    }
-
-  private:
-    CreateFromGifWorker(napi_env env, const char* resource_name)
-        : CreateFromWorker(env, resource_name) {
-        }
+private:
+  CreateFromGifWorker(napi_env env, const char *resource_name)
+      : CreateFromWorker(env, resource_name)
+  {
+  }
 };
 
 // Gd2
-class CreateFromGd2Worker : public CreateFromWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info) {
-      REQ_STR_ARG(0, path);
+class CreateFromGd2Worker : public CreateFromWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path to the Gd2 file to load.");
 
-      CreateFromGd2Worker* worker = new CreateFromGd2Worker(info.Env(),
-        "CreateFromGd2WorkerResource");
+    CreateFromGd2Worker *worker = new CreateFromGd2Worker(info.Env(),
+                                                          "CreateFromGd2WorkerResource");
 
-      worker->path = path;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    // execute the async task
+    FILE *in;
+    in = fopen(path.c_str(), "rb");
+    if (in == nullptr)
+    {
+      return SetError("Cannot open GD2 file");
     }
+    image = gdImageCreateFromGd2(in);
+    fclose(in);
+  }
 
-  protected:
-    void Execute() override {
-      // execute the async task
-      FILE *in; in = fopen(path.c_str(), "rb");
-      if (in == nullptr) {
-        return SetError("Cannot open GD2 file");
-      }
-      image = gdImageCreateFromGd2(in);
-      fclose(in);
-    }
-
-  private:
-    CreateFromGd2Worker(napi_env env, const char* resource_name)
-        : CreateFromWorker(env, resource_name) {
-        }
+private:
+  CreateFromGd2Worker(napi_env env, const char *resource_name)
+      : CreateFromWorker(env, resource_name)
+  {
+  }
 };
 
-class CreateFromGd2PartWorker : public CreateFromWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info) {
-      REQ_ARGS(5);
-      REQ_STR_ARG(0, path);
-      REQ_INT_ARG(1, srcX);
-      REQ_INT_ARG(2, srcY);
-      REQ_INT_ARG(3, width);
-      REQ_INT_ARG(4, height);
+class CreateFromGd2PartWorker : public CreateFromWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info)
+  {
+    REQ_ARGS(5);
+    REQ_STR_ARG(0, path, "Argument should be a path to the Gd2 file to load.");
+    REQ_INT_ARG(1, srcX);
+    REQ_INT_ARG(2, srcY);
+    REQ_INT_ARG(3, width);
+    REQ_INT_ARG(4, height);
 
-      CreateFromGd2PartWorker* worker = new CreateFromGd2PartWorker(info.Env(),
-        "CreateFromGd2PartWorkerResource");
+    CreateFromGd2PartWorker *worker = new CreateFromGd2PartWorker(info.Env(),
+                                                                  "CreateFromGd2PartWorkerResource");
 
-      worker->path = path;
-      worker->srcX = srcX;
-      worker->srcY = srcY;
-      worker->width = width;
-      worker->height = height;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->srcX = srcX;
+    worker->srcY = srcY;
+    worker->width = width;
+    worker->height = height;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    // execute the async task
+    FILE *in;
+    in = fopen(path.c_str(), "rb");
+    if (in == nullptr)
+    {
+      return SetError("Cannot open GD2 file to read part of it");
     }
+    image = gdImageCreateFromGd2Part(in, srcX, srcY, width, height);
 
-  protected:
-    void Execute() override {
-      // execute the async task
-      FILE *in; in = fopen(path.c_str(), "rb");
-      if (in == nullptr) {
-        return SetError("Cannot open GD2 file to read part of it");
-      }
-      image = gdImageCreateFromGd2Part(in, srcX, srcY, width, height);
+    fclose(in);
+  }
 
-      fclose(in);
-    }
+  int srcX;
 
-    int srcX;
+  int srcY;
 
-    int srcY;
+  int width;
 
-    int width;
+  int height;
 
-    int height;
-
-  private:
-    CreateFromGd2PartWorker(napi_env env, const char* resource_name)
-        : CreateFromWorker(env, resource_name) {
-        }
+private:
+  CreateFromGd2PartWorker(napi_env env, const char *resource_name)
+      : CreateFromWorker(env, resource_name)
+  {
+  }
 };
 
 // WBMP
-class CreateFromWBMPWorker : public CreateFromWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info) {
-      REQ_STR_ARG(0, path);
+class CreateFromWBMPWorker : public CreateFromWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path to the WBMP file to load.");
 
-      CreateFromWBMPWorker* worker = new CreateFromWBMPWorker(info.Env(),
-        "CreateFromWBMPWorkerResource");
+    CreateFromWBMPWorker *worker = new CreateFromWBMPWorker(info.Env(),
+                                                            "CreateFromWBMPWorkerResource");
 
-      worker->path = path;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    // execute the async task
+    FILE *in;
+    in = fopen(path.c_str(), "rb");
+    if (in == nullptr)
+    {
+      return SetError("Cannot open WBMP file");
     }
+    image = gdImageCreateFromWBMP(in);
+    fclose(in);
+  }
 
-  protected:
-    void Execute() override {
-      // execute the async task
-      FILE *in; in = fopen(path.c_str(), "rb");
-      if (in == nullptr) {
-        return SetError("Cannot open WBMP file");
-      }
-      image = gdImageCreateFromWBMP(in);
-      fclose(in);
-    }
-
-  private:
-    CreateFromWBMPWorker(napi_env env, const char* resource_name)
-        : CreateFromWorker(env, resource_name) {
-        }
+private:
+  CreateFromWBMPWorker(napi_env env, const char *resource_name)
+      : CreateFromWorker(env, resource_name)
+  {
+  }
 };
 
 // Webp
-class CreateFromWebpWorker : public CreateFromWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info) {
-      REQ_STR_ARG(0, path);
+class CreateFromWebpWorker : public CreateFromWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path to the Webp file to load.");
 
-      CreateFromWebpWorker* worker = new CreateFromWebpWorker(info.Env(),
-        "CreateFromWebpWorkerResource");
+    CreateFromWebpWorker *worker = new CreateFromWebpWorker(info.Env(),
+                                                            "CreateFromWebpWorkerResource");
 
-      worker->path = path;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    // execute the async task
+    FILE *in;
+    in = fopen(path.c_str(), "rb");
+    if (in == nullptr)
+    {
+      return SetError("Cannot open WEBP file");
     }
+    image = gdImageCreateFromWebp(in);
+    fclose(in);
+  }
 
-  protected:
-    void Execute() override {
-      // execute the async task
-      FILE *in; in = fopen(path.c_str(), "rb");
-      if (in == nullptr) {
-        return SetError("Cannot open WEBP file");
-      }
-      image = gdImageCreateFromWebp(in);
-      fclose(in);
-    }
-
-  private:
-    CreateFromWebpWorker(napi_env env, const char* resource_name)
-        : CreateFromWorker(env, resource_name) {
-        }
+private:
+  CreateFromWebpWorker(napi_env env, const char *resource_name)
+      : CreateFromWorker(env, resource_name)
+  {
+  }
 };
 
 // Bmp
-class CreateFromBmpWorker : public CreateFromWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info) {
-      REQ_STR_ARG(0, path);
+class CreateFromBmpWorker : public CreateFromWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path to the Bmp file to load.");
 
-      CreateFromBmpWorker* worker = new CreateFromBmpWorker(info.Env(),
-        "CreateFromBmpWorkerResource");
+    CreateFromBmpWorker *worker = new CreateFromBmpWorker(info.Env(),
+                                                          "CreateFromBmpWorkerResource");
 
-      worker->path = path;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    // execute the async task
+    FILE *in;
+    in = fopen(path.c_str(), "rb");
+    if (in == nullptr)
+    {
+      return SetError("Cannot open BMP file");
     }
+    image = gdImageCreateFromBmp(in);
+    fclose(in);
+  }
 
-  protected:
-    void Execute() override {
-      // execute the async task
-      FILE *in; in = fopen(path.c_str(), "rb");
-      if (in == nullptr) {
-        return SetError("Cannot open BMP file");
-      }
-      image = gdImageCreateFromBmp(in);
-      fclose(in);
-    }
-
-  private:
-    CreateFromBmpWorker(napi_env env, const char* resource_name)
-        : CreateFromWorker(env, resource_name) {
-        }
+private:
+  CreateFromBmpWorker(napi_env env, const char *resource_name)
+      : CreateFromWorker(env, resource_name)
+  {
+  }
 };
 
 // Tiff
-class CreateFromTiffWorker : public CreateFromWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info) {
-      REQ_STR_ARG(0, path);
+class CreateFromTiffWorker : public CreateFromWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path to the TIFF file to load.");
 
-      CreateFromTiffWorker* worker = new CreateFromTiffWorker(info.Env(),
-        "CreateFromTiffWorkerResource");
+    CreateFromTiffWorker *worker = new CreateFromTiffWorker(info.Env(),
+                                                            "CreateFromTiffWorkerResource");
 
-      worker->path = path;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    // execute the async task
+    FILE *in;
+    in = fopen(path.c_str(), "rb");
+    if (in == nullptr)
+    {
+      return SetError("Cannot open TIFF file");
     }
+    image = gdImageCreateFromTiff(in);
+    fclose(in);
+  }
 
-  protected:
-    void Execute() override {
-      // execute the async task
-      FILE *in; in = fopen(path.c_str(), "rb");
-      if (in == nullptr) {
-        return SetError("Cannot open TIFF file");
-      }
-      image = gdImageCreateFromTiff(in);
-      fclose(in);
-    }
-
-  private:
-    CreateFromTiffWorker(napi_env env, const char* resource_name)
-      : CreateFromWorker(env, resource_name) {
-      }
+private:
+  CreateFromTiffWorker(napi_env env, const char *resource_name)
+      : CreateFromWorker(env, resource_name)
+  {
+  }
 };
-
 
 /**
  * FileWorker handling gdImageFile via the AsyncWorker
  * Returns a Promise
  */
-class FileWorker : public AsyncWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info, gdImagePtr& gdImage) {
-      REQ_STR_ARG(0, path);
+class FileWorker : public AsyncWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path to the image file to load.");
 
-      FileWorker* worker = new FileWorker(info.Env(), "FileWorkerResource");
+    FileWorker *worker = new FileWorker(info.Env(), "FileWorkerResource");
 
-      worker->path = path;
-      worker->_gdImage = &gdImage;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->_gdImage = &gdImage;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    _success = gdImageFile(*_gdImage, path.c_str());
+
+    if (!_success)
+    {
+      return SetError("Cannot save file");
     }
+  }
 
-  protected:
-    void Execute() override {
-      _success = gdImageFile(*_gdImage, path.c_str());
+  virtual void OnOK() override
+  {
+    // resolve Promise with boolean
+    _deferred.Resolve(Napi::Boolean::New(Env(), _success));
+  }
 
-      if (!_success) {
-        return SetError("Cannot save file");
-      }
-    }
+  virtual void OnError(const Napi::Error &e) override
+  {
+    // reject Promise with error message
+    _deferred.Reject(Napi::String::New(Env(), e.Message()));
+  }
 
-    virtual void OnOK() override {
-      // resolve Promise with boolean
-      _deferred.Resolve(Napi::Boolean::New(Env(), _success));
-    }
+private:
+  FileWorker(napi_env env, const char *resource_name)
+      : AsyncWorker(env, resource_name), _deferred(Promise::Deferred::New(env))
+  {
+  }
 
-    virtual void OnError(const Napi::Error& e) override {
-      // reject Promise with error message
-      _deferred.Reject(Napi::String::New(Env(), e.Message()));
-    }
+  gdImagePtr *_gdImage;
 
-  private:
-    FileWorker(napi_env env, const char* resource_name)
-        : AsyncWorker(env, resource_name), _deferred(Promise::Deferred::New(env)) {
-        }
+  Promise::Deferred _deferred;
 
-    gdImagePtr* _gdImage;
+  std::string path;
 
-    Promise::Deferred _deferred;
-
-    std::string path;
-
-    bool _success;
+  bool _success;
 };
-
 
 /**
  * Async worker class to make the I/O from gdImageCreateFromFile async in JavaScript
  * Returns a Promise
  */
-class CreateFromFileWorker : public AsyncWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info) {
-      REQ_STR_ARG(0, path);
+class CreateFromFileWorker : public AsyncWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path to the image file to load.");
 
-      CreateFromFileWorker* worker = new CreateFromFileWorker(info.Env(),
-        "CreateFromFileWorkerResource");
+    CreateFromFileWorker *worker = new CreateFromFileWorker(info.Env(),
+                                                            "CreateFromFileWorkerResource");
 
-      worker->path = path;
-      worker->Queue();
-      return worker->_deferred.Promise();
-    }
+    worker->path = path;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
 
-  protected:
-    void Execute() override {
-      // execute the async task
-      image = gdImageCreateFromFile(path.c_str());
-    }
+protected:
+  void Execute() override
+  {
+    // execute the async task
+    image = gdImageCreateFromFile(path.c_str());
+  }
 
-    virtual void OnOK() override {
-      // create new instance of Gd::Image with resulting image
-      Napi::Value argv = Napi::External<gdImagePtr>::New(Env(), &image);
-      Napi::Object instance = Gd::Image::constructor.New({argv});
+  virtual void OnOK() override
+  {
+    // create new instance of Gd::Image with resulting image
+    Napi::Value argv = Napi::External<gdImagePtr>::New(Env(), &image);
+    Napi::Object instance = Gd::Image::constructor.New({argv});
 
-      // resolve Promise with instance of Gd::Image
-      _deferred.Resolve(instance);
-    }
+    // resolve Promise with instance of Gd::Image
+    _deferred.Resolve(instance);
+  }
 
-    virtual void OnError(const Napi::Error& e) override {
-      _deferred.Reject(Napi::String::New(Env(), e.Message()));
-    }
+  virtual void OnError(const Napi::Error &e) override
+  {
+    _deferred.Reject(Napi::String::New(Env(), e.Message()));
+  }
 
-    gdImagePtr image;
+  gdImagePtr image;
 
-    Promise::Deferred _deferred;
+  Promise::Deferred _deferred;
 
-    std::string path;
+  std::string path;
 
-  private:
-    CreateFromFileWorker(napi_env env, const char* resource_name)
-        : AsyncWorker(env, resource_name), _deferred(Promise::Deferred::New(env)) {
-        }
+private:
+  CreateFromFileWorker(napi_env env, const char *resource_name)
+      : AsyncWorker(env, resource_name), _deferred(Promise::Deferred::New(env))
+  {
+  }
 };
 
 /**
  * CreateWorker for async creation of images in memory
  */
-class CreateWorker : public AsyncWorker {
-  public:
-    CreateWorker(napi_env env, const char* resource_name, int width, int height, int trueColor)
-    : AsyncWorker(env, resource_name), _deferred(Promise::Deferred::New(env)),
-      _width(width), _height(height), _trueColor(trueColor) {
+class CreateWorker : public AsyncWorker
+{
+public:
+  CreateWorker(napi_env env, const char *resource_name, int width, int height, int trueColor)
+      : AsyncWorker(env, resource_name), _deferred(Promise::Deferred::New(env)),
+        _width(width), _height(height), _trueColor(trueColor)
+  {
+  }
+
+  Promise::Deferred _deferred;
+
+protected:
+  void Execute() override
+  {
+    if (_trueColor == 0)
+    {
+      image = gdImageCreate(_width, _height);
     }
-
-    Promise::Deferred _deferred;
-
-  protected:
-    void Execute() override {
-      if (_trueColor == 0) {
-        image = gdImageCreate(_width, _height);
-      } else {
-        image = gdImageCreateTrueColor(_width, _height);
-      }
-      if (!image) {
-        return SetError("No image created!");
-      }
+    else
+    {
+      image = gdImageCreateTrueColor(_width, _height);
     }
-
-    virtual void OnOK() override {
-      Napi::Value _argv = Napi::External<gdImagePtr>::New(Env(), &image);
-      Napi::Object instance = Gd::Image::constructor.New({_argv});
-
-      _deferred.Resolve(instance);
+    if (!image)
+    {
+      return SetError("No image created!");
     }
+  }
 
-    virtual void OnError(const Napi::Error& e) override {
-      _deferred.Reject(Napi::String::New(Env(), e.Message()));
-    }
+  virtual void OnOK() override
+  {
+    Napi::Value _argv = Napi::External<gdImagePtr>::New(Env(), &image);
+    Napi::Object instance = Gd::Image::constructor.New({_argv});
 
-  private:
-    gdImagePtr image;
+    _deferred.Resolve(instance);
+  }
 
-    int _width;
+  virtual void OnError(const Napi::Error &e) override
+  {
+    _deferred.Reject(Napi::String::New(Env(), e.Message()));
+  }
 
-    int _height;
+private:
+  gdImagePtr image;
 
-    int _trueColor;
+  int _width;
+
+  int _height;
+
+  int _trueColor;
 };
-
-
 
 /**
  * Save workers
  */
-class SaveWorker : public AsyncWorker {
-  public:
-    SaveWorker(napi_env env, const char* resource_name)
-      : AsyncWorker(env, resource_name), _deferred(Promise::Deferred::New(env)) {
-    }
+class SaveWorker : public AsyncWorker
+{
+public:
+  SaveWorker(napi_env env, const char *resource_name)
+      : AsyncWorker(env, resource_name), _deferred(Promise::Deferred::New(env))
+  {
+  }
 
-  protected:
-    virtual void OnOK() override {
-      _deferred.Resolve(Napi::Boolean::New(Env(), true));
-    }
+protected:
+  virtual void OnOK() override
+  {
+    _deferred.Resolve(Napi::Boolean::New(Env(), true));
+  }
 
-    virtual void OnError(const Napi::Error& e) override {
-      _deferred.Reject(Napi::String::New(Env(), e.Message()));
-    }
+  virtual void OnError(const Napi::Error &e) override
+  {
+    _deferred.Reject(Napi::String::New(Env(), e.Message()));
+  }
 
-    gdImagePtr* _gdImage;
+  gdImagePtr *_gdImage;
 
-    int quality;
+  int quality;
 
-    int level;
+  int level;
 
-    int foreground;
+  int foreground;
 
-    Promise::Deferred _deferred;
+  Promise::Deferred _deferred;
 
-    std::string path;
+  std::string path;
 };
 
-class SaveJpegWorker : public SaveWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info, gdImagePtr& gdImage) {
-      REQ_STR_ARG(0, path);
-      OPT_INT_ARG(1, quality, -1);
+class SaveJpegWorker : public SaveWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the JPEG.");
+    OPT_INT_ARG(1, quality, -1);
 
-      SaveJpegWorker* worker = new SaveJpegWorker(info.Env(),
-        "SaveJpegWorkerResource");
+    SaveJpegWorker *worker = new SaveJpegWorker(info.Env(),
+                                                "SaveJpegWorkerResource");
 
-      worker->path = path;
-      worker->quality = quality;
-      worker->_gdImage = &gdImage;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->quality = quality;
+    worker->_gdImage = &gdImage;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    FILE *out = fopen(path.c_str(), "wb");
+    if (out == nullptr)
+    {
+      return SetError("Cannot save JPEG file");
     }
+    gdImageJpeg(*_gdImage, out, quality);
+    fclose(out);
+  }
 
-  protected:
-    void Execute() override {
-      FILE *out = fopen(path.c_str(), "wb");
-      if (out == nullptr) {
-        return SetError("Cannot save JPEG file");
-      }
-      gdImageJpeg(*_gdImage, out, quality);
-      fclose(out);
-    }
-
-  private:
-    SaveJpegWorker(napi_env env, const char* resource_name)
-      : SaveWorker(env, resource_name) {
-      }
+private:
+  SaveJpegWorker(napi_env env, const char *resource_name)
+      : SaveWorker(env, resource_name)
+  {
+  }
 };
 
-class SaveGifWorker : public SaveWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info, gdImagePtr& gdImage) {
-      REQ_STR_ARG(0, path);
+class SaveGifWorker : public SaveWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the Gif.");
 
-      SaveGifWorker* worker = new SaveGifWorker(info.Env(),
-        "SaveGifWorkerResource");
+    SaveGifWorker *worker = new SaveGifWorker(info.Env(),
+                                              "SaveGifWorkerResource");
 
-      worker->path = path;
-      worker->_gdImage = &gdImage;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->_gdImage = &gdImage;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    FILE *out = fopen(path.c_str(), "wb");
+    if (out == nullptr)
+    {
+      return SetError("Cannot save GIF file");
     }
+    gdImageGif(*_gdImage, out);
+    fclose(out);
+  }
 
-  protected:
-    void Execute() override {
-      FILE *out = fopen(path.c_str(), "wb");
-      if (out == nullptr) {
-        return SetError("Cannot save GIF file");
-      }
-      gdImageGif(*_gdImage, out);
-      fclose(out);
-    }
-
-  private:
-    SaveGifWorker(napi_env env, const char* resource_name)
-      : SaveWorker(env, resource_name) {
-      }
+private:
+  SaveGifWorker(napi_env env, const char *resource_name)
+      : SaveWorker(env, resource_name)
+  {
+  }
 };
 
-class SavePngWorker : public SaveWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info, gdImagePtr& gdImage) {
-      REQ_STR_ARG(0, path);
-      OPT_INT_ARG(1, level, -1);
+class SavePngWorker : public SaveWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the PNG.");
+    OPT_INT_ARG(1, level, -1);
 
-      SavePngWorker* worker = new SavePngWorker(info.Env(),
-        "SavePngWorkerResource");
+    SavePngWorker *worker = new SavePngWorker(info.Env(),
+                                              "SavePngWorkerResource");
 
-      worker->path = path;
-      worker->level = level;
-      worker->_gdImage = &gdImage;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->level = level;
+    worker->_gdImage = &gdImage;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    FILE *out = fopen(path.c_str(), "wb");
+    if (out == nullptr)
+    {
+      return SetError("Cannot save PNG file");
     }
+    gdImagePngEx(*_gdImage, out, level);
+    fclose(out);
+  }
 
-  protected:
-    void Execute() override {
-      FILE *out = fopen(path.c_str(), "wb");
-      if (out == nullptr) {
-        return SetError("Cannot save PNG file");
-      }
-      gdImagePngEx(*_gdImage, out, level);
-      fclose(out);
-    }
-
-  private:
-    SavePngWorker(napi_env env, const char* resource_name)
-      : SaveWorker(env, resource_name) {
-      }
+private:
+  SavePngWorker(napi_env env, const char *resource_name)
+      : SaveWorker(env, resource_name)
+  {
+  }
 };
 
-class SaveWBMPWorker : public SaveWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info, gdImagePtr& gdImage) {
-      REQ_STR_ARG(0, path);
-      REQ_INT_ARG(1, foreground);
+class SaveWBMPWorker : public SaveWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the WBMP.");
+    REQ_INT_ARG(1, foreground);
 
-      SaveWBMPWorker* worker = new SaveWBMPWorker(info.Env(),
-        "SaveWBMPWorkerResource");
+    SaveWBMPWorker *worker = new SaveWBMPWorker(info.Env(),
+                                                "SaveWBMPWorkerResource");
 
-      worker->path = path;
-      worker->foreground = foreground;
-      worker->_gdImage = &gdImage;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->foreground = foreground;
+    worker->_gdImage = &gdImage;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    FILE *out = fopen(path.c_str(), "wb");
+    if (out == nullptr)
+    {
+      return SetError("Cannot save WBMP file");
     }
+    gdImageWBMP(*_gdImage, foreground, out);
+    fclose(out);
+  }
 
-  protected:
-    void Execute() override {
-      FILE *out = fopen(path.c_str(), "wb");
-      if (out == nullptr) {
-        return SetError("Cannot save WBMP file");
-      }
-      gdImageWBMP(*_gdImage, foreground, out);
-      fclose(out);
-    }
-
-  private:
-    SaveWBMPWorker(napi_env env, const char* resource_name)
-      : SaveWorker(env, resource_name) {
-      }
+private:
+  SaveWBMPWorker(napi_env env, const char *resource_name)
+      : SaveWorker(env, resource_name)
+  {
+  }
 };
 
-class SaveWebpWorker : public SaveWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info, gdImagePtr& gdImage) {
-      REQ_STR_ARG(0, path);
-      OPT_INT_ARG(1, level, -1);
+class SaveWebpWorker : public SaveWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the Webp.");
+    OPT_INT_ARG(1, level, -1);
 
-      SaveWebpWorker* worker = new SaveWebpWorker(info.Env(),
-        "SaveWebpWorkerResource");
+    SaveWebpWorker *worker = new SaveWebpWorker(info.Env(),
+                                                "SaveWebpWorkerResource");
 
-      worker->path = path;
-      worker->level = level;
-      worker->_gdImage = &gdImage;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->level = level;
+    worker->_gdImage = &gdImage;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    FILE *out = fopen(path.c_str(), "wb");
+    if (out == nullptr)
+    {
+      return SetError("Cannot save WEBP file");
     }
+    gdImageWebpEx(*_gdImage, out, level);
+    fclose(out);
+  }
 
-  protected:
-    void Execute() override {
-      FILE *out = fopen(path.c_str(), "wb");
-      if (out == nullptr) {
-        return SetError("Cannot save WEBP file");
-      }
-      gdImageWebpEx(*_gdImage, out, level);
-      fclose(out);
-    }
-
-  private:
-    SaveWebpWorker(napi_env env, const char* resource_name)
-      : SaveWorker(env, resource_name) {
-      }
+private:
+  SaveWebpWorker(napi_env env, const char *resource_name)
+      : SaveWorker(env, resource_name)
+  {
+  }
 };
 
-class SaveGdWorker : public SaveWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info, gdImagePtr& gdImage) {
-      REQ_STR_ARG(0, path);
+class SaveGdWorker : public SaveWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the Gd.");
 
-      SaveGdWorker* worker = new SaveGdWorker(info.Env(),
-        "SaveGdWorkerResource");
+    SaveGdWorker *worker = new SaveGdWorker(info.Env(),
+                                            "SaveGdWorkerResource");
 
-      worker->path = path;
-      worker->_gdImage = &gdImage;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->_gdImage = &gdImage;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    FILE *out = fopen(path.c_str(), "wb");
+    if (out == nullptr)
+    {
+      return SetError("Cannot save GD file");
     }
+    gdImageGd(*_gdImage, out);
+    fclose(out);
+  }
 
-  protected:
-    void Execute() override {
-      FILE *out = fopen(path.c_str(), "wb");
-      if (out == nullptr) {
-        return SetError("Cannot save GD file");
-      }
-      gdImageGd(*_gdImage, out);
-      fclose(out);
-    }
-
-  private:
-    SaveGdWorker(napi_env env, const char* resource_name)
-      : SaveWorker(env, resource_name) {
-      }
+private:
+  SaveGdWorker(napi_env env, const char *resource_name)
+      : SaveWorker(env, resource_name)
+  {
+  }
 };
 
-class SaveGd2Worker : public SaveWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info, gdImagePtr& gdImage) {
-      REQ_STR_ARG(0, path);
-      REQ_INT_ARG(1, chunkSize);
-      OPT_INT_ARG(2, format, GD2_FMT_RAW);
+class SaveGd2Worker : public SaveWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the Gd2.");
+    REQ_INT_ARG(1, chunkSize);
+    OPT_INT_ARG(2, format, GD2_FMT_RAW);
 
-      SaveGd2Worker* worker = new SaveGd2Worker(info.Env(),
-        "SaveGd2WorkerResource");
+    SaveGd2Worker *worker = new SaveGd2Worker(info.Env(),
+                                              "SaveGd2WorkerResource");
 
-      worker->path = path;
-      worker->chunkSize = chunkSize;
-      worker->format = format;
-      worker->_gdImage = &gdImage;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->chunkSize = chunkSize;
+    worker->format = format;
+    worker->_gdImage = &gdImage;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    FILE *out = fopen(path.c_str(), "wb");
+    if (out == nullptr)
+    {
+      return SetError("Cannot save GD2 file");
     }
+    gdImageGd2(*_gdImage, out, chunkSize, format);
+    fclose(out);
+  }
 
-  protected:
-    void Execute() override {
-      FILE *out = fopen(path.c_str(), "wb");
-      if (out == nullptr) {
-        return SetError("Cannot save GD2 file");
-      }
-      gdImageGd2(*_gdImage, out, chunkSize, format);
-      fclose(out);
-    }
+  int chunkSize;
 
-    int chunkSize;
+  int format;
 
-    int format;
-
-  private:
-    SaveGd2Worker(napi_env env, const char* resource_name)
-      : SaveWorker(env, resource_name) {
-      }
+private:
+  SaveGd2Worker(napi_env env, const char *resource_name)
+      : SaveWorker(env, resource_name)
+  {
+  }
 };
 
-class SaveBmpWorker : public SaveWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info, gdImagePtr& gdImage) {
-      REQ_ARGS(2);
-      REQ_STR_ARG(0, path);
-      REQ_INT_ARG(1, compression);
+class SaveBmpWorker : public SaveWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  {
+    REQ_ARGS(2);
+    REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the BMP.");
+    REQ_INT_ARG(1, compression);
 
-      SaveBmpWorker* worker = new SaveBmpWorker(info.Env(),
-        "SaveBmpWorkerResource");
+    SaveBmpWorker *worker = new SaveBmpWorker(info.Env(),
+                                              "SaveBmpWorkerResource");
 
-      worker->path = path;
-      worker->compression = compression;
-      worker->_gdImage = &gdImage;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->compression = compression;
+    worker->_gdImage = &gdImage;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    FILE *out = fopen(path.c_str(), "wb");
+    if (out == nullptr)
+    {
+      return SetError("Cannot save BMP file");
     }
+    gdImageBmp(*_gdImage, out, compression);
+    fclose(out);
+  }
 
-  protected:
-    void Execute() override {
-      FILE *out = fopen(path.c_str(), "wb");
-      if (out == nullptr) {
-        return SetError("Cannot save BMP file");
-      }
-      gdImageBmp(*_gdImage, out, compression);
-      fclose(out);
-    }
+  int compression;
 
-    int compression;
-
-  private:
-    SaveBmpWorker(napi_env env, const char* resource_name)
-      : SaveWorker(env, resource_name) {
-      }
+private:
+  SaveBmpWorker(napi_env env, const char *resource_name)
+      : SaveWorker(env, resource_name)
+  {
+  }
 };
 
-class SaveTiffWorker : public SaveWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info, gdImagePtr& gdImage) {
-      REQ_STR_ARG(0, path);
+class SaveTiffWorker : public SaveWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the TIFF.");
 
-      SaveTiffWorker* worker = new SaveTiffWorker(info.Env(),
-        "SaveTiffWorkerResource");
+    SaveTiffWorker *worker = new SaveTiffWorker(info.Env(),
+                                                "SaveTiffWorkerResource");
 
-      worker->path = path;
-      worker->_gdImage = &gdImage;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->_gdImage = &gdImage;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    FILE *out = fopen(path.c_str(), "wb");
+    if (out == nullptr)
+    {
+      return SetError("Cannot save TIFF file");
     }
+    gdImageTiff(*_gdImage, out);
+    fclose(out);
+  }
 
-  protected:
-    void Execute() override {
-      FILE *out = fopen(path.c_str(), "wb");
-      if (out == nullptr) {
-        return SetError("Cannot save TIFF file");
-      }
-      gdImageTiff(*_gdImage, out);
-      fclose(out);
-    }
-
-  private:
-    SaveTiffWorker(napi_env env, const char* resource_name)
-      : SaveWorker(env, resource_name) {
-      }
+private:
+  SaveTiffWorker(napi_env env, const char *resource_name)
+      : SaveWorker(env, resource_name)
+  {
+  }
 };

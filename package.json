@@ -33,7 +33,8 @@
     "pretest": "node-gyp build",
     "test": "mocha --reporter spec --bail --ui bdd --colors --file ./test/main.test.js",
     "install": "node-gyp rebuild",
-    "update-contributors": "git shortlog -sen | sed 's/^  /*/' > CONTRIBUTORS.md"
+    "update-contributors": "git shortlog -sen | sed 's/^  /*/' > CONTRIBUTORS.md",
+    "docker-run": "docker run -it -v $PWD:/usr/src yava:node-gd"
   },
   "repository": {
     "type": "git",
