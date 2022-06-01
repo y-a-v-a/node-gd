@@ -1,16 +1,19 @@
-const gd = require('../index');
-var assert = require('chai').assert;
+import gd from '../index.js';
+import { assert } from 'chai';
 
-var source = __dirname + '/fixtures';
-var target = __dirname + '/output';
+import dirname from './dirname.mjs';
 
+const currentDir = dirname(import.meta.url);
 
-describe("gd.openFile", () => {
+var source = currentDir + '/fixtures';
+var target = currentDir + '/output';
+
+describe('gd.openFile', () => {
   it('returns a Promise', () => {
     const imagePromise = gd.openFile(`${source}/input.jpg`);
 
     assert.ok(imagePromise.constructor === Promise);
-    imagePromise.then(image => image.destroy());
+    imagePromise.then((image) => image.destroy());
   });
 
   it('opens a file', async () => {
@@ -24,13 +27,13 @@ describe("gd.openFile", () => {
   it('throws an exception when file does not exist', async () => {
     try {
       await gd.openFile(`${source}/abcxyz.jpg`);
-    } catch(exception) {
+    } catch (exception) {
       assert.ok(exception instanceof Error);
     }
   });
 });
 
-describe("gd.file", () => {
+describe('gd.file', () => {
   it('returns a Promise', async () => {
     const img = await gd.openFile(`${source}/input.jpg`);
 
@@ -46,7 +49,7 @@ describe("gd.file", () => {
     assert.isTrue(a === true);
   });
 
-  it('saves files of different extensions', async function() {
+  it('saves files of different extensions', async function () {
     const image = await gd.openFile(`${source}/input.jpg`);
 
     const success1 = await image.file(`${target}/test.bmp`);
@@ -55,4 +58,4 @@ describe("gd.file", () => {
     assert.isTrue(success1 === true);
     assert.isTrue(success2 === true);
   });
-})
+});

@@ -1,12 +1,14 @@
-'use strict';
+import fs from 'fs';
 
-var fs = require('fs');
+import gd from '../index.js';
+import { assert } from 'chai';
 
-const gd = require('../index');
-var assert = require('chai').assert;
+import dirname from './dirname.mjs';
 
-var source = __dirname + '/fixtures/';
-var target = __dirname + '/output/';
+const currentDir = dirname(import.meta.url);
+
+var source = currentDir + '/fixtures/';
+var target = currentDir + '/output/';
 
 describe('Section Handling file types', function () {
   it('gd.Image#jpeg() -- returns a Promise', async function () {

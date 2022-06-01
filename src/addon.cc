@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2009-2011, Taegon Kim <gonom9@gmail.com>
- * Copyright (c) 2014-2020, Vincent Bruijn <vebruijn@gmail.com>
+ * Copyright (c) 2014-2021, Vincent Bruijn <vebruijn@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,10 +19,11 @@
 #include "node_gd.h"
 #include "node_gd.cc"
 
-Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
+Napi::Object Init(Napi::Env env, Napi::Object exports)
+{
   Gd::Init(env, exports);
 
   return exports;
 }
 
-NODE_API_MODULE(node_gd, InitAll);
+NODE_API_MODULE(node_gd, Init);

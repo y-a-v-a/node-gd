@@ -4,3 +4,9 @@ build
 test/fixtures/.DS_Store
 DS_Store
 test/dev/*
+.cache
+.npm
+.node_repl_history
+.bash_history
+.python_history
+.vscode
