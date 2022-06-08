@@ -322,7 +322,11 @@ public:
     Napi::Value GetBoundsSafe(const Napi::CallbackInfo &info);
     Napi::Value WidthGetter(const Napi::CallbackInfo &info);
     Napi::Value HeightGetter(const Napi::CallbackInfo &info);
+    Napi::Value ResolutionXGetter(const Napi::CallbackInfo &info);
+    Napi::Value ResolutionYGetter(const Napi::CallbackInfo &info);
     Napi::Value TrueColorGetter(const Napi::CallbackInfo &info);
+    Napi::Value InterpolationIdGetter(const Napi::CallbackInfo &info);
+    void InterpolationIdSetter(const Napi::CallbackInfo &info, const Napi::Value &value);
     /**
      * Font and Text Handling Funcitons
      */
@@ -368,6 +372,7 @@ public:
     Napi::Value CropAuto(const Napi::CallbackInfo &info);
     Napi::Value CropThreshold(const Napi::CallbackInfo &info);
     Napi::Value Emboss(const Napi::CallbackInfo &info);
+    Napi::Value Pixelate(const Napi::CallbackInfo &info);
 
     /**
      * Copying and Resizing Functions
@@ -385,6 +390,8 @@ public:
     Napi::Value TrueColorToPalette(const Napi::CallbackInfo &info);
     Napi::Value PaletteToTrueColor(const Napi::CallbackInfo &info);
     Napi::Value ColorMatch(const Napi::CallbackInfo &info);
+    Napi::Value Scale(const Napi::CallbackInfo &info);
+    Napi::Value RotateInterpolated(const Napi::CallbackInfo &info);
 
     Napi::Value GifAnimBegin(const Napi::CallbackInfo &info);
     Napi::Value GifAnimAdd(const Napi::CallbackInfo &info);

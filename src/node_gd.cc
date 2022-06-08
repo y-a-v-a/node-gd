@@ -281,7 +281,7 @@ Napi::Value Gd::TrueColorAlpha(const Napi::CallbackInfo &info)
 Napi::Value Gd::GdVersionGetter(const Napi::CallbackInfo &info)
 {
   std::stringstream version_string;
-  version_string << GD_MAJOR_VERSION << "." << GD_MINOR_VERSION << "." << GD_RELEASE_VERSION;
+  version_string << GD_MAJOR_VERSION << "." << GD_MINOR_VERSION << "." << GD_RELEASE_VERSION << GD_EXTRA_VERSION;
   Napi::String s = Napi::String::New(info.Env(), version_string.str());
   return s;
 }
@@ -421,6 +421,10 @@ Napi::Object Gd::Image::Init(Napi::Env env, Napi::Object exports)
             InstanceMethod("trueColorToPalette", &Gd::Image::TrueColorToPalette),
             InstanceMethod("paletteToTrueColor", &Gd::Image::PaletteToTrueColor),
             InstanceMethod("colorMatch", &Gd::Image::ColorMatch),
+            InstanceMethod("scale", &Gd::Image::Scale),
+            InstanceMethod("pixelate", &Gd::Image::Pixelate),
+            InstanceMethod("rotateInterpolated", &Gd::Image::RotateInterpolated),
+
             InstanceMethod("gifAnimBegin", &Gd::Image::GifAnimBegin),
             InstanceMethod("gifAnimAdd", &Gd::Image::GifAnimAdd),
             InstanceMethod("gifAnimEnd", &Gd::Image::GifAnimEnd),
@@ -448,8 +452,11 @@ Napi::Object Gd::Image::Init(Napi::Env env, Napi::Object exports)
              * static_cast<napi_property_attributes>(napi_default & napi_enumerable)
              */
             InstanceAccessor("trueColor", &Gd::Image::TrueColorGetter, nullptr, napi_enumerable, nullptr),
+            InstanceAccessor("interpolationId", &Gd::Image::InterpolationIdGetter, &Gd::Image::InterpolationIdSetter, static_cast<napi_property_attributes>(napi_writable | napi_enumerable), nullptr),
             InstanceAccessor("width", &Gd::Image::WidthGetter, nullptr, napi_enumerable, nullptr),
             InstanceAccessor("height", &Gd::Image::HeightGetter, nullptr, napi_enumerable, nullptr),
+            InstanceAccessor("resX", &Gd::Image::ResolutionXGetter, nullptr, napi_enumerable, nullptr),
+            InstanceAccessor("resY", &Gd::Image::ResolutionYGetter, nullptr, napi_enumerable, nullptr),
             InstanceAccessor("interlace", &Gd::Image::InterlaceGetter, &Gd::Image::InterlaceSetter, static_cast<napi_property_attributes>(napi_writable | napi_enumerable), nullptr),
             InstanceAccessor("colorsTotal", &Gd::Image::ColorsTotalGetter, nullptr, napi_enumerable, nullptr)
       });
@@ -1108,7 +1115,7 @@ Napi::Value Gd::Image::AlphaBlending(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_INT_ARG(0, blending, "A value of 0 or 1 for the alpha blending flag should be supplied.")
+  REQ_INT_ARG(0, blending, "A value of 0..4 for the alpha blending effect should be supplied. 0 = replace, 1 = alpha blend, 2 = normal, 3 = overlay, 4 = multiply");
   gdImageAlphaBlending(this->_image, blending);
 
   return info.This();
@@ -1159,7 +1166,7 @@ Napi::Value Gd::Image::SetResolution(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(2, "horizontal resolution and vertical resolution values.");
+  REQ_ARGS(2, "horizontal resolution and vertical resolution values. 96 dpi by default, values should be bigger than 0.");
   REQ_INT_ARG(0, res_x, "The horizontal resolution in DPI should be supplied.");
   REQ_INT_ARG(1, res_y, "The vertical resolution in DPI should be supplied.");
 
@@ -1298,12 +1305,58 @@ Napi::Value Gd::Image::HeightGetter(const Napi::CallbackInfo &info)
   return result;
 }
 
+Napi::Value Gd::Image::ResolutionXGetter(const Napi::CallbackInfo &info)
+{
+  CHECK_IMAGE_EXISTS;
+
+  Napi::Number result = Napi::Number::New(info.Env(), gdImageResolutionX(this->_image));
+  return result;
+}
+
+Napi::Value Gd::Image::ResolutionYGetter(const Napi::CallbackInfo &info)
+{
+  CHECK_IMAGE_EXISTS;
+
+  Napi::Number result = Napi::Number::New(info.Env(), gdImageResolutionY(this->_image));
+  return result;
+}
+
 Napi::Value Gd::Image::TrueColorGetter(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageTrueColor(this->_image));
   return result;
+}
+
+Napi::Value Gd::Image::InterpolationIdGetter(const Napi::CallbackInfo &info)
+{
+  CHECK_IMAGE_EXISTS;
+
+  Napi::Number result = Napi::Number::New(info.Env(), gdImageGetInterpolationMethod(this->_image));
+  return result;
+}
+
+void Gd::Image::InterpolationIdSetter(const Napi::CallbackInfo &info, const Napi::Value &value)
+{
+  if (this->_isDestroyed)
+  {
+    Napi::Error::New(info.Env(), "Image is already destroyed.")
+        .ThrowAsJavaScriptException();
+  }
+
+  if (value.IsNumber())
+  {
+
+    unsigned int id = value.As<Napi::Number>().Int32Value();
+    if (id > 30)
+    {
+      Napi::Error::New(info.Env(), "Interpolation method cannot be higher than 30. GD implements 30 different interpolation methods.").ThrowAsJavaScriptException();
+    }
+    gdInterpolationMethod method = static_cast<gdInterpolationMethod>(id);
+
+    gdImageSetInterpolationMethod(this->_image, method);
+  }
 }
 
 /**
@@ -2284,6 +2337,44 @@ Napi::Value Gd::Image::ColorMatch(const Napi::CallbackInfo &info)
   Napi::Number result = Napi::Number::New(info.Env(), gdResult);
 
   return result;
+}
+
+Napi::Value Gd::Image::Scale(const Napi::CallbackInfo &info)
+{
+  CHECK_IMAGE_EXISTS;
+
+  REQ_ARGS(2, "width and height.");
+  REQ_INT_ARG(0, new_width, "A value for 'width' should be supplied.");
+  REQ_INT_ARG(1, new_height, "A value for 'height' should be supplied.");
+
+  gdImagePtr newImage = gdImageScale(this->_image, new_width, new_height);
+
+  RETURN_IMAGE(newImage);
+}
+
+Napi::Value Gd::Image::Pixelate(const Napi::CallbackInfo &info)
+{
+  CHECK_IMAGE_EXISTS;
+
+  REQ_INT_ARG(0, block_size, "Pixel block size");
+  REQ_INT_ARG(1, mode, "Mode, 0 or 1, upperleft or average");
+
+  gdImagePixelate(this->_image, block_size, mode);
+
+  return info.This();
+}
+
+Napi::Value Gd::Image::RotateInterpolated(const Napi::CallbackInfo &info)
+{
+  CHECK_IMAGE_EXISTS;
+
+  REQ_ARGS(2, "angle and background color.");
+  REQ_DOUBLE_ARG(0, angle);
+  REQ_INT_ARG(1, bgcolor, "A background color value should be supplied.");
+
+  gdImagePtr newImage = gdImageRotateInterpolated(this->_image, angle, bgcolor);
+
+  RETURN_IMAGE(newImage);
 }
 
 Napi::Value Gd::Image::GifAnimBegin(const Napi::CallbackInfo &info)

@@ -9,10 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Only support libgd 2.3.0 and up
 
+### To do
+
 ### Added
 
 - A lot of error messages with a sane message
 - Added gdImageColorExactAlpha
+- Added gdImagePixelate
+- Added getter for interpolation_id
+- Added gdImageScale
+- Added gdImageSetInterpolationMethod
+- Added resX and resY getters
+- Added gdImageRotateInterpolated
 
 ### Removed
 

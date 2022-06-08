@@ -237,9 +237,19 @@ describe('gd.createTrueColor - Create a true color image', function () {
     img.destroy();
   });
 
-  it('has 5 enumerable properties', async function () {
+  it('has 8 enumerable properties', async function () {
     const img = await gd.createTrueColor(100, 100);
-    const props = ['trueColor', 'width', 'height', 'interlace', 'colorsTotal', 'toString'];
+    const props = [
+      'trueColor',
+      'width',
+      'height',
+      'interlace',
+      'colorsTotal',
+      'toString',
+      'interpolationId',
+      'resX',
+      'resY',
+    ];
 
     let i = 0;
     for (let prop in img) {
@@ -247,7 +257,7 @@ describe('gd.createTrueColor - Create a true color image', function () {
       i++;
     }
 
-    assert.equal(i, 6);
+    assert.equal(i, 9);
 
     img.destroy();
   });
