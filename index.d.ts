@@ -30,18 +30,6 @@ declare namespace gd {
 
     function createFromGifPtr(data: Ptr): Promise<gd.Image>;
 
-    function openGd2(path: string): Promise<gd.Image>;
-
-    function createFromGd2(path: string): Promise<gd.Image>;
-
-    function createFromGd2Ptr(data: Ptr): Promise<gd.Image>;
-
-    function openGd2Part(path: string, srcX: number, srcY: number, width: number, height: number): Promise<gd.Image>;
-
-    function createFromGd2Part(path: string, srcX: number, srcY: number, width: number, height: number): Promise<gd.Image>;
-
-    function createFromGd2PartPtr(data: Ptr, srcX: number, srcY: number, width: number, height: number): Promise<gd.Image>;
-
     function openWBMP(path: string): Promise<gd.Image>;
 
     function createFromWBMP(path: string): Promise<gd.Image>;
@@ -281,8 +269,6 @@ declare namespace gd {
         savePng(path: string, level: number): Promise<boolean>;
         saveJpeg(path: string, quality: number): Promise<boolean>;
         saveGif(path: string): Promise<boolean>;
-        saveGd(path: string): Promise<boolean>;
-        saveGd2(path: string, chunkSize: number, format?: string): Promise<boolean>;
         saveWBMP(path: string, foreground: 0x000000 | 0xffffff | number): Promise<boolean>;
         saveBmp(path: string, compression: 0 | 1): Promise<boolean>;
         saveTiff(path: string): Promise<boolean>;
@@ -290,8 +276,6 @@ declare namespace gd {
         png(path: string, level: number): Promise<boolean>;
         jpeg(path: string, quality: number): Promise<boolean>;
         gif(path: string): Promise<boolean>;
-        gd(path: string): Promise<boolean>;
-        gd2(path: string, chunkSize: number, format?: string): Promise<boolean>;
         wbmp(path: string, foreground: 0x000000 | 0xffffff | number): Promise<boolean>;
         bmp(path: string, compression: 0 | 1): Promise<boolean>;
         tiff(path: string): Promise<boolean>;

@@ -54,13 +54,13 @@ Napi::Object Gd::Init(Napi::Env env, Napi::Object exports)
 
 #ifdef HAVE_LIBHEIF
   Napi::PropertyDescriptor GdHeif = Napi::PropertyDescriptor::Value("GD_HEIF",
-    Napi::Number::New(env, GD_HEIF));
+                                                                    Napi::Number::New(env, GD_HEIF));
   exports.DefineProperty(GdHeif);
 #endif
 
 #ifdef HAVE_LIBAVIF
   Napi::PropertyDescriptor GdAvif = Napi::PropertyDescriptor::Value("GD_AVIF",
-    Napi::Number::New(env, GD_AVIF));
+                                                                    Napi::Number::New(env, GD_AVIF));
   exports.DefineProperty(GdAvif);
 #endif
 
@@ -134,10 +134,6 @@ Napi::Object Gd::Init(Napi::Env env, Napi::Object exports)
   exports.Set(Napi::String::New(env, "createFromPngPtr"), Napi::Function::New(env, CreateFromPngPtr));
   exports.Set(Napi::String::New(env, "createFromGif"), Napi::Function::New(env, CreateFromGif));
   exports.Set(Napi::String::New(env, "createFromGifPtr"), Napi::Function::New(env, CreateFromGifPtr));
-  exports.Set(Napi::String::New(env, "createFromGd2"), Napi::Function::New(env, CreateFromGd2));
-  exports.Set(Napi::String::New(env, "createFromGd2Ptr"), Napi::Function::New(env, CreateFromGd2Ptr));
-  exports.Set(Napi::String::New(env, "createFromGd2Part"), Napi::Function::New(env, CreateFromGd2Part));
-  exports.Set(Napi::String::New(env, "createFromGd2PartPtr"), Napi::Function::New(env, CreateFromGd2PartPtr));
   exports.Set(Napi::String::New(env, "createFromWBMP"), Napi::Function::New(env, CreateFromWBMP));
   exports.Set(Napi::String::New(env, "createFromWBMPPtr"), Napi::Function::New(env, CreateFromWBMPPtr));
 #if HAS_LIBWEBP
@@ -239,7 +235,6 @@ Napi::Value Gd::ImageCreateTrueColorSync(const Napi::CallbackInfo &info)
 DECLARE_CREATE_FROM(Jpeg);
 DECLARE_CREATE_FROM(Png);
 DECLARE_CREATE_FROM(Gif);
-DECLARE_CREATE_FROM(Gd2);
 DECLARE_CREATE_FROM(WBMP);
 #if HAS_LIBWEBP
 DECLARE_CREATE_FROM(Webp);
@@ -267,28 +262,6 @@ Napi::Value Gd::CreateFromFile(const Napi::CallbackInfo &info)
   return CreateFromFileWorker::DoWork(info);
 }
 #endif
-
-Napi::Value Gd::CreateFromGd2Part(const Napi::CallbackInfo &info)
-{
-  return CreateFromGd2PartWorker::DoWork(info);
-}
-
-Napi::Value Gd::CreateFromGd2PartPtr(const Napi::CallbackInfo &info)
-{
-  REQ_ARGS(5);
-  REQ_INT_ARG(1, srcX);
-  REQ_INT_ARG(2, srcY);
-  REQ_INT_ARG(3, width);
-  REQ_INT_ARG(4, height);
-
-  std::string strVal = info[0].As<Napi::String>().Utf8Value();
-  const char *str = strVal.c_str();
-  ssize_t len = strlen(str);
-
-  gdImagePtr im = gdImageCreateFromGd2PartPtr(len, &str, srcX, srcY, width, height);
-
-  RETURN_IMAGE(im);
-}
 
 Napi::Value Gd::TrueColor(const Napi::CallbackInfo &info)
 {
@@ -343,10 +316,6 @@ Napi::Object Gd::Image::Init(Napi::Env env, Napi::Object exports)
             InstanceMethod("pngPtr", &Gd::Image::PngPtr),
             InstanceMethod("gif", &Gd::Image::Gif),
             InstanceMethod("gifPtr", &Gd::Image::GifPtr),
-            InstanceMethod("gd", &Gd::Image::Gd),
-            InstanceMethod("gdPtr", &Gd::Image::GdPtr),
-            InstanceMethod("gd2", &Gd::Image::Gd2),
-            InstanceMethod("gd2Ptr", &Gd::Image::Gd2Ptr),
             InstanceMethod("wbmp", &Gd::Image::WBMP),
             InstanceMethod("wbmpPtr", &Gd::Image::WBMPPtr),
 #if HAS_LIBWEBP
@@ -645,43 +614,6 @@ Napi::Value Gd::Image::WebpPtr(const Napi::CallbackInfo &info)
 }
 #endif
 
-Napi::Value Gd::Image::Gd(const Napi::CallbackInfo &info)
-{
-  CHECK_IMAGE_EXISTS;
-
-  return SaveGdWorker::DoWork(info, this->_image);
-}
-
-Napi::Value Gd::Image::GdPtr(const Napi::CallbackInfo &info)
-{
-  CHECK_IMAGE_EXISTS;
-
-  int size;
-  char *data = (char *)gdImageGdPtr(this->_image, &size);
-
-  RETURN_DATA
-}
-
-Napi::Value Gd::Image::Gd2(const Napi::CallbackInfo &info)
-{
-  CHECK_IMAGE_EXISTS;
-
-  return SaveGd2Worker::DoWork(info, this->_image);
-}
-
-Napi::Value Gd::Image::Gd2Ptr(const Napi::CallbackInfo &info)
-{
-  CHECK_IMAGE_EXISTS;
-
-  REQ_INT_ARG(0, chunkSize);
-  OPT_INT_ARG(1, format, GD2_FMT_RAW);
-
-  int size;
-  char *data = (char *)gdImageGd2Ptr(this->_image, chunkSize, format, &size);
-
-  RETURN_DATA
-}
-
 #if SUPPORTS_GD_2_1_0
 Napi::Value Gd::Image::Bmp(const Napi::CallbackInfo &info)
 {
@@ -723,60 +655,71 @@ Napi::Value Gd::Image::TiffPtr(const Napi::CallbackInfo &info)
 #endif
 
 #if HAS_LIBHEIF
-Napi::Value Gd::Image::Heif(const Napi::CallbackInfo& info) {
+Napi::Value Gd::Image::Heif(const Napi::CallbackInfo &info)
+{
   CHECK_IMAGE_EXISTS;
 
   return SaveHeifWorker::DoWork(info, this->_image);
 }
 
-Napi::Value Gd::Image::HeifPtr(const Napi::CallbackInfo& info) {
+Napi::Value Gd::Image::HeifPtr(const Napi::CallbackInfo &info)
+{
   CHECK_IMAGE_EXISTS;
   OPT_INT_ARG(0, quality, -1);
   OPT_INT_ARG(1, codec_param, 1);
   OPT_STR_ARG(2, chroma, "444");
 
   gdHeifCodec codec;
-  const char* chroma_str = chroma.c_str();
+  const char *chroma_str = chroma.c_str();
 
-  if (codec_param == 1) {
+  if (codec_param == 1)
+  {
     codec = GD_HEIF_CODEC_HEVC;
-  } else if (codec_param == 4) {
+  }
+  else if (codec_param == 4)
+  {
     codec = GD_HEIF_CODEC_AV1;
-  } else {
+  }
+  else
+  {
     codec = GD_HEIF_CODEC_UNKNOWN;
   }
 
-  if (quality < -1 || quality > 200) {
+  if (quality < -1 || quality > 200)
+  {
     Napi::RangeError::New(info.Env(), "Value for quality must be greater than or equal to 0 and less than or equal to 200").ThrowAsJavaScriptException();
     return info.Env().Null();
   }
 
-  if (chroma.compare("444") != 0 && chroma.compare("422") != 0 && chroma.compare("420") != 0) {
+  if (chroma.compare("444") != 0 && chroma.compare("422") != 0 && chroma.compare("420") != 0)
+  {
     Napi::RangeError::New(info.Env(), "Value for chroma must be one of '420', '422' or '444' (default)").ThrowAsJavaScriptException();
     return info.Env().Null();
   }
 
   int size;
-  char *data = (char*)gdImageHeifPtrEx(this->_image, &size, quality, codec, chroma_str);
+  char *data = (char *)gdImageHeifPtrEx(this->_image, &size, quality, codec, chroma_str);
 
   RETURN_DATA
 }
 #endif
 
 #if HAS_LIBAVIF
-Napi::Value Gd::Image::Avif(const Napi::CallbackInfo& info) {
+Napi::Value Gd::Image::Avif(const Napi::CallbackInfo &info)
+{
   CHECK_IMAGE_EXISTS;
 
   return SaveAvifWorker::DoWork(info, this->_image);
 }
 
-Napi::Value Gd::Image::AvifPtr(const Napi::CallbackInfo& info) {
+Napi::Value Gd::Image::AvifPtr(const Napi::CallbackInfo &info)
+{
   CHECK_IMAGE_EXISTS;
   OPT_INT_ARG(0, quality, -1);
   OPT_INT_ARG(1, speed, -1);
 
   int size;
-  char *data = (char*)gdImageAvifPtrEx(this->_image, &size, quality, speed);
+  char *data = (char *)gdImageAvifPtrEx(this->_image, &size, quality, speed);
 
   RETURN_DATA
 }

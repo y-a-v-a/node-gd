@@ -63,43 +63,8 @@ describe('Section Handling file types', function () {
     const img = await gd.openPng(s);
     var canvas;
     canvas = await gd.createTrueColor(img.width, img.height);
-    img.copyResampled(
-      canvas,
-      0,
-      0,
-      0,
-      0,
-      img.width,
-      img.height,
-      img.width,
-      img.height
-    );
+    img.copyResampled(canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height);
     await canvas.saveGif(t);
-    assert.ok(fs.existsSync(t));
-    img.destroy();
-    canvas.destroy();
-  });
-
-  it('gd.Image#saveGd() -- can copy a png into gd', async () => {
-    var s, t;
-    s = source + 'input.png';
-    t = target + 'output.gd';
-    const img = await gd.openPng(s);
-
-    var canvas;
-    canvas = await gd.createTrueColor(img.width, img.height);
-    img.copyResampled(
-      canvas,
-      0,
-      0,
-      0,
-      0,
-      img.width,
-      img.height,
-      img.width,
-      img.height
-    );
-    await canvas.saveGd(t);
     assert.ok(fs.existsSync(t));
     img.destroy();
     canvas.destroy();
@@ -116,17 +81,7 @@ describe('Section Handling file types', function () {
     const img = await gd.openPng(s);
     var canvas, fg;
     canvas = await gd.createTrueColor(img.width, img.height);
-    img.copyResampled(
-      canvas,
-      0,
-      0,
-      0,
-      0,
-      img.width,
-      img.height,
-      img.width,
-      img.height
-    );
+    img.copyResampled(canvas, 0, 0, 0, 0, img.width, img.height, img.width, img.height);
     fg = img.getPixel(5, 5);
     await canvas.saveWBMP(t, fg);
     assert.ok(fs.existsSync(t));

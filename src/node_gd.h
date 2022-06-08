@@ -157,17 +157,22 @@
     return info.Env().Null();                                         \
   }
 
-#define OPT_STR_ARG(I, VAR, DEFAULT)                                    \
-  std::string VAR;                                                      \
-  if (info.Length() <= (I)) {                                           \
-    VAR = (DEFAULT);                                                    \
-  } else if (info[I].IsString()) {                                      \
-    VAR = info[I].As<Napi::String>().Utf8Value().c_str();               \
-  } else {                                                              \
-    Napi::TypeError::New(info.Env(),                                    \
-      "Optional argument " #I " must be a string")                      \
-      .ThrowAsJavaScriptException();                                    \
-    return info.Env().Null();                                           \
+#define OPT_STR_ARG(I, VAR, DEFAULT)                                  \
+  std::string VAR;                                                    \
+  if (info.Length() <= (I))                                           \
+  {                                                                   \
+    VAR = (DEFAULT);                                                  \
+  }                                                                   \
+  else if (info[I].IsString())                                        \
+  {                                                                   \
+    VAR = info[I].As<Napi::String>().Utf8Value().c_str();             \
+  }                                                                   \
+  else                                                                \
+  {                                                                   \
+    Napi::TypeError::New(info.Env(),                                  \
+                         "Optional argument " #I " must be a string") \
+        .ThrowAsJavaScriptException();                                \
+    return info.Env().Null();                                         \
   }
 
 #define OPT_BOOL_ARG(I, VAR, DEFAULT)                                  \
@@ -286,21 +291,17 @@ public:
     Napi::Value Webp(const Napi::CallbackInfo &info);
     Napi::Value WebpPtr(const Napi::CallbackInfo &info);
 #endif
-    Napi::Value Gd(const Napi::CallbackInfo &info);
-    Napi::Value GdPtr(const Napi::CallbackInfo &info);
-    Napi::Value Gd2(const Napi::CallbackInfo &info);
-    Napi::Value Gd2Ptr(const Napi::CallbackInfo &info);
 #if SUPPORTS_GD_2_1_0
     Napi::Value Bmp(const Napi::CallbackInfo &info);
     Napi::Value BmpPtr(const Napi::CallbackInfo &info);
 #endif
 #if HAS_LIBHEIF
-    Napi::Value Heif(const Napi::CallbackInfo& info);
-    Napi::Value HeifPtr(const Napi::CallbackInfo& info);
+    Napi::Value Heif(const Napi::CallbackInfo &info);
+    Napi::Value HeifPtr(const Napi::CallbackInfo &info);
 #endif
 #if HAS_LIBAVIF
-    Napi::Value Avif(const Napi::CallbackInfo& info);
-    Napi::Value AvifPtr(const Napi::CallbackInfo& info);
+    Napi::Value Avif(const Napi::CallbackInfo &info);
+    Napi::Value AvifPtr(const Napi::CallbackInfo &info);
 #endif
 
 #if HAS_LIBTIFF
@@ -453,8 +454,6 @@ private:
   static Napi::Value CreateFromPngPtr(const Napi::CallbackInfo &info);
   static Napi::Value CreateFromGif(const Napi::CallbackInfo &info);
   static Napi::Value CreateFromGifPtr(const Napi::CallbackInfo &info);
-  static Napi::Value CreateFromGd2(const Napi::CallbackInfo &info);
-  static Napi::Value CreateFromGd2Ptr(const Napi::CallbackInfo &info);
   static Napi::Value CreateFromWBMP(const Napi::CallbackInfo &info);
   static Napi::Value CreateFromWBMPPtr(const Napi::CallbackInfo &info);
 #if HAS_LIBWEBP
@@ -467,12 +466,12 @@ private:
   static Napi::Value CreateFromBmpPtr(const Napi::CallbackInfo &info);
 #endif
 #if HAS_LIBHEIF
-  static Napi::Value CreateFromHeif(const Napi::CallbackInfo& info);
-  static Napi::Value CreateFromHeifPtr(const Napi::CallbackInfo& info);
+  static Napi::Value CreateFromHeif(const Napi::CallbackInfo &info);
+  static Napi::Value CreateFromHeifPtr(const Napi::CallbackInfo &info);
 #endif
 #if HAS_LIBAVIF
-  static Napi::Value CreateFromAvif(const Napi::CallbackInfo& info);
-  static Napi::Value CreateFromAvifPtr(const Napi::CallbackInfo& info);
+  static Napi::Value CreateFromAvif(const Napi::CallbackInfo &info);
+  static Napi::Value CreateFromAvifPtr(const Napi::CallbackInfo &info);
 #endif
 #if HAS_LIBTIFF
   static Napi::Value CreateFromTiff(const Napi::CallbackInfo &info);
@@ -485,9 +484,6 @@ private:
 #if SUPPORTS_GD_2_1_1
   static Napi::Value CreateFromFile(const Napi::CallbackInfo &info);
 #endif
-
-  static Napi::Value CreateFromGd2Part(const Napi::CallbackInfo &info);
-  static Napi::Value CreateFromGd2PartPtr(const Napi::CallbackInfo &info);
 
   /**
    * Section D - Calculate functions
