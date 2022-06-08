@@ -21,10 +21,7 @@
 #include <cstring>
 #include "node_gd.h"
 #include "node_gd_workers.cc"
-
-#if SUPPORTS_GD_2_1_0
 #include <gd_errors.h>
-#endif
 
 Napi::Object Gd::Init(Napi::Env env, Napi::Object exports)
 {
@@ -141,10 +138,9 @@ Napi::Object Gd::Init(Napi::Env env, Napi::Object exports)
   exports.Set(Napi::String::New(env, "createFromWebpPtr"), Napi::Function::New(env, CreateFromWebpPtr));
 #endif
 
-#if SUPPORTS_GD_2_1_0
   exports.Set(Napi::String::New(env, "createFromBmp"), Napi::Function::New(env, CreateFromBmp));
   exports.Set(Napi::String::New(env, "createFromBmpPtr"), Napi::Function::New(env, CreateFromBmpPtr));
-#endif
+
 #if HAS_LIBHEIF
   exports.Set(Napi::String::New(env, "createFromHeif"), Napi::Function::New(env, CreateFromHeif));
   exports.Set(Napi::String::New(env, "createFromHeifPtr"), Napi::Function::New(env, CreateFromHeifPtr));
@@ -158,9 +154,7 @@ Napi::Object Gd::Init(Napi::Env env, Napi::Object exports)
   exports.Set(Napi::String::New(env, "createFromTiffPtr"), Napi::Function::New(env, CreateFromTiffPtr));
 #endif
 
-#if SUPPORTS_GD_2_1_1
   exports.Set(Napi::String::New(env, "createFromFile"), Napi::Function::New(env, CreateFromFile));
-#endif
   exports.Set(Napi::String::New(env, "trueColor"), Napi::Function::New(env, TrueColor));
   exports.Set(Napi::String::New(env, "trueColorAlpha"), Napi::Function::New(env, TrueColorAlpha));
   exports.Set(Napi::String::New(env, "getGDVersion"), Napi::Function::New(env, GdVersionGetter));
@@ -172,9 +166,9 @@ Napi::Object Gd::Init(Napi::Env env, Napi::Object exports)
 
 Napi::Value Gd::ImageCreate(const Napi::CallbackInfo &info)
 {
-  REQ_ARGS(2);
-  REQ_INT_ARG(0, width);
-  REQ_INT_ARG(1, height);
+  REQ_ARGS(2, "width and height.");
+  REQ_INT_ARG(0, width, "A value for 'width' should be supplied.");
+  REQ_INT_ARG(1, height, "A value for 'height' should be supplied.");
 
   INT_ARG_RANGE(width, "width");
   INT_ARG_RANGE(height, "height");
@@ -187,9 +181,9 @@ Napi::Value Gd::ImageCreate(const Napi::CallbackInfo &info)
 
 Napi::Value Gd::ImageCreateTrueColor(const Napi::CallbackInfo &info)
 {
-  REQ_ARGS(2);
-  REQ_INT_ARG(0, width);
-  REQ_INT_ARG(1, height);
+  REQ_ARGS(2, "width and height.");
+  REQ_INT_ARG(0, width, "A value for 'width' should be supplied.");
+  REQ_INT_ARG(1, height, "A value for 'height' should be supplied.");
 
   INT_ARG_RANGE(width, "width");
   INT_ARG_RANGE(height, "height");
@@ -202,9 +196,9 @@ Napi::Value Gd::ImageCreateTrueColor(const Napi::CallbackInfo &info)
 
 Napi::Value Gd::ImageCreateSync(const Napi::CallbackInfo &info)
 {
-  REQ_ARGS(2);
-  REQ_INT_ARG(0, width);
-  REQ_INT_ARG(1, height);
+  REQ_ARGS(2, "width and height.");
+  REQ_INT_ARG(0, width, "A value for 'width' should be supplied.");
+  REQ_INT_ARG(1, height, "A value for 'height' should be supplied.");
 
   INT_ARG_RANGE(width, "width");
   INT_ARG_RANGE(height, "height");
@@ -216,9 +210,9 @@ Napi::Value Gd::ImageCreateSync(const Napi::CallbackInfo &info)
 
 Napi::Value Gd::ImageCreateTrueColorSync(const Napi::CallbackInfo &info)
 {
-  REQ_ARGS(2);
-  REQ_INT_ARG(0, width);
-  REQ_INT_ARG(1, height);
+  REQ_ARGS(2, "width and height.");
+  REQ_INT_ARG(0, width, "A value for 'width' should be supplied.");
+  REQ_INT_ARG(1, height, "A value for 'height' should be supplied.");
 
   INT_ARG_RANGE(width, "width");
   INT_ARG_RANGE(height, "height");
@@ -236,13 +230,11 @@ DECLARE_CREATE_FROM(Jpeg);
 DECLARE_CREATE_FROM(Png);
 DECLARE_CREATE_FROM(Gif);
 DECLARE_CREATE_FROM(WBMP);
+DECLARE_CREATE_FROM(Bmp);
 #if HAS_LIBWEBP
 DECLARE_CREATE_FROM(Webp);
 #endif
 
-#if SUPPORTS_GD_2_1_0
-DECLARE_CREATE_FROM(Bmp);
-#endif
 #if HAS_LIBHEIF
 DECLARE_CREATE_FROM(Heif);
 #endif
@@ -253,7 +245,6 @@ DECLARE_CREATE_FROM(Avif);
 DECLARE_CREATE_FROM(Tiff);
 #endif
 
-#if SUPPORTS_GD_2_1_1
 /**
  * Returns a Promise
  */
@@ -261,14 +252,13 @@ Napi::Value Gd::CreateFromFile(const Napi::CallbackInfo &info)
 {
   return CreateFromFileWorker::DoWork(info);
 }
-#endif
 
 Napi::Value Gd::TrueColor(const Napi::CallbackInfo &info)
 {
-  REQ_ARGS(3);
-  REQ_INT_ARG(0, r);
-  REQ_INT_ARG(1, g);
-  REQ_INT_ARG(2, b);
+  REQ_ARGS(3, "red, green and blue.");
+  REQ_INT_ARG(0, r, "A value for 'red' should be supplied.");
+  REQ_INT_ARG(1, g, "A value for 'green' should be supplied.");
+  REQ_INT_ARG(2, b, "A value for 'blue' should be supplied.");
 
   uint32_t result = gdTrueColor(r, g, b);
 
@@ -277,11 +267,11 @@ Napi::Value Gd::TrueColor(const Napi::CallbackInfo &info)
 
 Napi::Value Gd::TrueColorAlpha(const Napi::CallbackInfo &info)
 {
-  REQ_ARGS(4);
-  REQ_INT_ARG(0, r);
-  REQ_INT_ARG(1, g);
-  REQ_INT_ARG(2, b);
-  REQ_INT_ARG(3, a);
+  REQ_ARGS(4, "red, green, blue and alpha.");
+  REQ_INT_ARG(0, r, "A value for 'red' should be supplied.");
+  REQ_INT_ARG(1, g, "A value for 'green' should be supplied.");
+  REQ_INT_ARG(2, b, "A value for 'blue' should be supplied.");
+  REQ_INT_ARG(3, a, "A value for 'alpha' should be supplied.");
 
   uint32_t result = gdTrueColorAlpha(r, g, b, a);
 
@@ -322,10 +312,8 @@ Napi::Object Gd::Image::Init(Napi::Env env, Napi::Object exports)
             InstanceMethod("webp", &Gd::Image::Webp),
             InstanceMethod("webpPtr", &Gd::Image::WebpPtr),
 #endif
-#if SUPPORTS_GD_2_1_0
             InstanceMethod("bmp", &Gd::Image::Bmp),
             InstanceMethod("bmpPtr", &Gd::Image::BmpPtr),
-#endif
 #if HAS_LIBHEIF
             InstanceMethod("heif", &Gd::Image::Heif),
             InstanceMethod("heifPtr", &Gd::Image::HeifPtr),
@@ -338,9 +326,7 @@ Napi::Object Gd::Image::Init(Napi::Env env, Napi::Object exports)
             InstanceMethod("tiff", &Gd::Image::Tiff),
             InstanceMethod("tiffPtr", &Gd::Image::TiffPtr),
 #endif
-#if SUPPORTS_GD_2_1_1
             InstanceMethod("file", &Gd::Image::File),
-#endif
 
             /**
              * Drawing Functions
@@ -355,9 +341,7 @@ Napi::Object Gd::Image::Init(Napi::Env env, Napi::Object exports)
             InstanceMethod("filledRectangle", &Gd::Image::FilledRectangle),
             InstanceMethod("arc", &Gd::Image::Arc),
             InstanceMethod("filledArc", &Gd::Image::FilledArc),
-#if SUPPORTS_GD_2_1_0
             InstanceMethod("ellipse", &Gd::Image::Ellipse),
-#endif
             InstanceMethod("filledEllipse", &Gd::Image::FilledEllipse),
             InstanceMethod("fillToBorder", &Gd::Image::FillToBorder),
             InstanceMethod("fill", &Gd::Image::Fill),
@@ -371,9 +355,7 @@ Napi::Object Gd::Image::Init(Napi::Env env, Napi::Object exports)
             InstanceMethod("saveAlpha", &Gd::Image::SaveAlpha),
             InstanceMethod("setClip", &Gd::Image::SetClip),
             InstanceMethod("getClip", &Gd::Image::GetClip),
-#if SUPPORTS_GD_2_1_0
             InstanceMethod("setResolution", &Gd::Image::SetResolution),
-#endif
 
             /**
              * Query Functions
@@ -400,6 +382,7 @@ Napi::Object Gd::Image::Init(Napi::Env env, Napi::Object exports)
             InstanceMethod("colorClosestAlpha", &Gd::Image::ColorClosestAlpha),
             InstanceMethod("colorClosestHWB", &Gd::Image::ColorClosestHWB),
             InstanceMethod("colorExact", &Gd::Image::ColorExact),
+            InstanceMethod("colorExactAlpha", &Gd::Image::ColorExactAlpha),
             InstanceMethod("colorResolve", &Gd::Image::ColorResolve),
             InstanceMethod("colorResolveAlpha", &Gd::Image::ColorResolveAlpha),
             InstanceMethod("red", &Gd::Image::Red),
@@ -413,7 +396,6 @@ Napi::Object Gd::Image::Init(Napi::Env env, Napi::Object exports)
              * Color Manipulation Functions
              */
             InstanceMethod("colorTransparent", &Gd::Image::ColorTransparent),
-#if SUPPORTS_GD_2_1_0
             InstanceMethod("colorReplace", &Gd::Image::ColorReplace),
             InstanceMethod("colorReplaceThreshold", &Gd::Image::ColorReplaceThreshold),
             InstanceMethod("colorReplaceArray", &Gd::Image::ColorReplaceArray),
@@ -433,17 +415,12 @@ Napi::Object Gd::Image::Init(Napi::Env env, Napi::Object exports)
             InstanceMethod("crop", &Gd::Image::Crop),
             InstanceMethod("cropAuto", &Gd::Image::CropAuto),
             InstanceMethod("cropThreshold", &Gd::Image::CropThreshold),
-#endif
-#if SUPPORTS_GD_2_1_1
             InstanceMethod("emboss", &Gd::Image::Emboss),
-#endif
             InstanceMethod("sharpen", &Gd::Image::Sharpen),
             InstanceMethod("createPaletteFromTrueColor", &Gd::Image::CreatePaletteFromTrueColor),
             InstanceMethod("trueColorToPalette", &Gd::Image::TrueColorToPalette),
-#if SUPPORTS_GD_2_1_0
             InstanceMethod("paletteToTrueColor", &Gd::Image::PaletteToTrueColor),
             InstanceMethod("colorMatch", &Gd::Image::ColorMatch),
-#endif
             InstanceMethod("gifAnimBegin", &Gd::Image::GifAnimBegin),
             InstanceMethod("gifAnimAdd", &Gd::Image::GifAnimAdd),
             InstanceMethod("gifAnimEnd", &Gd::Image::GifAnimEnd),
@@ -486,7 +463,13 @@ Napi::Object Gd::Image::Init(Napi::Env env, Napi::Object exports)
 Gd::Image::Image(const Napi::CallbackInfo &info)
     : Napi::ObjectWrap<Image>(info)
 {
-  REQ_EXT_ARG(0, image);
+  if (info.Length() <= 0 || !info[0].IsExternal())
+  {
+    Napi::TypeError::New(info.Env(), "Argument invalid, should be an Image.").ThrowAsJavaScriptException();
+    return;
+  }
+  Napi::External<gdImagePtr> image =
+      info[0].As<Napi::External<gdImagePtr> >();
 
   gdImagePtr *imgPtr = image.Data();
 
@@ -585,7 +568,7 @@ Napi::Value Gd::Image::WBMPPtr(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_INT_ARG(0, foreground);
+  REQ_INT_ARG(0, foreground, "The index of the foreground color should be supplied.");
 
   int size;
   char *data = (char *)gdImageWBMPPtr(this->_image, &size, foreground);
@@ -614,7 +597,6 @@ Napi::Value Gd::Image::WebpPtr(const Napi::CallbackInfo &info)
 }
 #endif
 
-#if SUPPORTS_GD_2_1_0
 Napi::Value Gd::Image::Bmp(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
@@ -633,7 +615,6 @@ Napi::Value Gd::Image::BmpPtr(const Napi::CallbackInfo &info)
 
   RETURN_DATA
 }
-#endif
 
 #if HAS_LIBTIFF
 Napi::Value Gd::Image::Tiff(const Napi::CallbackInfo &info)
@@ -725,14 +706,12 @@ Napi::Value Gd::Image::AvifPtr(const Napi::CallbackInfo &info)
 }
 #endif
 
-#if SUPPORTS_GD_2_1_1
 Napi::Value Gd::Image::File(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
   return FileWorker::DoWork(info, this->_image);
 }
-#endif
 
 /**
  * Drawing Functions
@@ -741,10 +720,10 @@ Napi::Value Gd::Image::SetPixel(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(3);
-  REQ_INT_ARG(0, x);
-  REQ_INT_ARG(1, y);
-  REQ_INT_ARG(2, color);
+  REQ_ARGS(3, "x coordinate, y coordinate and color number.");
+  REQ_INT_ARG(0, x, "A value for the x coordinate should be supplied.");
+  REQ_INT_ARG(1, y, "A value for the y coordinate should be supplied.");
+  REQ_INT_ARG(2, color, "A color number should supplied.");
 
   gdImageSetPixel(this->_image, x, y, color);
 
@@ -755,12 +734,12 @@ Napi::Value Gd::Image::Line(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(5);
-  REQ_INT_ARG(0, x1);
-  REQ_INT_ARG(1, y1);
-  REQ_INT_ARG(2, x2);
-  REQ_INT_ARG(3, y2);
-  REQ_INT_ARG(4, color);
+  REQ_ARGS(5, "x1, y1, x2, y2 and a color value.");
+  REQ_INT_ARG(0, x1, "A value for the x1 coordinate should be supplied.");
+  REQ_INT_ARG(1, y1, "A value for the y1 coordinate should be supplied.");
+  REQ_INT_ARG(2, x2, "A value for the x2 coordinate should be supplied.");
+  REQ_INT_ARG(3, y2, "A value for the y2 coordinate should be supplied.");
+  REQ_INT_ARG(4, color, "A color number should supplied.");
 
   gdImageLine(this->_image, x1, y1, x2, y2, color);
 
@@ -771,12 +750,12 @@ Napi::Value Gd::Image::DashedLine(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(5);
-  REQ_INT_ARG(0, x1);
-  REQ_INT_ARG(1, y1);
-  REQ_INT_ARG(2, x2);
-  REQ_INT_ARG(3, y2);
-  REQ_INT_ARG(4, color);
+  REQ_ARGS(5, "x1, y1, x2, y2 and a color value.");
+  REQ_INT_ARG(0, x1, "A value for the x1 coordinate should be supplied.");
+  REQ_INT_ARG(1, y1, "A value for the y1 coordinate should be supplied.");
+  REQ_INT_ARG(2, x2, "A value for the x2 coordinate should be supplied.");
+  REQ_INT_ARG(3, y2, "A value for the y2 coordinate should be supplied.");
+  REQ_INT_ARG(4, color, "A color number should supplied.");
 
   gdImageDashedLine(this->_image, x1, y1, x2, y2, color);
 
@@ -787,8 +766,8 @@ Napi::Value Gd::Image::Polygon(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(2);
-  REQ_INT_ARG(1, color);
+  REQ_ARGS(2, "an array of coordinates and a color value.");
+  REQ_INT_ARG(1, color, "A color number should supplied.");
 
   if (!info[0].IsArray())
   {
@@ -829,8 +808,8 @@ Napi::Value Gd::Image::OpenPolygon(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(2);
-  REQ_INT_ARG(1, color);
+  REQ_ARGS(2, "an array of coordinates and a color value.");
+  REQ_INT_ARG(1, color, "A color number should supplied.");
 
   if (!info[0].IsArray())
   {
@@ -871,8 +850,8 @@ Napi::Value Gd::Image::FilledPolygon(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(2);
-  REQ_INT_ARG(1, color);
+  REQ_ARGS(2, "an array of coordinates and a color value.");
+  REQ_INT_ARG(1, color, "A color number should supplied.");
 
   if (!info[0].IsArray())
   {
@@ -913,12 +892,12 @@ Napi::Value Gd::Image::Rectangle(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(5);
-  REQ_INT_ARG(0, x1);
-  REQ_INT_ARG(1, y1);
-  REQ_INT_ARG(2, x2);
-  REQ_INT_ARG(3, y2);
-  REQ_INT_ARG(4, color);
+  REQ_ARGS(5, "for x1, y1, x2, y2 and a color value.");
+  REQ_INT_ARG(0, x1, "A value for the x1 coordinate should be supplied.");
+  REQ_INT_ARG(1, y1, "A value for the y1 coordinate should be supplied.");
+  REQ_INT_ARG(2, x2, "A value for the x2 coordinate should be supplied.");
+  REQ_INT_ARG(3, y2, "A value for the y2 coordinate should be supplied.");
+  REQ_INT_ARG(4, color, "A color number should supplied.");
 
   gdImageRectangle(this->_image, x1, y1, x2, y2, color);
 
@@ -929,12 +908,12 @@ Napi::Value Gd::Image::FilledRectangle(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(5);
-  REQ_INT_ARG(0, x1);
-  REQ_INT_ARG(1, y1);
-  REQ_INT_ARG(2, x2);
-  REQ_INT_ARG(3, y2);
-  REQ_INT_ARG(4, color);
+  REQ_ARGS(5, "for x1, y1, x2, y2 and a color value.");
+  REQ_INT_ARG(0, x1, "A value for the x1 coordinate should be supplied.");
+  REQ_INT_ARG(1, y1, "A value for the y1 coordinate should be supplied.");
+  REQ_INT_ARG(2, x2, "A value for the x2 coordinate should be supplied.");
+  REQ_INT_ARG(3, y2, "A value for the y2 coordinate should be supplied.");
+  REQ_INT_ARG(4, color, "A color number should supplied.");
 
   gdImageFilledRectangle(this->_image, x1, y1, x2, y2, color);
 
@@ -945,14 +924,14 @@ Napi::Value Gd::Image::Arc(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(7);
-  REQ_INT_ARG(0, cx);
-  REQ_INT_ARG(1, cy);
-  REQ_INT_ARG(2, width);
-  REQ_INT_ARG(3, height);
-  REQ_INT_ARG(4, begin);
-  REQ_INT_ARG(5, end);
-  REQ_INT_ARG(6, color);
+  REQ_ARGS(7, "center x, center y, width, height, begin degrees, end degrees and color value.");
+  REQ_INT_ARG(0, cx, "A value for the center x coordinate should be supplied.");
+  REQ_INT_ARG(1, cy, "A value for the center y coordinate should be supplied.");
+  REQ_INT_ARG(2, width, "A value for 'width' should be supplied.");
+  REQ_INT_ARG(3, height, "A value for 'height' should be supplied.");
+  REQ_INT_ARG(4, begin, "A begin value, in degrees, for the arc needs to be supplied.");
+  REQ_INT_ARG(5, end, "An end value, in degrees, for the arc needs to be supplied.");
+  REQ_INT_ARG(6, color, "A color number should supplied.");
 
   gdImageArc(this->_image, cx, cy, width, height, begin, end, color);
 
@@ -963,49 +942,47 @@ Napi::Value Gd::Image::FilledArc(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(8);
-  REQ_INT_ARG(0, cx);
-  REQ_INT_ARG(1, cy);
-  REQ_INT_ARG(2, width);
-  REQ_INT_ARG(3, height);
-  REQ_INT_ARG(4, begin);
-  REQ_INT_ARG(5, end);
-  REQ_INT_ARG(6, color);
-  REQ_INT_ARG(7, style);
+  REQ_ARGS(8, "center x, center y, width, height, begin degrees, end degrees, color value and style.");
+  REQ_INT_ARG(0, cx, "A value for the center x coordinate should be supplied.");
+  REQ_INT_ARG(1, cy, "A value for the center y coordinate should be supplied.");
+  REQ_INT_ARG(2, width, "A value for 'width' should be supplied.");
+  REQ_INT_ARG(3, height, "A value for 'height' should be supplied.");
+  REQ_INT_ARG(4, begin, "A begin value, in degrees, for the arc needs to be supplied.");
+  REQ_INT_ARG(5, end, "An end value, in degrees, for the arc needs to be supplied.");
+  REQ_INT_ARG(6, color, "A color number should supplied.");
+  REQ_INT_ARG(7, style, "Value for style should be supplied.");
 
   gdImageFilledArc(this->_image, cx, cy, width, height, begin, end, color, style);
 
   return info.This();
 }
 
-#if SUPPORTS_GD_2_1_0
 Napi::Value Gd::Image::Ellipse(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(5);
-  REQ_INT_ARG(0, cx);
-  REQ_INT_ARG(1, cy);
-  REQ_INT_ARG(2, width);
-  REQ_INT_ARG(3, height);
-  REQ_INT_ARG(4, color);
+  REQ_ARGS(5, "center x, center y, width, height and color value.");
+  REQ_INT_ARG(0, cx, "A value for the center x coordinate should be supplied.");
+  REQ_INT_ARG(1, cy, "A value for the center y coordinate should be supplied.");
+  REQ_INT_ARG(2, width, "A value for 'width' should be supplied.");
+  REQ_INT_ARG(3, height, "A value for 'height' should be supplied.");
+  REQ_INT_ARG(4, color, "A color number should supplied.");
 
   gdImageEllipse(this->_image, cx, cy, width, height, color);
 
   return info.This();
 }
-#endif
 
 Napi::Value Gd::Image::FilledEllipse(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(5);
-  REQ_INT_ARG(0, cx);
-  REQ_INT_ARG(1, cy);
-  REQ_INT_ARG(2, width);
-  REQ_INT_ARG(3, height);
-  REQ_INT_ARG(4, color);
+  REQ_ARGS(5, "center x, center y, width, height and color value.");
+  REQ_INT_ARG(0, cx, "A value for the center x coordinate should be supplied.");
+  REQ_INT_ARG(1, cy, "A value for the center y coordinate should be supplied.");
+  REQ_INT_ARG(2, width, "A value for 'width' should be supplied.");
+  REQ_INT_ARG(3, height, "A value for 'height' should be supplied.");
+  REQ_INT_ARG(4, color, "A color number should supplied.");
 
   gdImageFilledEllipse(this->_image, cx, cy, width, height, color);
 
@@ -1016,11 +993,11 @@ Napi::Value Gd::Image::FillToBorder(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(4);
-  REQ_INT_ARG(0, x);
-  REQ_INT_ARG(1, y);
-  REQ_INT_ARG(2, border);
-  REQ_INT_ARG(3, color);
+  REQ_ARGS(4, "x coordinate, y coordinate, border offset and color value.");
+  REQ_INT_ARG(0, x, "A value for the x coordinate should be supplied.");
+  REQ_INT_ARG(1, y, "A value for the y coordinate should be supplied.");
+  REQ_INT_ARG(2, border, "A value for the border offset should be supplied.");
+  REQ_INT_ARG(3, color, "A color number should supplied.");
 
   gdImageFillToBorder(this->_image, x, y, border, color);
 
@@ -1031,10 +1008,10 @@ Napi::Value Gd::Image::Fill(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(3);
-  REQ_INT_ARG(0, x);
-  REQ_INT_ARG(1, y);
-  REQ_INT_ARG(2, color);
+  REQ_ARGS(3, "x coordinate, y coordinate and a color value.");
+  REQ_INT_ARG(0, x, "A value for the x coordinate should be supplied.");
+  REQ_INT_ARG(1, y, "A value for the y coordinate should be supplied.");
+  REQ_INT_ARG(2, color, "A color number should supplied.");
 
   gdImageFill(this->_image, x, y, color);
 
@@ -1045,7 +1022,7 @@ Napi::Value Gd::Image::SetAntiAliased(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_INT_ARG(0, color);
+  REQ_INT_ARG(0, color, "A color number should supplied.");
 
   gdImageSetAntiAliased(this->_image, color);
 
@@ -1056,9 +1033,9 @@ Napi::Value Gd::Image::SetAntiAliasedDontBlend(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(2);
-  REQ_INT_ARG(0, color);
-  REQ_INT_ARG(1, dont_blend); // what does this mean?
+  REQ_ARGS(2, "a color number and a color value not to blend");
+  REQ_INT_ARG(0, color, "A color number should supplied.");
+  REQ_INT_ARG(1, dont_blend, "A color number, whether or not to blend the supplied color, should be supplied."); // what does this mean?
 
   gdImageSetAntiAliasedDontBlend(this->_image, color, dont_blend);
 
@@ -1120,7 +1097,7 @@ Napi::Value Gd::Image::SetThickness(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_INT_ARG(0, thickness)
+  REQ_INT_ARG(0, thickness, "Thickness value in pixels should be supplied.");
 
   gdImageSetThickness(this->_image, thickness);
 
@@ -1131,7 +1108,7 @@ Napi::Value Gd::Image::AlphaBlending(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_INT_ARG(0, blending)
+  REQ_INT_ARG(0, blending, "A value of 0 or 1 for the alpha blending flag should be supplied.")
   gdImageAlphaBlending(this->_image, blending);
 
   return info.This();
@@ -1141,7 +1118,7 @@ Napi::Value Gd::Image::SaveAlpha(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_INT_ARG(0, saveFlag)
+  REQ_INT_ARG(0, saveFlag, "A value of 0 or 1 should be supplied to whether or not save the alpha channel of the pixles.")
   gdImageSaveAlpha(this->_image, saveFlag);
 
   return info.This();
@@ -1151,11 +1128,11 @@ Napi::Value Gd::Image::SetClip(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(4);
-  REQ_INT_ARG(0, x1);
-  REQ_INT_ARG(1, y1);
-  REQ_INT_ARG(2, x2);
-  REQ_INT_ARG(3, y2);
+  REQ_ARGS(4, "x1 coordinate, y1 coordinate, x2 coordinate and y2 coordinate.");
+  REQ_INT_ARG(0, x1, "A value for the x1 coordinate should be supplied.");
+  REQ_INT_ARG(1, y1, "A value for the y1 coordinate should be supplied.");
+  REQ_INT_ARG(2, x2, "A value for the x2 coordinate should be supplied.");
+  REQ_INT_ARG(3, y2, "A value for the y2 coordinate should be supplied.");
 
   gdImageSetClip(this->_image, x1, y1, x2, y2);
 
@@ -1178,20 +1155,18 @@ Napi::Value Gd::Image::GetClip(const Napi::CallbackInfo &info)
   return result;
 }
 
-#if SUPPORTS_GD_2_1_0
 Napi::Value Gd::Image::SetResolution(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(2);
-  REQ_INT_ARG(0, res_x);
-  REQ_INT_ARG(1, res_y);
+  REQ_ARGS(2, "horizontal resolution and vertical resolution values.");
+  REQ_INT_ARG(0, res_x, "The horizontal resolution in DPI should be supplied.");
+  REQ_INT_ARG(1, res_y, "The vertical resolution in DPI should be supplied.");
 
   gdImageSetResolution(this->_image, res_x, res_y);
 
   return info.This();
 }
-#endif
 
 /**
  * Query Functions
@@ -1200,9 +1175,9 @@ Napi::Value Gd::Image::GetPixel(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(2);
-  REQ_INT_ARG(0, x);
-  REQ_INT_ARG(1, y);
+  REQ_ARGS(2, "x coordinate and y coordinate");
+  REQ_INT_ARG(0, x, "A value for the x coordinate should be supplied.");
+  REQ_INT_ARG(1, y, "A value for the y coordinate should be supplied.");
 
   if (x < 0 || y < 0)
   {
@@ -1230,9 +1205,9 @@ Napi::Value Gd::Image::GetTrueColorPixel(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(2);
-  REQ_INT_ARG(0, x);
-  REQ_INT_ARG(1, y);
+  REQ_ARGS(2, "x coordinate and y coordinate");
+  REQ_INT_ARG(0, x, "A value for the x coordinate should be supplied.");
+  REQ_INT_ARG(1, y, "A value for the y coordinate should be supplied.");
 
   if (x < 0 || y < 0)
   {
@@ -1262,9 +1237,9 @@ Napi::Value Gd::Image::ImageColorAt(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(2);
-  REQ_INT_ARG(0, x);
-  REQ_INT_ARG(1, y);
+  REQ_ARGS(2, "x coordinate and y coordinate");
+  REQ_INT_ARG(0, x, "A value for the x coordinate should be supplied.");
+  REQ_INT_ARG(1, y, "A value for the y coordinate should be supplied.");
 
   Napi::Number result;
   gdImagePtr im = this->_image;
@@ -1299,9 +1274,9 @@ Napi::Value Gd::Image::GetBoundsSafe(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(2);
-  REQ_INT_ARG(0, x);
-  REQ_INT_ARG(1, y);
+  REQ_ARGS(2, "x coordinate and y coordinate");
+  REQ_INT_ARG(0, x, "A value for the x coordinate should be supplied.");
+  REQ_INT_ARG(1, y, "A value for the y coordinate should be supplied.");
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageBoundsSafe(this->_image, x, y));
   return result;
@@ -1338,13 +1313,13 @@ Napi::Value Gd::Image::StringFTBBox(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(7);
-  REQ_INT_ARG(0, color);
+  REQ_ARGS(7, "color value, font list, font size, angle, x coordinate, y coordinate and text to render.");
+  REQ_INT_ARG(0, color, "A color number should supplied.");
   REQ_STR_ARG(1, font, "Font list missing.");
   REQ_DOUBLE_ARG(2, size);
   REQ_DOUBLE_ARG(3, angle);
-  REQ_INT_ARG(4, x);
-  REQ_INT_ARG(5, y);
+  REQ_INT_ARG(4, x, "A value for the x coordinate should be supplied.");
+  REQ_INT_ARG(5, y, "A value for the y coordinate should be supplied.");
   REQ_STR_ARG(6, str, "Text to display in the image missing");
 
   int brect[8];
@@ -1373,13 +1348,13 @@ Napi::Value Gd::Image::StringFT(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(7);
-  REQ_INT_ARG(0, color);
+  REQ_ARGS(7, "color value, font list, font size, angle, x coordinate, y coordinate and text to render (optionally 8th argument if the rectangle coordinates should be returnd).");
+  REQ_INT_ARG(0, color, "A color number should supplied.");
   REQ_STR_ARG(1, font, "Font list missing.");
   REQ_DOUBLE_ARG(2, size);
   REQ_DOUBLE_ARG(3, angle);
-  REQ_INT_ARG(4, x);
-  REQ_INT_ARG(5, y);
+  REQ_INT_ARG(4, x, "A value for the x coordinate should be supplied.");
+  REQ_INT_ARG(5, y, "A value for the y coordinate should be supplied.");
   REQ_STR_ARG(6, str, "Text to display is missing.");
   OPT_BOOL_ARG(7, return_rectangle, false);
 
@@ -1420,13 +1395,13 @@ Napi::Value Gd::Image::StringFTEx(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(8);
-  REQ_INT_ARG(0, color);
+  REQ_ARGS(8, "color number, font list, font size, angle, x coordinate, y coordinate, text to render, object containing options.");
+  REQ_INT_ARG(0, color, "A color number should supplied.");
   REQ_STR_ARG(1, font, "Font list missing.");
   REQ_DOUBLE_ARG(2, size);
   REQ_DOUBLE_ARG(3, angle);
-  REQ_INT_ARG(4, x);
-  REQ_INT_ARG(5, y);
+  REQ_INT_ARG(4, x, "A value for the x coordinate should be supplied.");
+  REQ_INT_ARG(5, y, "A value for the y coordinate should be supplied.");
   REQ_STR_ARG(6, str, "Text to display missing.");
 
   if (!info[7].IsObject())
@@ -1631,9 +1606,9 @@ Napi::Value Gd::Image::StringFTCircle(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(9);
-  REQ_INT_ARG(0, cx);
-  REQ_INT_ARG(1, cy);
+  REQ_ARGS(9, "center x coordinate, center y coordinate, radius, text radius, fill portion, font list, font size, top distance, bottom distance, color number.");
+  REQ_INT_ARG(0, cx, "A value for the center x coordinate should be supplied.");
+  REQ_INT_ARG(1, cy, "A value for the center y coordinate should be supplied.");
   REQ_DOUBLE_ARG(2, radius);
   REQ_DOUBLE_ARG(3, textRadius);
   REQ_DOUBLE_ARG(4, fillPortion);
@@ -1641,7 +1616,7 @@ Napi::Value Gd::Image::StringFTCircle(const Napi::CallbackInfo &info)
   REQ_DOUBLE_ARG(6, size);
   REQ_STR_ARG(7, top, "Distance from top in pixels missing");
   REQ_STR_ARG(8, bottom, "Distance form bottom in pixels missing.");
-  REQ_INT_ARG(9, color);
+  REQ_INT_ARG(9, color, "A color number should supplied.");
 
   char *error;
   char *fontlist = &font[0];
@@ -1666,7 +1641,6 @@ Napi::Value Gd::Image::ColorAllocate(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(3);
   OPT_INT_ARG(0, r, 0);
   OPT_INT_ARG(1, g, 0);
   OPT_INT_ARG(2, b, 0);
@@ -1737,6 +1711,19 @@ Napi::Value Gd::Image::ColorExact(const Napi::CallbackInfo &info)
   return result;
 }
 
+Napi::Value Gd::Image::ColorExactAlpha(const Napi::CallbackInfo &info)
+{
+  CHECK_IMAGE_EXISTS;
+
+  OPT_INT_ARG(0, r, 0);
+  OPT_INT_ARG(1, g, 0);
+  OPT_INT_ARG(2, b, 0);
+  OPT_INT_ARG(3, a, 100);
+
+  Napi::Number result = Napi::Number::New(info.Env(), gdImageColorExactAlpha(this->_image, r, g, b, a));
+  return result;
+}
+
 Napi::Value Gd::Image::ColorResolve(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
@@ -1774,7 +1761,7 @@ Napi::Value Gd::Image::Red(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_INT_ARG(0, color);
+  REQ_INT_ARG(0, color, "A color number should supplied.");
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageRed(this->_image, color));
   return result;
@@ -1784,7 +1771,7 @@ Napi::Value Gd::Image::Blue(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_INT_ARG(0, color);
+  REQ_INT_ARG(0, color, "A color number should supplied.");
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageBlue(this->_image, color));
   return result;
@@ -1794,7 +1781,7 @@ Napi::Value Gd::Image::Green(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_INT_ARG(0, color);
+  REQ_INT_ARG(0, color, "A color number should supplied.");
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageGreen(this->_image, color));
   return result;
@@ -1804,7 +1791,7 @@ Napi::Value Gd::Image::Alpha(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_INT_ARG(0, color);
+  REQ_INT_ARG(0, color, "A color number should supplied.");
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageAlpha(this->_image, color));
   return result;
@@ -1856,7 +1843,7 @@ Napi::Value Gd::Image::ColorDeallocate(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_INT_ARG(0, color);
+  REQ_INT_ARG(0, color, "A color number should supplied.");
   gdImageColorDeallocate(this->_image, color);
 
   return info.This();
@@ -1866,20 +1853,19 @@ Napi::Value Gd::Image::ColorTransparent(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_INT_ARG(0, color);
+  REQ_INT_ARG(0, color, "A color number should supplied.");
   gdImageColorTransparent(this->_image, color);
 
   return info.This();
 }
 
-#if SUPPORTS_GD_2_1_0
 Napi::Value Gd::Image::ColorReplace(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(2);
-  REQ_INT_ARG(0, fromColor);
-  REQ_INT_ARG(1, toColor);
+  REQ_ARGS(2, "'from' color value and 'to' color value.");
+  REQ_INT_ARG(0, fromColor, "A 'from' color number should supplied.");
+  REQ_INT_ARG(1, toColor, "A 'to' color number should supplied.");
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageColorReplace(this->_image, fromColor, toColor));
 
@@ -1890,9 +1876,9 @@ Napi::Value Gd::Image::ColorReplaceThreshold(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(3);
-  REQ_INT_ARG(0, fromColor);
-  REQ_INT_ARG(1, toColor);
+  REQ_ARGS(3, "'from' color value, 'to' color value and threshold");
+  REQ_INT_ARG(0, fromColor, "A 'from' color number should supplied.");
+  REQ_INT_ARG(1, toColor, "A 'to' color number should supplied.");
   REQ_DOUBLE_ARG(2, threshold);
 
   Napi::Number result =
@@ -1905,7 +1891,7 @@ Napi::Value Gd::Image::ColorReplaceArray(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(2);
+  REQ_ARGS(2, "array of 'from' colors, array of 'to' colors.");
 
   Napi::Array fromArray = info[0].As<Napi::Array>();
   unsigned int flen = fromArray.Length(), _flen = 0;
@@ -1974,7 +1960,7 @@ Napi::Value Gd::Image::Brightness(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_INT_ARG(0, brightness);
+  REQ_INT_ARG(0, brightness, "A value between -255 and 255 should be supplied for brightness.");
 
   gdImageBrightness(this->_image, brightness);
 
@@ -2028,11 +2014,11 @@ Napi::Value Gd::Image::Crop(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(4);
-  REQ_INT_ARG(0, x);
-  REQ_INT_ARG(1, y);
-  REQ_INT_ARG(2, width);
-  REQ_INT_ARG(3, height);
+  REQ_ARGS(4, "x coordinate, y coordinate, width and height.");
+  REQ_INT_ARG(0, x, "A value for the x coordinate should be supplied.");
+  REQ_INT_ARG(1, y, "A value for the y coordinate should be supplied.");
+  REQ_INT_ARG(2, width, "A value for 'width' should be supplied.");
+  REQ_INT_ARG(3, height, "A value for 'height' should be supplied.");
 
   gdRect *rect = new gdRect;
 
@@ -2050,11 +2036,11 @@ Napi::Value Gd::Image::CropAuto(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_INT_ARG(0, mode);
+  REQ_INT_ARG(0, mode, "A value for crop mode should be supplied, between 0 and 5.");
 
   if (mode > 4)
   {
-    Napi::RangeError::New(info.Env(), "Crop mode should be between 0 and 5")
+    Napi::RangeError::New(info.Env(), "Crop mode should be between 0 and 5.")
         .ThrowAsJavaScriptException();
     return info.Env().Null();
   }
@@ -2068,15 +2054,13 @@ Napi::Value Gd::Image::CropThreshold(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_INT_ARG(0, color);
+  REQ_INT_ARG(0, color, "A color number should supplied.");
   REQ_DOUBLE_ARG(1, threshold);
 
   gdImagePtr newImage = gdImageCropThreshold(this->_image, color, threshold);
   RETURN_IMAGE(newImage);
 }
-#endif
 
-#if SUPPORTS_GD_2_1_1
 Napi::Value Gd::Image::Emboss(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
@@ -2084,7 +2068,6 @@ Napi::Value Gd::Image::Emboss(const Napi::CallbackInfo &info)
   gdImageEmboss(this->_image);
   return info.This();
 }
-#endif
 
 /**
  * Copying and Resizing Functions
@@ -2093,14 +2076,14 @@ Napi::Value Gd::Image::Copy(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(7);
+  REQ_ARGS(7, "destination image, dest x coordinate, dest y coordinate, source x cooridinate, source y coordinate, width and height.");
   REQ_IMG_ARG(0, dest);
-  REQ_INT_ARG(1, dstX);
-  REQ_INT_ARG(2, dstY);
-  REQ_INT_ARG(3, srcX);
-  REQ_INT_ARG(4, srcY);
-  REQ_INT_ARG(5, width);
-  REQ_INT_ARG(6, height);
+  REQ_INT_ARG(1, dstX, "A value for the destination x coordinate should be supplied.");
+  REQ_INT_ARG(2, dstY, "A value for the destination y coordinate should be supplied.");
+  REQ_INT_ARG(3, srcX, "A value for the source x coordinate should be supplied.");
+  REQ_INT_ARG(4, srcY, "A value for the source y coordinate should be supplied.");
+  REQ_INT_ARG(5, width, "A value for 'width' should be supplied.");
+  REQ_INT_ARG(6, height, "A value for 'height' should be supplied.");
 
   gdImageCopy(dest, this->_image, dstX, dstY, srcX, srcY, width, height);
 
@@ -2111,16 +2094,16 @@ Napi::Value Gd::Image::CopyResized(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(9);
+  REQ_ARGS(9, "destination image, dest x coordinate, dest y coordinate, source x cooridinate, source y coordinate, destination width, destination height, source width and source height.");
   REQ_IMG_ARG(0, dest);
-  REQ_INT_ARG(1, dstX);
-  REQ_INT_ARG(2, dstY);
-  REQ_INT_ARG(3, srcX);
-  REQ_INT_ARG(4, srcY);
-  REQ_INT_ARG(5, destW);
-  REQ_INT_ARG(6, destH);
-  REQ_INT_ARG(7, srcW);
-  REQ_INT_ARG(8, srcH);
+  REQ_INT_ARG(1, dstX, "A value for the destination x coordinate should be supplied.");
+  REQ_INT_ARG(2, dstY, "A value for the destination y coordinate should be supplied.");
+  REQ_INT_ARG(3, srcX, "A value for the source x coordinate should be supplied.");
+  REQ_INT_ARG(4, srcY, "A value for the source y coordinate should be supplied.");
+  REQ_INT_ARG(5, destW, "A value for the destination width should be supplied.");
+  REQ_INT_ARG(6, destH, "A value for the destination height should be supplied.");
+  REQ_INT_ARG(7, srcW, "A value for the source width should be supplied.");
+  REQ_INT_ARG(8, srcH, "A value for the source height should be supplied.");
 
   gdImageCopyResized(dest, this->_image, dstX, dstY, srcX, srcY, destW, destH, srcW, srcH);
 
@@ -2131,16 +2114,16 @@ Napi::Value Gd::Image::CopyResampled(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(9);
+  REQ_ARGS(9, "destination image, dest x coordinate, dest y coordinate, source x cooridinate, source y coordinate, destination width, destination height, source width and source height.");
   REQ_IMG_ARG(0, dest);
-  REQ_INT_ARG(1, dstX);
-  REQ_INT_ARG(2, dstY);
-  REQ_INT_ARG(3, srcX);
-  REQ_INT_ARG(4, srcY);
-  REQ_INT_ARG(5, destW);
-  REQ_INT_ARG(6, destH);
-  REQ_INT_ARG(7, srcW);
-  REQ_INT_ARG(8, srcH);
+  REQ_INT_ARG(1, dstX, "A value for the destination x coordinate should be supplied.");
+  REQ_INT_ARG(2, dstY, "A value for the destination y coordinate should be supplied.");
+  REQ_INT_ARG(3, srcX, "A value for the source x coordinate should be supplied.");
+  REQ_INT_ARG(4, srcY, "A value for the source y coordinate should be supplied.");
+  REQ_INT_ARG(5, destW, "A value for the destination width should be supplied.");
+  REQ_INT_ARG(6, destH, "A value for the destination height should be supplied.");
+  REQ_INT_ARG(7, srcW, "A value for the source width should be supplied.");
+  REQ_INT_ARG(8, srcH, "A value for the source height should be supplied.");
 
   gdImageCopyResampled(dest, this->_image, dstX, dstY, srcX, srcY, destW, destH, srcW, srcH);
 
@@ -2151,15 +2134,15 @@ Napi::Value Gd::Image::CopyRotated(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(8);
+  REQ_ARGS(8, "destination image, dest x coordinate, dest y coordinate, source x cooridinate, source y coordinate, destination width, destination height and angle in degrees.");
   REQ_IMG_ARG(0, dest);
   REQ_DOUBLE_ARG(1, dstX);
   REQ_DOUBLE_ARG(2, dstY);
-  REQ_INT_ARG(3, srcX);
-  REQ_INT_ARG(4, srcY);
-  REQ_INT_ARG(5, srcW);
-  REQ_INT_ARG(6, srcH);
-  REQ_INT_ARG(7, angle);
+  REQ_INT_ARG(3, srcX, "A value for the source x coordinate should be supplied.");
+  REQ_INT_ARG(4, srcY, "A value for the source y coordinate should be supplied.");
+  REQ_INT_ARG(5, srcW, "A value for the source width should be supplied.");
+  REQ_INT_ARG(6, srcH, "A value for the source height should be supplied.");
+  REQ_INT_ARG(7, angle, "A value for angle in degrees should be supplied.");
 
   gdImageCopyRotated(dest, this->_image, dstX, dstY, srcX, srcY, srcW, srcH, angle);
 
@@ -2170,15 +2153,15 @@ Napi::Value Gd::Image::CopyMerge(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(8);
+  REQ_ARGS(8, "destination image, dest x coordinate, dest y coordinate, source x cooridinate, source y coordinate, width, height and percentage value.");
   REQ_IMG_ARG(0, dest);
-  REQ_INT_ARG(1, dstX);
-  REQ_INT_ARG(2, dstY);
-  REQ_INT_ARG(3, srcX);
-  REQ_INT_ARG(4, srcY);
-  REQ_INT_ARG(5, width);
-  REQ_INT_ARG(6, height);
-  REQ_INT_ARG(7, pct);
+  REQ_INT_ARG(1, dstX, "A value for the destination x coordinate should be supplied.");
+  REQ_INT_ARG(2, dstY, "A value for the destination y coordinate should be supplied.");
+  REQ_INT_ARG(3, srcX, "A value for the source x coordinate should be supplied.");
+  REQ_INT_ARG(4, srcY, "A value for the source y coordinate should be supplied.");
+  REQ_INT_ARG(5, width, "A value for 'width' should be supplied.");
+  REQ_INT_ARG(6, height, "A value for 'height' should be supplied.");
+  REQ_INT_ARG(7, pct, "A percentage value between 0 and 100 should be supplied.");
 
   gdImageCopyMerge(dest, this->_image, dstX, dstY, srcX, srcY, width, height, pct);
 
@@ -2189,15 +2172,15 @@ Napi::Value Gd::Image::CopyMergeGray(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(8);
+  REQ_ARGS(8, "destination image, destination x coordinate, destination y coordinate, source x coordinate, source y coordinate, width, height and percentage value.");
   REQ_IMG_ARG(0, dest);
-  REQ_INT_ARG(1, dstX);
-  REQ_INT_ARG(2, dstY);
-  REQ_INT_ARG(3, srcX);
-  REQ_INT_ARG(4, srcY);
-  REQ_INT_ARG(5, width);
-  REQ_INT_ARG(6, height);
-  REQ_INT_ARG(7, pct);
+  REQ_INT_ARG(1, dstX, "A value for the destination x coordinate should be supplied.");
+  REQ_INT_ARG(2, dstY, "A value for the destination y coordinate should be supplied.");
+  REQ_INT_ARG(3, srcX, "A value for the source x coordinate should be supplied.");
+  REQ_INT_ARG(4, srcY, "A value for the source y coordinate should be supplied.");
+  REQ_INT_ARG(5, width, "A value for 'width' should be supplied.");
+  REQ_INT_ARG(6, height, "A value for 'height' should be supplied.");
+  REQ_INT_ARG(7, pct, "A value for the percentage of the source color intensity in range 0..100 should be supplied.");
 
   gdImageCopyMergeGray(dest, this->_image, dstX, dstY, srcX, srcY, width, height, pct);
 
@@ -2219,7 +2202,7 @@ Napi::Value Gd::Image::SquareToCircle(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_INT_ARG(0, radius);
+  REQ_INT_ARG(0, radius, "A value for the radius of the new image should be supplied.");
 
   gdImagePtr newImage = gdImageSquareToCircle(this->_image, radius);
 
@@ -2230,7 +2213,7 @@ Napi::Value Gd::Image::Sharpen(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_INT_ARG(0, pct);
+  REQ_INT_ARG(0, pct, "A percentage value for sharpening should be supplied. This can be greater than 100.");
 
   gdImageSharpen(this->_image, pct);
 
@@ -2256,17 +2239,10 @@ Napi::Value Gd::Image::TrueColorToPalette(const Napi::CallbackInfo &info)
   OPT_INT_ARG(0, ditherFlag, 0);
   OPT_INT_ARG(1, colorsWanted, 256);
 
-#if SUPPORTS_GD_2_1_0
   Napi::Number result = Napi::Number::New(info.Env(), gdImageTrueColorToPalette(this->_image, ditherFlag, colorsWanted));
   return result;
-#endif
-#if SUPPORTS_UNTIL_GD_2_0_36
-  gdImageTrueColorToPalette(this->_image, ditherFlag, colorsWanted);
-  return info.Env().Undefined();
-#endif
 }
 
-#if SUPPORTS_GD_2_1_0
 Napi::Value Gd::Image::PaletteToTrueColor(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
@@ -2309,15 +2285,14 @@ Napi::Value Gd::Image::ColorMatch(const Napi::CallbackInfo &info)
 
   return result;
 }
-#endif
 
 Napi::Value Gd::Image::GifAnimBegin(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(2);
-  REQ_INT_ARG(0, GlobalCM); // global color map
-  REQ_INT_ARG(1, Loops);
+  REQ_ARGS(2, "for global color map and amount of loops.");
+  REQ_INT_ARG(0, GlobalCM, "A value for the global color map should be supplied."); // global color map
+  REQ_INT_ARG(1, Loops, "A value for the amount of loops should be supplied.");
 
   int size;
   // create new buffer containing result
@@ -2335,12 +2310,12 @@ Napi::Value Gd::Image::GifAnimAdd(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(5);
-  REQ_INT_ARG(0, LocalCM);
-  REQ_INT_ARG(1, LeftOfs);
-  REQ_INT_ARG(2, TopOfs);
-  REQ_INT_ARG(3, Delay);
-  REQ_INT_ARG(4, Disposal);
+  REQ_ARGS(5, "local color map flag, left offset, top offset, delay and disposal mode.");
+  REQ_INT_ARG(0, LocalCM, "Flag. If 1, use a local Color Map for this frame");
+  REQ_INT_ARG(1, LeftOfs, "A value for the left offset of image in frame should be supplied.");
+  REQ_INT_ARG(2, TopOfs, "A value for the top offset of image in frame should be supplied.");
+  REQ_INT_ARG(3, Delay, "A value for the delay before next frame (in 1/100 seconds) should be supplied.");
+  REQ_INT_ARG(4, Disposal, "A value for the disposal mode should be supplied.");
 
   int size;
   char *data;
@@ -2389,7 +2364,7 @@ Napi::Value Gd::Image::Compare(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(1);
+  REQ_ARGS(1, "of type Image.");
   if (!info[0].IsObject())
   {
     Napi::TypeError::New(info.Env(), "Argument 0 must be an image").ThrowAsJavaScriptException();

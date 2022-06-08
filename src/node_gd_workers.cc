@@ -714,7 +714,7 @@ public:
   static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
   {
     REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the WBMP.");
-    REQ_INT_ARG(1, foreground);
+    REQ_INT_ARG(1, foreground, "The index of the foreground color should be supplied.");
 
     SaveWBMPWorker *worker = new SaveWBMPWorker(info.Env(),
                                                 "SaveWBMPWorkerResource");
@@ -787,9 +787,9 @@ class SaveBmpWorker : public SaveWorker
 public:
   static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
   {
-    REQ_ARGS(2);
+    REQ_ARGS(2, "destination file path and compression flag.");
     REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the BMP.");
-    REQ_INT_ARG(1, compression);
+    REQ_INT_ARG(1, compression, "BMP compression flag should be either 0 (no compression) or 1 (compression).");
 
     SaveBmpWorker *worker = new SaveBmpWorker(info.Env(),
                                               "SaveBmpWorkerResource");

@@ -253,20 +253,14 @@ var transparentRed = gd.trueColorAlpha(255, 0, 0, 63); // 1073676288
 #### Return value
 
 - `String`
-  - Something like `2.1.1`
+  - Something like `2.3.0`
 
-Will return a string representing the version of your currently installed GD version. Outputs something like `2.1.1`
+Will return a string representing the version of your currently installed GD version. Outputs something like `2.3.0`
 
 ```javascript
-var gd = requide('node-gd');
+import gd from 'node-gd';
 
-if (gd.getGDVersion() >= '2.1.1') {
-  const img = await gd.openFile('./test.png');
-
-  // do something with img
-
-  img.destroy();
-}
+console.log(gd.getGDVersion());
 ```
 
 # Manipulating graphic images
@@ -1083,11 +1077,10 @@ Be aware that since `node-gd` version 0.3.x libgd2 version 2.1.x is mostly suppo
 Another way to check the installed GD version on your system:
 
 ```javascript
-const gd = require('node-gd');
+import gd from 'node-gd';
 
-// as of node-gd 0.4.x
-var version = gd.getGDVersion();
-console.log(version); // 2.0.1 or 2.1.1 or the like
+const version = gd.getGDVersion();
+console.log(version); // 2.3.1 or the like
 ```
 
 # Test

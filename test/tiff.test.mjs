@@ -14,7 +14,7 @@ describe('Section Handling TIFF files', function () {
   it('gd.openTiff() -- can open a tiff and save it as a jpg', async function () {
     var s;
     var t;
-    if (gd.getGDVersion() < '2.2.4') {
+    if (!gd.GD_TIFF) {
       return this.skip();
     }
     s = source + 'input.tif';
@@ -29,7 +29,7 @@ describe('Section Handling TIFF files', function () {
   it('gd.Image#saveTiff() -- can open a jpg file and save it as a tiff', async function () {
     var s;
     var t;
-    if (gd.getGDVersion() < '2.2.4') {
+    if (!gd.GD_TIFF) {
       return this.skip();
     }
     s = source + 'input.jpg';
@@ -44,7 +44,7 @@ describe('Section Handling TIFF files', function () {
   it('gd.createFromTiff() -- can open a tiff and save it as a tiff', async function () {
     var s;
     var t;
-    if (gd.getGDVersion() < '2.2.4') {
+    if (!gd.GD_TIFF) {
       return this.skip();
     }
     s = source + 'input.tif';
@@ -57,7 +57,7 @@ describe('Section Handling TIFF files', function () {
   });
 
   it('gd.createFromTiffPtr() -- can open a tif and store it in a pointer and save a tiff from the pointer', async function () {
-    if (gd.getGDVersion() < '2.2.4') {
+    if (!gd.GD_TIFF) {
       return this.skip();
     }
     var s = source + 'input.tif';
@@ -72,7 +72,7 @@ describe('Section Handling TIFF files', function () {
 
   it('gd.Image#saveTiff() -- can create a truecolor Tiff image with text', async function () {
     var f, img, t, txtColor;
-    if (gd.getGDVersion() < '2.2.4' || !gd.GD_TIFF) {
+    if (!gd.GD_TIFF) {
       return this.skip();
     }
     f = source + 'FreeSans.ttf';

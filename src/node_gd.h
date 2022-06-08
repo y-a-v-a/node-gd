@@ -25,24 +25,10 @@
 
 #define SUPPORTS_GD_2_3_0 (SUPPORTS_GD_2_3_3 || GD_MINOR_VERSION == 3 && GD_RELEASE_VERSION >= 0)
 
-#define SUPPORTS_GD_2_2_5 (SUPPORTS_GD_2_3_0 || GD_MINOR_VERSION == 2 && GD_RELEASE_VERSION >= 5)
-
-#define SUPPORTS_GD_2_2_4 (SUPPORTS_GD_2_2_5 || GD_MINOR_VERSION == 2 && GD_RELEASE_VERSION >= 4)
-
-#define SUPPORTS_GD_2_2_0 (SUPPORTS_GD_2_2_4 || (GD_MINOR_VERSION == 2 && GD_RELEASE_VERSION >= 0))
-
-#define SUPPORTS_GD_2_1_1 (SUPPORTS_GD_2_2_0 || (GD_MINOR_VERSION == 1 && GD_RELEASE_VERSION == 1))
-
-#define SUPPORTS_GD_2_1_0 (SUPPORTS_GD_2_1_1 || (GD_MINOR_VERSION == 1 && GD_RELEASE_VERSION == 0))
-
-#define SUPPORTS_GD_2_0_36 (SUPPORTS_GD_2_1_0 || (GD_MINOR_VERSION == 0 && GD_RELEASE_VERSION <= 36))
-
-#define SUPPORTS_UNTIL_GD_2_0_36 (GD_MINOR_VERSION == 0 && GD_RELEASE_VERSION <= 36)
-
 #define HAS_LIBHEIF (HAVE_LIBHEIF && SUPPORTS_GD_2_3_3)
 #define HAS_LIBAVIF (HAVE_LIBAVIF && SUPPORTS_GD_2_3_3)
-#define HAS_LIBTIFF (HAVE_LIBTIFF && SUPPORTS_GD_2_2_4)
-#define HAS_LIBWEBP (HAVE_LIBWEBP && SUPPORTS_GD_2_1_0)
+#define HAS_LIBTIFF (HAVE_LIBTIFF)
+#define HAS_LIBWEBP (HAVE_LIBWEBP)
 
 // Since gd 2.0.28, these are always built in
 #define GD_GIF 1
@@ -56,13 +42,13 @@
 #define COLOR_TITLED gdTiled
 #define COLOR_TRANSPARENT gdTransparent
 
-#define REQ_ARGS(N)                               \
-  if (info.Length() < (N))                        \
-  {                                               \
-    Napi::Error::New(info.Env(),                  \
-                     "Expected " #N " arguments") \
-        .ThrowAsJavaScriptException();            \
-    return info.Env().Null();                     \
+#define REQ_ARGS(N, MSG)                                  \
+  if (info.Length() < (N))                                \
+  {                                                       \
+    Napi::Error::New(info.Env(),                          \
+                     "Expected " #N " argument(s): " MSG) \
+        .ThrowAsJavaScriptException();                    \
+    return info.Env().Null();                             \
   }
 
 #define REQ_STR_ARG(I, VAR, MSG)                                   \
@@ -75,15 +61,15 @@
   }                                                                \
   std::string VAR = info[I].As<Napi::String>().Utf8Value().c_str();
 
-#define REQ_INT_ARG(I, VAR)                                    \
-  int VAR;                                                     \
-  if (info.Length() <= (I) || !info[I].IsNumber())             \
-  {                                                            \
-    Napi::TypeError::New(info.Env(),                           \
-                         "Argument " #I " must be an integer") \
-        .ThrowAsJavaScriptException();                         \
-    return info.Env().Null();                                  \
-  }                                                            \
+#define REQ_INT_ARG(I, VAR, MSG)                                   \
+  int VAR;                                                         \
+  if (info.Length() <= (I) || !info[I].IsNumber())                 \
+  {                                                                \
+    Napi::TypeError::New(info.Env(),                               \
+                         "Argument " #I " must be a Number. " MSG) \
+        .ThrowAsJavaScriptException();                             \
+    return info.Env().Null();                                      \
+  }                                                                \
   VAR = info[I].ToNumber();
 
 #define INT_ARG_RANGE(I, PROP)                                          \
@@ -99,7 +85,7 @@
   if (info.Length() <= (I) || !info[I].IsFunction())           \
   {                                                            \
     Napi::TypeError::New(info.Env(),                           \
-                         "Argument " #I " must be a function") \
+                         "Argument " #I " must be a Function") \
         .ThrowAsJavaScriptException();                         \
     return info.Env().Null();                                  \
   }                                                            \
@@ -116,22 +102,11 @@
   }                                                          \
   VAR = info[I].ToNumber();
 
-#define REQ_EXT_ARG(I, VAR)                          \
-  if (info.Length() <= (I) || !info[I].IsExternal()) \
-  {                                                  \
-    Napi::TypeError::New(info.Env(),                 \
-                         "Argument " #I " invalid")  \
-        .ThrowAsJavaScriptException();               \
-    return;                                          \
-  }                                                  \
-  Napi::External<gdImagePtr> VAR =                   \
-      info[I].As<Napi::External<gdImagePtr> >();
-
 #define REQ_IMG_ARG(I, VAR)                                            \
   if (info.Length() <= (I) || !info[I].IsObject())                     \
   {                                                                    \
     Napi::TypeError::New(info.Env(),                                   \
-                         "Argument " #I " must be an object")          \
+                         "Argument " #I " must be an Image object.")   \
         .ThrowAsJavaScriptException();                                 \
     return info.Env().Null();                                          \
   }                                                                    \
@@ -170,7 +145,7 @@
   else                                                                \
   {                                                                   \
     Napi::TypeError::New(info.Env(),                                  \
-                         "Optional argument " #I " must be a string") \
+                         "Optional argument " #I " must be a String") \
         .ThrowAsJavaScriptException();                                \
     return info.Env().Null();                                         \
   }
@@ -213,7 +188,7 @@
   }                                                                     \
   Napi::Value Gd::CreateFrom##TYPE##Ptr(const Napi::CallbackInfo &info) \
   {                                                                     \
-    REQ_ARGS(1);                                                        \
+    REQ_ARGS(1, "of type Buffer.");                                     \
     ASSERT_IS_BUFFER(info[0]);                                          \
     gdImagePtr im;                                                      \
     Napi::Buffer<char> buffer = info[0].As<Napi::Buffer<char> >();      \
@@ -291,10 +266,8 @@ public:
     Napi::Value Webp(const Napi::CallbackInfo &info);
     Napi::Value WebpPtr(const Napi::CallbackInfo &info);
 #endif
-#if SUPPORTS_GD_2_1_0
     Napi::Value Bmp(const Napi::CallbackInfo &info);
     Napi::Value BmpPtr(const Napi::CallbackInfo &info);
-#endif
 #if HAS_LIBHEIF
     Napi::Value Heif(const Napi::CallbackInfo &info);
     Napi::Value HeifPtr(const Napi::CallbackInfo &info);
@@ -308,10 +281,8 @@ public:
     Napi::Value Tiff(const Napi::CallbackInfo &info);
     Napi::Value TiffPtr(const Napi::CallbackInfo &info);
 #endif
-
-#if SUPPORTS_GD_2_1_1
     Napi::Value File(const Napi::CallbackInfo &info);
-#endif
+
     /**
      * Drawing Functions
      */
@@ -325,10 +296,7 @@ public:
     Napi::Value FilledRectangle(const Napi::CallbackInfo &info);
     Napi::Value Arc(const Napi::CallbackInfo &info);
     Napi::Value FilledArc(const Napi::CallbackInfo &info);
-#if SUPPORTS_GD_2_1_0
     Napi::Value Ellipse(const Napi::CallbackInfo &info);
-#endif
-
     Napi::Value FilledEllipse(const Napi::CallbackInfo &info);
     Napi::Value FillToBorder(const Napi::CallbackInfo &info);
     Napi::Value Fill(const Napi::CallbackInfo &info);
@@ -342,9 +310,7 @@ public:
     Napi::Value SaveAlpha(const Napi::CallbackInfo &info);
     Napi::Value SetClip(const Napi::CallbackInfo &info);
     Napi::Value GetClip(const Napi::CallbackInfo &info);
-#if SUPPORTS_GD_2_1_0
     Napi::Value SetResolution(const Napi::CallbackInfo &info);
-#endif
 
     /**
      * Query Functions
@@ -373,6 +339,7 @@ public:
     Napi::Value ColorClosestAlpha(const Napi::CallbackInfo &info);
     Napi::Value ColorClosestHWB(const Napi::CallbackInfo &info);
     Napi::Value ColorExact(const Napi::CallbackInfo &info);
+    Napi::Value ColorExactAlpha(const Napi::CallbackInfo &info);
     Napi::Value ColorResolve(const Napi::CallbackInfo &info);
     Napi::Value ColorResolveAlpha(const Napi::CallbackInfo &info);
     Napi::Value ColorsTotalGetter(const Napi::CallbackInfo &info);
@@ -385,7 +352,6 @@ public:
     Napi::Value GetTransparent(const Napi::CallbackInfo &info);
     Napi::Value ColorDeallocate(const Napi::CallbackInfo &info);
     Napi::Value ColorTransparent(const Napi::CallbackInfo &info);
-#if SUPPORTS_GD_2_1_0
     Napi::Value ColorReplace(const Napi::CallbackInfo &info);
     Napi::Value ColorReplaceThreshold(const Napi::CallbackInfo &info);
     Napi::Value ColorReplaceArray(const Napi::CallbackInfo &info);
@@ -401,11 +367,7 @@ public:
     Napi::Value Crop(const Napi::CallbackInfo &info);
     Napi::Value CropAuto(const Napi::CallbackInfo &info);
     Napi::Value CropThreshold(const Napi::CallbackInfo &info);
-#endif
-
-#if SUPPORTS_GD_2_1_1
     Napi::Value Emboss(const Napi::CallbackInfo &info);
-#endif
 
     /**
      * Copying and Resizing Functions
@@ -421,11 +383,8 @@ public:
     Napi::Value Sharpen(const Napi::CallbackInfo &info);
     Napi::Value CreatePaletteFromTrueColor(const Napi::CallbackInfo &info);
     Napi::Value TrueColorToPalette(const Napi::CallbackInfo &info);
-
-#if SUPPORTS_GD_2_1_0
     Napi::Value PaletteToTrueColor(const Napi::CallbackInfo &info);
     Napi::Value ColorMatch(const Napi::CallbackInfo &info);
-#endif
 
     Napi::Value GifAnimBegin(const Napi::CallbackInfo &info);
     Napi::Value GifAnimAdd(const Napi::CallbackInfo &info);
@@ -461,10 +420,9 @@ private:
   static Napi::Value CreateFromWebpPtr(const Napi::CallbackInfo &info);
 #endif
 
-#if SUPPORTS_GD_2_1_0
   static Napi::Value CreateFromBmp(const Napi::CallbackInfo &info);
   static Napi::Value CreateFromBmpPtr(const Napi::CallbackInfo &info);
-#endif
+
 #if HAS_LIBHEIF
   static Napi::Value CreateFromHeif(const Napi::CallbackInfo &info);
   static Napi::Value CreateFromHeifPtr(const Napi::CallbackInfo &info);
@@ -478,12 +436,10 @@ private:
   static Napi::Value CreateFromTiffPtr(const Napi::CallbackInfo &info);
 #endif
 
-/**
- * Section C - Creation of image in memory from a file, type based on file extension
- */
-#if SUPPORTS_GD_2_1_1
+  /**
+   * Section C - Creation of image in memory from a file, type based on file extension
+   */
   static Napi::Value CreateFromFile(const Napi::CallbackInfo &info);
-#endif
 
   /**
    * Section D - Calculate functions

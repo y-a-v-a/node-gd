@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# 3.0.0 (alfa)
+
+- Only support libgd 2.3.0 and up
+
+### Added
+
+- A lot of error messages with a sane message
+- Added gdImageColorExactAlpha
+
+### Removed
+
+- Removed gd and gd2 image formats as libgd turned them off by default since 2.3.0
+- Removed many libgd version conditions since decision is made to support libgd 2.3.0 and up only per node-gd 3.x.x
+
 # 2.1.1 - 2020-09-10 (current)
 
 ### Added
@@ -25,7 +39,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Tests with regard to font boundary coordinates
 
-
 # 2.0.1 - 2020-05-26
 
 ### Added
@@ -43,8 +56,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Remove `.npmignore` in favour of `files` property in `package.json`.
 
-
-
 # 2.0.0 - 2020-01-19
 
 ### Added
@@ -53,7 +64,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a license file.
 - Added a changelog file.
 - Added a lot of new tests.
-
 
 ### Changed
 
@@ -71,7 +81,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Breaking
 
 - Dropped support for Node <6.x
-
 
 # 1.5.4 - 2018-02-06
 

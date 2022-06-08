@@ -58,19 +58,11 @@ describe('Meta information', function () {
   });
 
   it('gd.GD_GIFANIM -- will have built in GIF animation support', function () {
-    assert.equal(
-      gd.GD_GIFANIM,
-      1,
-      'No GIF animation support for libgd is impossible!'
-    );
+    assert.equal(gd.GD_GIFANIM, 1, 'No GIF animation support for libgd is impossible!');
   });
 
   it('gd.GD_OPENPOLYGON -- will have built in open polygon support', function () {
-    assert.equal(
-      gd.GD_OPENPOLYGON,
-      1,
-      'No open polygon support for libgd is impossible!'
-    );
+    assert.equal(gd.GD_OPENPOLYGON, 1, 'No open polygon support for libgd is impossible!');
   });
 });
 
@@ -191,9 +183,6 @@ describe('Image filter functions', function () {
 
   it('gd.Image#grayscale() -- can convert to grayscale', async function () {
     var s, t;
-    if (gd.getGDVersion() < '2.1.1') {
-      return this.skip();
-    }
     s = source + 'input.png';
     t = target + 'output-grayscale.png';
     const img = await gd.openPng(s);
@@ -205,9 +194,6 @@ describe('Image filter functions', function () {
 
   it('gd.Image#gaussianBlur() -- can add gaussian blur to an image', async function () {
     var s, t;
-    if (gd.getGDVersion() < '2.1.1') {
-      return this.skip();
-    }
     s = source + 'input.png';
     t = target + 'output-gaussianblur.png';
     const img = await gd.openPng(s);
@@ -223,9 +209,6 @@ describe('Image filter functions', function () {
 
   it('gd.Image#negate() -- can negate an image', async function () {
     var s, t;
-    if (gd.getGDVersion() < '2.1.1') {
-      return this.skip();
-    }
     s = source + 'input.png';
     t = target + 'output-negate.png';
     const img = await gd.openPng(s);
@@ -238,9 +221,6 @@ describe('Image filter functions', function () {
 
   it('gd.Image#brightness() -- can change brightness of an image', async function () {
     var s, t;
-    if (gd.getGDVersion() < '2.1.1') {
-      return this.skip();
-    }
     s = source + 'input.png';
     t = target + 'output-brightness.png';
     const img = await gd.openPng(s);
@@ -254,9 +234,6 @@ describe('Image filter functions', function () {
 
   it('gd.Image#contrast() -- can change contrast of an image', async function () {
     var s, t;
-    if (gd.getGDVersion() < '2.1.1') {
-      return this.skip();
-    }
     s = source + 'input.png';
     t = target + 'output-contrast.png';
     const img = await gd.openPng(s);
@@ -269,9 +246,6 @@ describe('Image filter functions', function () {
 
   it('gd.Image#emboss() -- can emboss an image', async function () {
     var s, t;
-    if (gd.getGDVersion() < '2.1.1') {
-      return this.skip();
-    }
     s = source + 'input.png';
     t = target + 'output-emboss.png';
     const img = await gd.openPng(s);
@@ -283,9 +257,6 @@ describe('Image filter functions', function () {
 
   it('gd.Image#selectiveBlur() -- can apply selective blur to an image', async function () {
     var s, t;
-    if (gd.getGDVersion() < '2.1.1') {
-      return this.skip();
-    }
     s = source + 'input.png';
     t = target + 'output-selectiveBlur.png';
     const img = await gd.openPng(s);
@@ -324,9 +295,6 @@ describe('Image filter functions', function () {
 
   it('gd.Image#stringFT() -- can create a truecolor BMP image with text', async function () {
     var f, img, t, txtColor;
-    if (gd.getGDVersion() < '2.1.1') {
-      return this.skip();
-    }
     f = source + 'FreeSans.ttf';
     t = target + 'output-truecolor-string.bmp';
     img = await gd.createTrueColor(120, 20);

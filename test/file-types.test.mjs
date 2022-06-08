@@ -72,10 +72,6 @@ describe('Section Handling file types', function () {
 
   it('gd.Image#saveWBMP() -- can copy a png into WBMP', async function () {
     var s, t;
-    if (gd.getGDVersion() < '2.1.1') {
-      this.skip();
-      return;
-    }
     s = source + 'input.png';
     t = target + 'output.wbmp';
     const img = await gd.openPng(s);
@@ -118,10 +114,6 @@ describe('Section Handling file types', function () {
   it('gd.Image#savePng() -- can open a bmp and save it as png', async function () {
     var s;
     var t;
-    if (gd.getGDVersion() < '2.1.1') {
-      this.skip();
-      return;
-    }
     s = source + 'input.bmp';
     t = target + 'output-from-bmp.png';
     const img = await gd.openBmp(s);
