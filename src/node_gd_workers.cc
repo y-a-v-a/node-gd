@@ -173,97 +173,6 @@ private:
   }
 };
 
-// Gd2
-class CreateFromGd2Worker : public CreateFromWorker
-{
-public:
-  static Value DoWork(const CallbackInfo &info)
-  {
-    REQ_STR_ARG(0, path, "Argument should be a path to the Gd2 file to load.");
-
-    CreateFromGd2Worker *worker = new CreateFromGd2Worker(info.Env(),
-                                                          "CreateFromGd2WorkerResource");
-
-    worker->path = path;
-    worker->Queue();
-    return worker->_deferred.Promise();
-  }
-
-protected:
-  void Execute() override
-  {
-    // execute the async task
-    FILE *in;
-    in = fopen(path.c_str(), "rb");
-    if (in == nullptr)
-    {
-      return SetError("Cannot open GD2 file");
-    }
-    image = gdImageCreateFromGd2(in);
-    fclose(in);
-  }
-
-private:
-  CreateFromGd2Worker(napi_env env, const char *resource_name)
-      : CreateFromWorker(env, resource_name)
-  {
-  }
-};
-
-class CreateFromGd2PartWorker : public CreateFromWorker
-{
-public:
-  static Value DoWork(const CallbackInfo &info)
-  {
-    REQ_ARGS(5);
-    REQ_STR_ARG(0, path, "Argument should be a path to the Gd2 file to load.");
-    REQ_INT_ARG(1, srcX);
-    REQ_INT_ARG(2, srcY);
-    REQ_INT_ARG(3, width);
-    REQ_INT_ARG(4, height);
-
-    CreateFromGd2PartWorker *worker = new CreateFromGd2PartWorker(info.Env(),
-                                                                  "CreateFromGd2PartWorkerResource");
-
-    worker->path = path;
-    worker->srcX = srcX;
-    worker->srcY = srcY;
-    worker->width = width;
-    worker->height = height;
-    worker->Queue();
-    return worker->_deferred.Promise();
-  }
-
-protected:
-  void Execute() override
-  {
-    // execute the async task
-    FILE *in;
-    in = fopen(path.c_str(), "rb");
-    if (in == nullptr)
-    {
-      return SetError("Cannot open GD2 file to read part of it");
-    }
-    image = gdImageCreateFromGd2Part(in, srcX, srcY, width, height);
-
-    fclose(in);
-  }
-
-  int srcX;
-
-  int srcY;
-
-  int width;
-
-  int height;
-
-private:
-  CreateFromGd2PartWorker(napi_env env, const char *resource_name)
-      : CreateFromWorker(env, resource_name)
-  {
-  }
-};
-
 // WBMP
 class CreateFromWBMPWorker : public CreateFromWorker
 {
@@ -414,67 +323,79 @@ private:
 
 // Avif
 #if HAS_LIBAVIF
-class CreateFromAvifWorker : public CreateFromWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info) {
-      REQ_STR_ARG(0, path, "Argument should be a path to the Avif file to load.");
+class CreateFromAvifWorker : public CreateFromWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path to the Avif file to load.");
 
-      CreateFromAvifWorker* worker = new CreateFromAvifWorker(info.Env(),
-        "CreateFromAvifWorkerResource");
+    CreateFromAvifWorker *worker = new CreateFromAvifWorker(info.Env(),
+                                                            "CreateFromAvifWorkerResource");
 
-      worker->path = path;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    // execute the async task
+    FILE *in;
+    in = fopen(path.c_str(), "rb");
+    if (in == nullptr)
+    {
+      return SetError("Cannot open Avif file");
     }
+    image = gdImageCreateFromAvif(in);
+    fclose(in);
+  }
 
-  protected:
-    void Execute() override {
-      // execute the async task
-      FILE *in; in = fopen(path.c_str(), "rb");
-      if (in == nullptr) {
-        return SetError("Cannot open Avif file");
-      }
-      image = gdImageCreateFromAvif(in);
-      fclose(in);
-    }
-
-  private:
-    CreateFromAvifWorker(napi_env env, const char* resource_name)
-      : CreateFromWorker(env, resource_name) {
-      }
+private:
+  CreateFromAvifWorker(napi_env env, const char *resource_name)
+      : CreateFromWorker(env, resource_name)
+  {
+  }
 };
 #endif
 
 #if HAS_LIBHEIF
 // Heif
-class CreateFromHeifWorker : public CreateFromWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info) {
-      REQ_STR_ARG(0, path, "Argument should be a path to the Heif file to load.");
+class CreateFromHeifWorker : public CreateFromWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path to the Heif file to load.");
 
-      CreateFromHeifWorker* worker = new CreateFromHeifWorker(info.Env(),
-        "CreateFromHeifWorkerResource");
+    CreateFromHeifWorker *worker = new CreateFromHeifWorker(info.Env(),
+                                                            "CreateFromHeifWorkerResource");
 
-      worker->path = path;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    // execute the async task
+    FILE *in;
+    in = fopen(path.c_str(), "rb");
+    if (in == nullptr)
+    {
+      return SetError("Cannot open Heif file");
     }
+    image = gdImageCreateFromHeif(in);
+    fclose(in);
+  }
 
-  protected:
-    void Execute() override {
-      // execute the async task
-      FILE *in; in = fopen(path.c_str(), "rb");
-      if (in == nullptr) {
-        return SetError("Cannot open Heif file");
-      }
-      image = gdImageCreateFromHeif(in);
-      fclose(in);
-    }
-
-  private:
-    CreateFromHeifWorker(napi_env env, const char* resource_name)
-      : CreateFromWorker(env, resource_name) {
-      }
+private:
+  CreateFromHeifWorker(napi_env env, const char *resource_name)
+      : CreateFromWorker(env, resource_name)
+  {
+  }
 };
 #endif
 
@@ -861,84 +782,6 @@ private:
   }
 };
 
-class SaveGdWorker : public SaveWorker
-{
-public:
-  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
-  {
-    REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the Gd.");
-
-    SaveGdWorker *worker = new SaveGdWorker(info.Env(),
-                                            "SaveGdWorkerResource");
-
-    worker->path = path;
-    worker->_gdImage = &gdImage;
-    worker->Queue();
-    return worker->_deferred.Promise();
-  }
-
-protected:
-  void Execute() override
-  {
-    FILE *out = fopen(path.c_str(), "wb");
-    if (out == nullptr)
-    {
-      return SetError("Cannot save GD file");
-    }
-    gdImageGd(*_gdImage, out);
-    fclose(out);
-  }
-
-private:
-  SaveGdWorker(napi_env env, const char *resource_name)
-      : SaveWorker(env, resource_name)
-  {
-  }
-};
-
-class SaveGd2Worker : public SaveWorker
-{
-public:
-  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
-  {
-    REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the Gd2.");
-    REQ_INT_ARG(1, chunkSize);
-    OPT_INT_ARG(2, format, GD2_FMT_RAW);
-
-    SaveGd2Worker *worker = new SaveGd2Worker(info.Env(),
-                                              "SaveGd2WorkerResource");
-
-    worker->path = path;
-    worker->chunkSize = chunkSize;
-    worker->format = format;
-    worker->_gdImage = &gdImage;
-    worker->Queue();
-    return worker->_deferred.Promise();
-  }
-
-protected:
-  void Execute() override
-  {
-    FILE *out = fopen(path.c_str(), "wb");
-    if (out == nullptr)
-    {
-      return SetError("Cannot save GD2 file");
-    }
-    gdImageGd2(*_gdImage, out, chunkSize, format);
-    fclose(out);
-  }
-
-  int chunkSize;
-
-  int format;
-
-private:
-  SaveGd2Worker(napi_env env, const char *resource_name)
-      : SaveWorker(env, resource_name)
-  {
-  }
-};
-
 class SaveBmpWorker : public SaveWorker
 {
 public:
@@ -1015,89 +858,104 @@ private:
 };
 
 #if HAS_LIBAVIF
-class SaveHeifWorker : public SaveWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info, gdImagePtr& gdImage) {
-      REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the Heif.");
-      OPT_INT_ARG(1, quality, -1);
-      OPT_INT_ARG(2, codec_param, 1);
-      OPT_STR_ARG(3, chroma_param,  "444");
+class SaveHeifWorker : public SaveWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the Heif.");
+    OPT_INT_ARG(1, quality, -1);
+    OPT_INT_ARG(2, codec_param, 1);
+    OPT_STR_ARG(3, chroma_param, "444");
 
-      const char* chroma = chroma_param.c_str();
+    const char *chroma = chroma_param.c_str();
 
-      SaveHeifWorker* worker = new SaveHeifWorker(info.Env(),
-        "SaveHeifWorkerResource");
+    SaveHeifWorker *worker = new SaveHeifWorker(info.Env(),
+                                                "SaveHeifWorkerResource");
 
-      worker->path = path;
-      worker->_gdImage = &gdImage;
-      worker->quality = quality;
-      if (codec_param == 1) {
-        worker->codec = GD_HEIF_CODEC_HEVC;
-      } else if (codec_param == 4) {
-        worker->codec = GD_HEIF_CODEC_AV1;
-      } else {
-        worker->codec = GD_HEIF_CODEC_UNKNOWN;
-      }
-      worker->chroma = chroma;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->_gdImage = &gdImage;
+    worker->quality = quality;
+    if (codec_param == 1)
+    {
+      worker->codec = GD_HEIF_CODEC_HEVC;
     }
-
-  protected:
-    void Execute() override {
-      FILE *out = fopen(path.c_str(), "wb");
-      if (out == nullptr) {
-        return SetError("Cannot save Heif file");
-      }
-      gdImageHeifEx(*_gdImage, out, quality, codec, chroma);
-      fclose(out);
+    else if (codec_param == 4)
+    {
+      worker->codec = GD_HEIF_CODEC_AV1;
     }
+    else
+    {
+      worker->codec = GD_HEIF_CODEC_UNKNOWN;
+    }
+    worker->chroma = chroma;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
 
-    gdHeifCodec codec;
+protected:
+  void Execute() override
+  {
+    FILE *out = fopen(path.c_str(), "wb");
+    if (out == nullptr)
+    {
+      return SetError("Cannot save Heif file");
+    }
+    gdImageHeifEx(*_gdImage, out, quality, codec, chroma);
+    fclose(out);
+  }
 
-    const char* chroma;
+  gdHeifCodec codec;
 
-  private:
-    SaveHeifWorker(napi_env env, const char* resource_name)
-      : SaveWorker(env, resource_name) {
-      }
+  const char *chroma;
+
+private:
+  SaveHeifWorker(napi_env env, const char *resource_name)
+      : SaveWorker(env, resource_name)
+  {
+  }
 };
 #endif
 
 #if HAS_LIBAVIF
-class SaveAvifWorker : public SaveWorker {
-  public:
-    static Value DoWork(const CallbackInfo& info, gdImagePtr& gdImage) {
-      REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the Avif.");
-      OPT_INT_ARG(1, quality, -1);
-      OPT_INT_ARG(2, speed, -1);
+class SaveAvifWorker : public SaveWorker
+{
+public:
+  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  {
+    REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the Avif.");
+    OPT_INT_ARG(1, quality, -1);
+    OPT_INT_ARG(2, speed, -1);
 
-      SaveAvifWorker* worker = new SaveAvifWorker(info.Env(),
-        "SaveAvifWorkerResource");
+    SaveAvifWorker *worker = new SaveAvifWorker(info.Env(),
+                                                "SaveAvifWorkerResource");
 
-      worker->path = path;
-      worker->_gdImage = &gdImage;
-      worker->quality = quality;
-      worker->speed = speed;
-      worker->Queue();
-      return worker->_deferred.Promise();
+    worker->path = path;
+    worker->_gdImage = &gdImage;
+    worker->quality = quality;
+    worker->speed = speed;
+    worker->Queue();
+    return worker->_deferred.Promise();
+  }
+
+protected:
+  void Execute() override
+  {
+    FILE *out = fopen(path.c_str(), "wb");
+    if (out == nullptr)
+    {
+      return SetError("Cannot save Avif file");
     }
+    gdImageAvifEx(*_gdImage, out, quality, speed);
+    fclose(out);
+  }
 
-  protected:
-    void Execute() override {
-      FILE *out = fopen(path.c_str(), "wb");
-      if (out == nullptr) {
-        return SetError("Cannot save Avif file");
-      }
-      gdImageAvifEx(*_gdImage, out, quality, speed);
-      fclose(out);
-    }
+  int speed;
 
-    int speed;
-
-  private:
-    SaveAvifWorker(napi_env env, const char* resource_name)
-      : SaveWorker(env, resource_name) {
-      }
+private:
+  SaveAvifWorker(napi_env env, const char *resource_name)
+      : SaveWorker(env, resource_name)
+  {
+  }
 };
 #endif
