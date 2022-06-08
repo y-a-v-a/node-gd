@@ -413,10 +413,11 @@ private:
 };
 
 // Avif
+#if HAS_LIBAVIF
 class CreateFromAvifWorker : public CreateFromWorker {
   public:
     static Value DoWork(const CallbackInfo& info) {
-      REQ_STR_ARG(0, path);
+      REQ_STR_ARG(0, path, "Argument should be a path to the Avif file to load.");
 
       CreateFromAvifWorker* worker = new CreateFromAvifWorker(info.Env(),
         "CreateFromAvifWorkerResource");
@@ -442,12 +443,14 @@ class CreateFromAvifWorker : public CreateFromWorker {
       : CreateFromWorker(env, resource_name) {
       }
 };
+#endif
 
+#if HAS_LIBHEIF
 // Heif
 class CreateFromHeifWorker : public CreateFromWorker {
   public:
     static Value DoWork(const CallbackInfo& info) {
-      REQ_STR_ARG(0, path);
+      REQ_STR_ARG(0, path, "Argument should be a path to the Heif file to load.");
 
       CreateFromHeifWorker* worker = new CreateFromHeifWorker(info.Env(),
         "CreateFromHeifWorkerResource");
@@ -473,6 +476,7 @@ class CreateFromHeifWorker : public CreateFromWorker {
       : CreateFromWorker(env, resource_name) {
       }
 };
+#endif
 
 /**
  * FileWorker handling gdImageFile via the AsyncWorker
@@ -1010,10 +1014,11 @@ private:
   }
 };
 
+#if HAS_LIBAVIF
 class SaveHeifWorker : public SaveWorker {
   public:
     static Value DoWork(const CallbackInfo& info, gdImagePtr& gdImage) {
-      REQ_STR_ARG(0, path);
+      REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the Heif.");
       OPT_INT_ARG(1, quality, -1);
       OPT_INT_ARG(2, codec_param, 1);
       OPT_STR_ARG(3, chroma_param,  "444");
@@ -1057,11 +1062,13 @@ class SaveHeifWorker : public SaveWorker {
       : SaveWorker(env, resource_name) {
       }
 };
+#endif
 
+#if HAS_LIBAVIF
 class SaveAvifWorker : public SaveWorker {
   public:
     static Value DoWork(const CallbackInfo& info, gdImagePtr& gdImage) {
-      REQ_STR_ARG(0, path);
+      REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the Avif.");
       OPT_INT_ARG(1, quality, -1);
       OPT_INT_ARG(2, speed, -1);
 
@@ -1093,3 +1100,4 @@ class SaveAvifWorker : public SaveWorker {
       : SaveWorker(env, resource_name) {
       }
 };
+#endif

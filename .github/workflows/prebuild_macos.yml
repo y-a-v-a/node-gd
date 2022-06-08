@@ -1,0 +1,27 @@
+name: Make macOS prebuild
+on: workflow_dispatch # trigger by "hand"
+
+jobs:
+  macOS:
+    strategy:
+      matrix:
+        node: [14, 16, 18]
+        node-gd-tag: [] # git tag, like 3.x.x
+    name: ${{ matrix.node-gd-tag }}, NodeJS ${{ matrix.node }}, macOS
+    runs-on: macos-latest
+    env:
+      BUILD_VERSION: ${{ matrix.node-gd-tag }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ matrix.node-gd-tag }}
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Build
+        run: |
+          npm install -g node-gyp
+          brew update
+          brew install pkg-config gd libheif libimagequant libde265 x265

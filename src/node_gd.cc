@@ -358,12 +358,12 @@ Napi::Object Gd::Image::Init(Napi::Env env, Napi::Object exports)
             InstanceMethod("bmpPtr", &Gd::Image::BmpPtr),
 #endif
 #if HAS_LIBHEIF
-      InstanceMethod("heif", &Gd::Image::Heif),
-      InstanceMethod("heifPtr", &Gd::Image::HeifPtr),
+            InstanceMethod("heif", &Gd::Image::Heif),
+            InstanceMethod("heifPtr", &Gd::Image::HeifPtr),
 #endif
 #if HAS_LIBAVIF
-      InstanceMethod("avif", &Gd::Image::Avif),
-      InstanceMethod("avifPtr", &Gd::Image::AvifPtr),
+            InstanceMethod("avif", &Gd::Image::Avif),
+            InstanceMethod("avifPtr", &Gd::Image::AvifPtr),
 #endif
 #if HAS_LIBTIFF
             InstanceMethod("tiff", &Gd::Image::Tiff),

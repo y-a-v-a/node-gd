@@ -21,12 +21,9 @@
 #include <napi.h>
 #include <gd.h>
 
-#define SUPPORTS_GD_2_3_2 (GD_MINOR_VERSION == 3                        \
-                  && GD_RELEASE_VERSION >= 2)
+#define SUPPORTS_GD_2_3_3 (GD_MINOR_VERSION == 3 && GD_RELEASE_VERSION >= 3)
 
-#define SUPPORTS_GD_2_3_0 (SUPPORTS_GD_2_3_2                            \
-                  || GD_MINOR_VERSION == 3                              \
-                  && GD_RELEASE_VERSION >= 0)
+#define SUPPORTS_GD_2_3_0 (SUPPORTS_GD_2_3_3 || GD_MINOR_VERSION == 3 && GD_RELEASE_VERSION >= 0)
 
 #define SUPPORTS_GD_2_2_5 (SUPPORTS_GD_2_3_0 || GD_MINOR_VERSION == 2 && GD_RELEASE_VERSION >= 5)
 
@@ -42,8 +39,8 @@
 
 #define SUPPORTS_UNTIL_GD_2_0_36 (GD_MINOR_VERSION == 0 && GD_RELEASE_VERSION <= 36)
 
-#define HAS_LIBHEIF (HAVE_LIBHEIF && SUPPORTS_GD_2_3_2)
-#define HAS_LIBAVIF (HAVE_LIBAVIF && SUPPORTS_GD_2_3_2)
+#define HAS_LIBHEIF (HAVE_LIBHEIF && SUPPORTS_GD_2_3_3)
+#define HAS_LIBAVIF (HAVE_LIBAVIF && SUPPORTS_GD_2_3_3)
 #define HAS_LIBTIFF (HAVE_LIBTIFF && SUPPORTS_GD_2_2_4)
 #define HAS_LIBWEBP (HAVE_LIBWEBP && SUPPORTS_GD_2_1_0)
 
@@ -189,7 +186,6 @@
                          "Optional argument " #I " must be a Boolean") \
         .ThrowAsJavaScriptException();                                 \
     return info.Env().Null();                                          \
-
   }
 
 #define RETURN_IMAGE(IMG)                                       \
