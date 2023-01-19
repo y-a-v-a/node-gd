@@ -46,8 +46,8 @@
             'GCC_SYMBOLS_PRIVATE_EXTERN': 'YES', # -fvisibility=hidden
             'GCC_ENABLE_CPP_EXCEPTIONS': 'YES'
           },
-          "libraries": ["-L/usr/local/lib", "-L/opt/local/lib"],
-          "include_dirs": ["/usr/local/include", "/opt/local/include"]
+          "libraries": ["-L/opt/homebrew/lib", "-L/usr/local/lib", "-L/opt/local/lib"],
+          "include_dirs": ["/opt/homebrew/include", "/usr/local/include", "/opt/local/include"]
         }],
         ["with_heif=='true'", {
           'defines': [
