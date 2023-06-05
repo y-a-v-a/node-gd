@@ -9,7 +9,7 @@ jobs:
       - name: Node setup
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '20'
       - name: Setup GCC
         uses: egor-tensin/setup-gcc@v1
         with:
