@@ -5,11 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# 3.0.0 (alfa)
+# 3.0.0 - 2023-06-05 (current)
 
 - Only support libgd 2.3.0 and up
-
-### To do
 
 ### Added
 
@@ -21,13 +19,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added gdImageSetInterpolationMethod
 - Added resX and resY getters
 - Added gdImageRotateInterpolated
+- Added homebrew paths e.g. `/opt/homebrew/include`
+
+### Updated
+
+- Updated dependencies to latest versions
+- Updated Github actions dependencies
+- C++ code formatting
 
 ### Removed
 
 - Removed gd and gd2 image formats as libgd turned them off by default since 2.3.0
 - Removed many libgd version conditions since decision is made to support libgd 2.3.0 and up only per node-gd 3.x.x
 
-# 2.1.1 - 2020-09-10 (current)
+# 2.1.1 - 2020-09-10
 
 ### Added
 
