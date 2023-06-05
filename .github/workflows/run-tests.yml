@@ -3,13 +3,18 @@ on: [push, pull_request]
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [16, 18, 20]
+    name: Node ${{ matrix.node }} sample
     steps:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Node setup
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
       - name: Setup GCC
         uses: egor-tensin/setup-gcc@v1
         with:
