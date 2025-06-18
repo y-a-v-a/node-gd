@@ -857,7 +857,7 @@ private:
   }
 };
 
-#if HAS_LIBAVIF
+#if HAS_LIBHEIF
 class SaveHeifWorker : public SaveWorker
 {
 public:
