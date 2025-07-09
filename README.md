@@ -6,25 +6,39 @@ GD graphics library, [libgd](http://www.libgd.org/), C++ bindings for Node.js. T
 
 ## Installation
 
-### Preconditions
+### Quick Installation (Recommended)
+
+For most users, installation is now much simpler thanks to prebuilt binaries:
+
+```bash
+$ npm install node-gd
+```
+
+This will automatically download and install a precompiled binary for your platform (macOS x64/arm64, Linux x64/arm64) and Node.js version. No build tools or system dependencies required!
+
+### Manual Installation
+
+If prebuilt binaries are not available for your platform or you want to build from source:
+
+#### Preconditions
 
 Have environment-specific build tools available. Next to that: to take full advantage of node-gd, best is to ensure you install the latest version of libgd2, which can be found at the [libgd github repository](https://github.com/libgd/libgd/releases).
 
-### On Debian/Ubuntu
+#### On Debian/Ubuntu
 
 ```bash
 $ sudo apt-get install libgd-dev # libgd
 $ npm install node-gd
 ```
 
-### On RHEL/CentOS
+#### On RHEL/CentOS
 
 ```bash
 $ sudo yum install gd-devel
 $ npm install node-gd
 ```
 
-### On Mac OS/X
+#### On Mac OS/X
 
 Using Homebrew
 
@@ -40,9 +54,26 @@ $ sudo port install pkgconfig gd2
 $ npm install node-gd
 ```
 
-### Will not build on Windows!
+### Platform Support
 
-Sorry, will not build on Windows. I have no Windows machine to make it work. It could work, but I just don't have the stuff at hand.
+- **✅ macOS** - x64 and arm64 (Apple Silicon) - prebuilt binaries available
+- **✅ Linux** - x64 and arm64 - prebuilt binaries available  
+- **✅ FreeBSD** - manual build only
+- **❌ Windows** - Not supported
+
+### Build from Source
+
+If you need to build from source or want to customize the build:
+
+```bash
+$ git clone https://github.com/y-a-v-a/node-gd.git
+$ cd node-gd
+$ npm install # This will fallback to building from source if no prebuilt binary
+```
+
+### Supported Node.js Versions
+
+Prebuilt binaries are available for Node.js versions 16, 18, 20, and 22. The package supports Node.js 14+ but prebuilt binaries are only provided for actively maintained versions.
 
 ## Usage
 

@@ -1,0 +1,12 @@
+{
+  "napi": true,
+  "strip": true,
+  "arch": ["x64", "arm64"],
+  "target": [
+    "node@16.0.0",
+    "node@18.0.0",
+    "node@20.0.0",
+    "node@22.0.0"
+  ],
+  "debug": false
+}

@@ -17,7 +17,8 @@
     "CONTRIBUTORS.md",
     "index.d.ts",
     "test/*.test.js",
-    "test/fixtures/*"
+    "test/fixtures/*",
+    "prebuilds"
   ],
   "os": [
     "!win32"
@@ -25,14 +26,20 @@
   "engines": {
     "node": ">=14"
   },
+  "binary": {
+    "napi_versions": [3, 4, 5, 6, 7, 8, 9]
+  },
   "homepage": "https://github.com/y-a-v-a/node-gd",
   "bugs": "https://github.com/y-a-v-a/node-gd/issues",
   "scripts": {
-    "clean": "rm -rf test/output/* build/",
+    "clean": "rm -rf test/output/* build/ prebuilds/",
     "rebuild": "node-gyp rebuild -j max",
     "pretest": "node-gyp build -j max",
     "test": "./node_modules/.bin/mocha --reporter spec --bail --ui bdd --colors --file ./test/main.test.mjs",
-    "install": "node-gyp rebuild -j max",
+    "install": "node-gyp-build || node-gyp rebuild -j max",
+    "prebuild": "prebuildify --napi --strip",
+    "prebuild-all": "prebuildify --napi --strip --arch x64 --arch arm64",
+    "prebuild-upload": "prebuildify --napi --strip --upload-all",
     "update-contributors": "git shortlog -sen | sed 's/^  /*/' > CONTRIBUTORS.md",
     "docker-build": "docker build --progress=plain -t yava:node-gd .",
     "docker-run": "docker run -it -v $PWD:/usr/src yava:node-gd"
@@ -90,10 +97,12 @@
   "readmeFilename": "README.md",
   "devDependencies": {
     "chai": "4.3.7",
-    "mocha": "^10.2.0"
+    "mocha": "^10.2.0",
+    "prebuildify": "^6.0.0"
   },
   "dependencies": {
     "node-addon-api": "^6.1.0",
-    "node-gyp": "9.3.1"
+    "node-gyp": "9.3.1",
+    "node-gyp-build": "^4.8.0"
   }
 }

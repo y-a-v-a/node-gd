@@ -1,5 +1,6 @@
 node_modules
 build
+prebuilds
 .DS_Store
 test/fixtures/.DS_Store
 DS_Store
@@ -10,3 +11,7 @@ test/dev/*
 .bash_history
 .python_history
 .vscode
+
+# Prebuild artifacts
+*.tar.gz
+*.tgz
