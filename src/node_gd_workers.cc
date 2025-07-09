@@ -946,6 +946,15 @@ protected:
     {
       return SetError("Cannot save Avif file");
     }
+    
+    // Check if image is valid
+    if (*_gdImage == nullptr)
+    {
+      fclose(out);
+      return SetError("Invalid image for AVIF conversion");
+    }
+    
+    // Try to save AVIF - this can fail if codec is not available
     gdImageAvifEx(*_gdImage, out, quality, speed);
     fclose(out);
   }

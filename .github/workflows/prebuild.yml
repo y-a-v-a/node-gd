@@ -45,7 +45,8 @@ jobs:
         sudo apt-get install -y build-essential pkg-config libgd-dev
         # Install optional dependencies for full feature set
         sudo apt-get install -y libheif-dev libavif-dev libtiff-dev libwebp-dev \
-          libfontconfig1-dev libfreetype6-dev libpng-dev libjpeg-dev
+          libfontconfig1-dev libfreetype6-dev libpng-dev libjpeg-dev \
+          libaom-dev libdav1d-dev
     
     - name: Install system dependencies (macOS)
       if: matrix.os == 'macos-latest'
