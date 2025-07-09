@@ -76,7 +76,7 @@ jobs:
         npx prebuildify --napi --strip
     
     - name: Upload prebuilds
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: prebuilds-${{ matrix.os }}-${{ matrix.node-version }}-${{ matrix.architecture }}
         path: prebuilds/
@@ -101,9 +101,11 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Download all prebuilds
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         path: all-prebuilds
+        pattern: prebuilds-*
+        merge-multiple: true
     
     - name: Reorganize prebuilds
       run: |
