@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        node-version: [16, 18, 20, 22]
+        node-version: [18, 20, 22]
         architecture: [x64]
         include:
           # Add arm64 for macOS (Apple Silicon)
