@@ -7,7 +7,7 @@ USER root
 ENV HOME=/usr/src
 
 RUN apt-get update && \
-  apt-get install build-essential pkg-config python3 libgd-dev -y && \
+  apt-get install build-essential pkg-config python3 libgd-dev libheif-dev libavif-dev -y && \
   npm i -g npm && \
   npm i -g node-gyp && \
   mkdir $HOME/.cache && \

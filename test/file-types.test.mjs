@@ -111,6 +111,36 @@ describe('Section Handling file types', function () {
     img.destroy();
   });
 
+  it('gd.Image#saveHeif() -- can open a jpeg file and save it as heif', async function () {
+    if (!gd.GD_HEIF) {
+      this.skip();
+      return;
+    }
+    var s, t;
+    s = source + 'input.jpg';
+    t = target + 'output-from-jpeg.heif';
+    const img = await gd.openJpeg(s);
+
+    await img.saveHeif(t, -1);
+    assert.ok(fs.existsSync(t));
+    img.destroy();
+  });
+
+  it('gd.openHeif() -- can open a heif file and save it as png', async function () {
+    if (!gd.GD_HEIF) {
+      this.skip();
+      return;
+    }
+    var s, t;
+    s = source + 'input.heif';
+    t = target + 'output-from-heif.png';
+    const img = await gd.openHeif(s);
+
+    await img.savePng(t, -1);
+    assert.ok(fs.existsSync(t));
+    img.destroy();
+  });
+
   it('gd.Image#savePng() -- can open a bmp and save it as png', async function () {
     var s;
     var t;
