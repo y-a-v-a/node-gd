@@ -693,10 +693,10 @@ Napi::Value Gd::Image::HeifPtr(const Napi::CallbackInfo &info)
 #endif
 
 #if HAS_LIBAVIF
+// Note: AvifPtr has two parameters (quality, speed) - keeping original implementation
 Napi::Value Gd::Image::Avif(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
-
   return SaveAvifWorker::DoWork(info, this->_image);
 }
 

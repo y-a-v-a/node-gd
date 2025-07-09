@@ -48,6 +48,24 @@ declare namespace gd {
 
     function createFromTiffPtr(data: Ptr): Promise<gd.Image>;
 
+    function openWebp(path: string): Promise<gd.Image>;
+
+    function createFromWebp(path: string): Promise<gd.Image>;
+
+    function createFromWebpPtr(data: Ptr): Promise<gd.Image>;
+
+    function openHeif(path: string): Promise<gd.Image>;
+
+    function createFromHeif(path: string): Promise<gd.Image>;
+
+    function createFromHeifPtr(data: Ptr): Promise<gd.Image>;
+
+    function openAvif(path: string): Promise<gd.Image>;
+
+    function createFromAvif(path: string): Promise<gd.Image>;
+
+    function createFromAvifPtr(data: Ptr): Promise<gd.Image>;
+
     function openFile(path: string): Promise<gd.Image>;
 
     function createFromFile(path: string): Promise<gd.Image>;
@@ -116,11 +134,11 @@ declare namespace gd {
 
         setAntiAliasedDontBlend(color: Color, dontblend: boolean): gd.Image;
 
-        setBrush(image): gd.Image;
+        setBrush(image: gd.Image): gd.Image;
 
-        setTile(image): gd.Image;
+        setTile(image: gd.Image): gd.Image;
 
-        setStyle(array): gd.Image;
+        setStyle(array: Color[]): gd.Image;
 
         setThickness(thickness: number): gd.Image;
 
@@ -272,6 +290,9 @@ declare namespace gd {
         saveWBMP(path: string, foreground: 0x000000 | 0xffffff | number): Promise<boolean>;
         saveBmp(path: string, compression: 0 | 1): Promise<boolean>;
         saveTiff(path: string): Promise<boolean>;
+        saveWebp(path: string, quality?: number): Promise<boolean>;
+        saveHeif(path: string, quality?: number): Promise<boolean>;
+        saveAvif(path: string, quality?: number): Promise<boolean>;
 
         png(path: string, level: number): Promise<boolean>;
         jpeg(path: string, quality: number): Promise<boolean>;
@@ -279,6 +300,9 @@ declare namespace gd {
         wbmp(path: string, foreground: 0x000000 | 0xffffff | number): Promise<boolean>;
         bmp(path: string, compression: 0 | 1): Promise<boolean>;
         tiff(path: string): Promise<boolean>;
+        webp(path: string, quality?: number): Promise<boolean>;
+        heif(path: string, quality?: number): Promise<boolean>;
+        avif(path: string, quality?: number): Promise<boolean>;
 
         file(path: string): Promise<boolean>;
     }

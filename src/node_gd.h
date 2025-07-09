@@ -212,6 +212,7 @@
   gdFree(data);                                         \
   return result;
 
+
 #define CHECK_IMAGE_EXISTS                                     \
   if (_isDestroyed)                                            \
   {                                                            \

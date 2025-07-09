@@ -1,6 +1,6 @@
 # Map /usr/src to /Users/vincentb/Projects/node-gd
 # docker run -it -v $(pwd):/usr/src y-a-v-a:node-gd bash
-FROM node:18
+FROM node:22
 
 USER root
 
