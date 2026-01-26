@@ -9,24 +9,77 @@ on:
     types: [published]
 
 jobs:
-  prebuild:
-    runs-on: ${{ matrix.os }}
+  prebuild-linux:
+    runs-on: ubuntu-latest
+    container: node:${{ matrix.node-version }}-bookworm
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        node-version: [18, 20, 22]
+        architecture: [x64]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies (Debian)
+        run: |
+          apt-get update
+          apt-get install -y build-essential pkg-config libgd-dev
+          # Install optional dependencies for full feature set
+          apt-get install -y libheif-dev libavif-dev libtiff-dev libwebp-dev \
+            libfontconfig1-dev libfreetype6-dev libpng-dev libjpeg-dev \
+            libaom-dev libdav1d-dev
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ matrix.node-version }}-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and test
+        run: |
+          npm run rebuild
+          npm test
+
+      - name: Generate prebuilds
+        run: |
+          npx prebuildify --napi --strip
+
+      - name: Upload prebuilds
+        uses: actions/upload-artifact@v4
+        with:
+          name: prebuilds-debian-${{ matrix.node-version }}-${{ matrix.architecture }}
+          path: prebuilds/
+          retention-days: 30
+
+      - name: Verify prebuild works
+        run: |
+          # Test that the prebuild can be loaded
+          node -e "
+            const gd = require('./');
+            console.log('Version:', gd.getGDVersion());
+            console.log('Prebuild loaded successfully');
+          "
+
+  prebuild-macos:
+    runs-on: macos-latest
+
+    strategy:
+      matrix:
         node-version: [18, 20, 22]
         architecture: [x64]
         include:
           # Add arm64 for macOS (Apple Silicon)
-          - os: macos-latest
-            node-version: 18
+          - node-version: 18
             architecture: arm64
-          - os: macos-latest
-            node-version: 20
+          - node-version: 20
             architecture: arm64
-          - os: macos-latest
-            node-version: 22
+          - node-version: 22
             architecture: arm64
 
     steps:
@@ -38,18 +91,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           architecture: ${{ matrix.architecture }}
 
-      - name: Install system dependencies (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential pkg-config libgd-dev
-          # Install optional dependencies for full feature set
-          sudo apt-get install -y libheif-dev libavif-dev libtiff-dev libwebp-dev \
-            libfontconfig1-dev libfreetype6-dev libpng-dev libjpeg-dev \
-            libaom-dev libdav1d-dev
-
       - name: Install system dependencies (macOS)
-        if: matrix.os == 'macos-latest'
         run: |
           brew install pkg-config gd
           # Install optional dependencies for full feature set
@@ -78,7 +120,7 @@ jobs:
       - name: Upload prebuilds
         uses: actions/upload-artifact@v4
         with:
-          name: prebuilds-${{ matrix.os }}-${{ matrix.node-version }}-${{ matrix.architecture }}
+          name: prebuilds-macos-${{ matrix.node-version }}-${{ matrix.architecture }}
           path: prebuilds/
           retention-days: 30
 
@@ -93,8 +135,9 @@ jobs:
 
   # Job to collect all prebuilds and prepare for release
   collect-prebuilds:
-    needs: prebuild
+    needs: [prebuild-linux, prebuild-macos]
     runs-on: ubuntu-latest
+    container: debian:bookworm-slim
     if: github.event_name == 'release' && github.event.action == 'published'
 
     steps:

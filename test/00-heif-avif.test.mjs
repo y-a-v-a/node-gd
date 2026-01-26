@@ -8,6 +8,9 @@ const source = currentDir + '/fixtures/';
 const target = currentDir + '/output/';
 
 describe('HEIF and AVIF Support', function () {
+  it('logs HEIF/AVIF feature flags', function () {
+    console.log(`GD_HEIF=${gd.GD_HEIF} GD_AVIF=${gd.GD_AVIF}`);
+  });
   
   describe('HEIF format tests', function () {
     it('gd.GD_HEIF -- should be defined correctly', function () {
