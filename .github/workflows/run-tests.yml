@@ -22,6 +22,6 @@ jobs:
       - name: Install packages
         run: |
           sudo apt-get update
-          sudo apt-get -y install libgd-dev libheif-dev libavif-dev libaom-dev libdav1d-dev
+          sudo apt-get -y install libgd-dev libheif-dev libavif-dev libaom-dev libdav1d-dev libx265-dev
       - name: Run npm tasks
         run: npm install && npm run test
