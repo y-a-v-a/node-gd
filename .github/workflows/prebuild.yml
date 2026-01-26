@@ -61,9 +61,13 @@ jobs:
         run: |
           # Test that the prebuild can be loaded
           node -e "
-            const gd = require('./');
-            console.log('Version:', gd.getGDVersion());
-            console.log('Prebuild loaded successfully');
+            import('./index.js').then(({ default: gd }) => {
+              console.log('Version:', gd.getGDVersion());
+              console.log('Prebuild loaded successfully');
+            }).catch((error) => {
+              console.error(error);
+              process.exit(1);
+            });
           "
 
   prebuild-macos:
@@ -128,9 +132,13 @@ jobs:
         run: |
           # Test that the prebuild can be loaded
           node -e "
-            const gd = require('./');
-            console.log('Version:', gd.getGDVersion());
-            console.log('Prebuild loaded successfully');
+            import('./index.js').then(({ default: gd }) => {
+              console.log('Version:', gd.getGDVersion());
+              console.log('Prebuild loaded successfully');
+            }).catch((error) => {
+              console.error(error);
+              process.exit(1);
+            });
           "
 
   # Job to collect all prebuilds and prepare for release
