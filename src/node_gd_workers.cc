@@ -89,6 +89,11 @@ protected:
       return SetError("Cannot open JPEG file");
     }
     image = gdImageCreateFromJpeg(in);
+    if (!image)
+    {
+      fclose(in);
+      return SetError("Cannot read JPEG file");
+    }
     fclose(in);
   }
 
@@ -126,6 +131,11 @@ protected:
       return SetError("Cannot open PNG file");
     }
     image = gdImageCreateFromPng(in);
+    if (!image)
+    {
+      fclose(in);
+      return SetError("Cannot read PNG file");
+    }
     fclose(in);
   }
 
@@ -163,6 +173,11 @@ protected:
       return SetError("Cannot open GIF file");
     }
     image = gdImageCreateFromGif(in);
+    if (!image)
+    {
+      fclose(in);
+      return SetError("Cannot read GIF file");
+    }
     fclose(in);
   }
 
@@ -200,6 +215,11 @@ protected:
       return SetError("Cannot open WBMP file");
     }
     image = gdImageCreateFromWBMP(in);
+    if (!image)
+    {
+      fclose(in);
+      return SetError("Cannot read WBMP file");
+    }
     fclose(in);
   }
 
@@ -237,6 +257,11 @@ protected:
       return SetError("Cannot open WEBP file");
     }
     image = gdImageCreateFromWebp(in);
+    if (!image)
+    {
+      fclose(in);
+      return SetError("Cannot read WEBP file");
+    }
     fclose(in);
   }
 
@@ -274,6 +299,11 @@ protected:
       return SetError("Cannot open BMP file");
     }
     image = gdImageCreateFromBmp(in);
+    if (!image)
+    {
+      fclose(in);
+      return SetError("Cannot read BMP file");
+    }
     fclose(in);
   }
 
@@ -311,6 +341,11 @@ protected:
       return SetError("Cannot open TIFF file");
     }
     image = gdImageCreateFromTiff(in);
+    if (!image)
+    {
+      fclose(in);
+      return SetError("Cannot read TIFF file");
+    }
     fclose(in);
   }
 
@@ -349,6 +384,11 @@ protected:
       return SetError("Cannot open Avif file");
     }
     image = gdImageCreateFromAvif(in);
+    if (!image)
+    {
+      fclose(in);
+      return SetError("Cannot read Avif file");
+    }
     fclose(in);
   }
 
@@ -388,6 +428,11 @@ protected:
       return SetError("Cannot open Heif file");
     }
     image = gdImageCreateFromHeif(in);
+    if (!image)
+    {
+      fclose(in);
+      return SetError("Cannot read Heif file");
+    }
     fclose(in);
   }
 
@@ -480,6 +525,10 @@ protected:
   {
     // execute the async task
     image = gdImageCreateFromFile(path.c_str());
+    if (!image)
+    {
+      return SetError("Cannot read image file");
+    }
   }
 
   virtual void OnOK() override
@@ -868,8 +917,6 @@ public:
     OPT_INT_ARG(2, codec_param, 1);
     OPT_STR_ARG(3, chroma_param, "444");
 
-    const char *chroma = chroma_param.c_str();
-
     SaveHeifWorker *worker = new SaveHeifWorker(info.Env(),
                                                 "SaveHeifWorkerResource");
 
@@ -888,7 +935,7 @@ public:
     {
       worker->codec = GD_HEIF_CODEC_UNKNOWN;
     }
-    worker->chroma = chroma;
+    worker->chroma = chroma_param;
     worker->Queue();
     return worker->_deferred.Promise();
   }
@@ -901,13 +948,13 @@ protected:
     {
       return SetError("Cannot save Heif file");
     }
-    gdImageHeifEx(*_gdImage, out, quality, codec, chroma);
+    gdImageHeifEx(*_gdImage, out, quality, codec, chroma.c_str());
     fclose(out);
   }
 
   gdHeifCodec codec;
 
-  const char *chroma;
+  std::string chroma;
 
 private:
   SaveHeifWorker(napi_env env, const char *resource_name)
