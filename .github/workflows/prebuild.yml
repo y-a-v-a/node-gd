@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18, 20, 22]
+        node-version: [20, 22, 24]
         architecture: [x64]
 
     steps:
@@ -75,15 +75,15 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18, 20, 22]
+        node-version: [20, 22, 24]
         architecture: [x64]
         include:
           # Add arm64 for macOS (Apple Silicon)
-          - node-version: 18
-            architecture: arm64
           - node-version: 20
             architecture: arm64
           - node-version: 22
+            architecture: arm64
+          - node-version: 24
             architecture: arm64
 
     steps:

@@ -6,7 +6,7 @@ jobs:
     container: node:${{ matrix.node }}-bookworm
     strategy:
       matrix:
-        node: [18, 20, 22]
+        node: [20, 22, 24]
     name: Node ${{ matrix.node }} sample
     steps:
       - name: Checkout
