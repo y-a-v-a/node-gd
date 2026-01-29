@@ -74,13 +74,13 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-13
+          - os: macos-15-intel
             node-version: 20
             architecture: x64
-          - os: macos-13
+          - os: macos-15-intel
             node-version: 22
             architecture: x64
-          - os: macos-13
+          - os: macos-15-intel
             node-version: 24
             architecture: x64
           - os: macos-latest
