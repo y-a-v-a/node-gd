@@ -71,20 +71,29 @@ jobs:
           "
 
   prebuild-macos:
-    runs-on: macos-latest
-
     strategy:
       matrix:
-        node-version: [20, 22, 24]
-        architecture: [x64]
         include:
-          # Add arm64 for macOS (Apple Silicon)
-          - node-version: 20
+          - os: macos-13
+            node-version: 20
+            architecture: x64
+          - os: macos-13
+            node-version: 22
+            architecture: x64
+          - os: macos-13
+            node-version: 24
+            architecture: x64
+          - os: macos-latest
+            node-version: 20
             architecture: arm64
-          - node-version: 22
+          - os: macos-latest
+            node-version: 22
             architecture: arm64
-          - node-version: 24
+          - os: macos-latest
+            node-version: 24
             architecture: arm64
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -151,6 +160,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org/
+
       - name: Download all prebuilds
         uses: actions/download-artifact@v4
         with:
@@ -175,3 +190,8 @@ jobs:
           files: prebuilds.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to npm (includes prebuilds/)
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
