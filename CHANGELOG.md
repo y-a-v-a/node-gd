@@ -5,7 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# 3.0.0 - 2023-06-05 (current)
+# 3.1.0 - 2026-01-30 (current)
+
+### Added
+- Prebuilt binary packaging via prebuildify, with prebuilds bundled in the npm package.
+- HEIF/AVIF/WebP TypeScript API surface (open/create/save methods) and test coverage.
+- Docker test helper script and expanded documentation.
+
+### Changed
+- Dropped support for Node.js 18; now requires Node.js 20+ (CI targets 20/22/24).
+- Install script uses `node-gyp-build` with fallback to `node-gyp rebuild`.
+- CI workflows updated for prebuilds and modern macOS runners; Linux prebuilds moved to Debian.
+- Dependency updates (node-addon-api, node-gyp, mocha/chai, and security-related transitive bumps).
+
+### Fixed
+- Avoid overriding existing image `save*` helpers (issue #84).
+- More robust error handling for image decoding and HEIF/AVIF save paths.
+
+# 3.0.0 - 2023-06-05
 
 - Only support libgd 2.3.0 and up
 
