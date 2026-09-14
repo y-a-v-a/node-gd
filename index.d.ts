@@ -252,9 +252,9 @@ declare namespace gd {
 
         colorMatch(image: gd.Image): number;
 
-        gifAnimBegin(anim: string, useGlobalColorMap: -1 | 0 | 1, loops: number): Uint8Array;
+        gifAnimBegin(globalColorMap: -1 | 0 | 1, loops: number): Buffer | false;
 
-        gifAnimAdd(anim: string, localColorMap: number, leftOffset: number, topOffset: number, delay: number, disposal: number, prevFrame: gd.Image | null): boolean;
+        gifAnimAdd(localColorMap: -1 | 0 | 1, leftOffset: number, topOffset: number, delay: number, disposal: GifDisposal, prevFrame: gd.Image | null): Buffer | false;
 
         gifAnimEnd(): Buffer | false;
 
@@ -305,6 +305,42 @@ declare namespace gd {
         avif(path: string, quality?: number): Promise<boolean>;
 
         file(path: string): Promise<boolean>;
+    }
+
+    // Animated GIFs
+
+    /** 0: unspecified, 1: leave in place, 2: restore to background, 3: restore to previous */
+    type GifDisposal = 0 | 1 | 2 | 3;
+
+    interface GifAnimFrameOptions {
+        localColorMap?: -1 | 0 | 1;
+        leftOffset?: number;
+        topOffset?: number;
+        /** delay before the next frame in 1/100 seconds */
+        delay?: number;
+        disposal?: GifDisposal;
+    }
+
+    interface GifAnimOptions extends GifAnimFrameOptions {
+        globalColorMap?: -1 | 0 | 1;
+        /** -1: play once, 0: loop forever, n: repeat n times */
+        loops?: number;
+    }
+
+    class GifAnim {
+        constructor(image: gd.Image, options?: GifAnimOptions);
+
+        readonly frames: gd.Image[];
+
+        readonly isEnded: boolean;
+
+        readonly lastIndex: number;
+
+        add(image: gd.Image, options?: GifAnimFrameOptions): void;
+
+        end(): Promise<Buffer>;
+
+        end(path: string): Promise<boolean>;
     }
 
     export const enum AutoCrop {
