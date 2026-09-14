@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# Unreleased
+# 3.2.0 - 2026-09-14 (current)
 
 ### Added
 - Test coverage for drawing primitives, color functions, transformations and filters, copying and comparing images, encoding and decoding all supported formats, and `gd.GifAnim`.
@@ -32,8 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Wrong argument index in the `stringFTEx()` error and missing argument count check in `stringFTCircle()`.
 - Tests that passed without asserting anything when the expected error was not thrown.
 - Outdated GIF animation documentation and TypeScript declarations.
+- Release workflow flattening prebuilds into a single directory, which left only one unusable prebuild in the npm package.
 
-# 3.1.0 - 2026-01-30 (current)
+# 3.1.0 - 2026-01-30
 
 ### Added
 - Prebuilt binary packaging via prebuildify, with prebuilds bundled in the npm package.

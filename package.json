@@ -1,6 +1,6 @@
 {
   "name": "node-gd",
-  "version": "3.0.0",
+  "version": "3.2.0",
   "description": "GD graphics library (libgd) C++ bindings for Node.js",
   "main": "index.js",
   "types": "index.d.ts",
