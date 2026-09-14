@@ -260,7 +260,15 @@ public:
   private:
     gdImagePtr _image{nullptr};
 
+    // copies of the images set with setBrush() and setTile(), owned by
+    // this instance so libgd never reads a destroyed brush or tile
+    gdImagePtr _brush{nullptr};
+
+    gdImagePtr _tile{nullptr};
+
     bool _isDestroyed{true};
+
+    void DestroyImages();
 
     operator gdImagePtr() const { return _image; }
 

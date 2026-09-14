@@ -487,13 +487,21 @@ Gd::Image::Image(const Napi::CallbackInfo &info)
 
 Gd::Image::~Image()
 {
-  if (this->_image != nullptr)
-  {
-    gdImageDestroy(this->_image);
+  this->DestroyImages();
+}
 
-    this->_isDestroyed = true;
-    this->_image = nullptr;
+void Gd::Image::DestroyImages()
+{
+  for (gdImagePtr *image : {&this->_image, &this->_brush, &this->_tile})
+  {
+    if (*image != nullptr)
+    {
+      gdImageDestroy(*image);
+      *image = nullptr;
+    }
   }
+
+  this->_isDestroyed = true;
 }
 
 gdImagePtr Gd::Image::ImageArg(const Napi::CallbackInfo &info, size_t index)
@@ -529,13 +537,8 @@ gdImagePtr Gd::Image::ImageArg(const Napi::CallbackInfo &info, size_t index)
  */
 Napi::Value Gd::Image::Destroy(const Napi::CallbackInfo &info)
 {
-  if (this->_image != nullptr)
-  {
-    gdImageDestroy(this->_image);
-  }
+  this->DestroyImages();
 
-  this->_isDestroyed = true;
-  this->_image = nullptr;
   return info.Env().Undefined();
 }
 
@@ -1065,12 +1068,74 @@ Napi::Value Gd::Image::SetAntiAliasedDontBlend(const Napi::CallbackInfo &info)
   return info.This();
 }
 
+/**
+ * Copy the parts of an image libgd reads when applying a brush or tile:
+ * pixels, palette, transparent color and clipping rectangle.
+ * gdImageClone() is not used, as in libgd 2.3.3 it writes to unallocated
+ * memory for images that have drawn a filled polygon.
+ */
+static gdImagePtr CopyForDrawing(gdImagePtr src)
+{
+  gdImagePtr dst = src->trueColor ? gdImageCreateTrueColor(src->sx, src->sy)
+                                  : gdImageCreate(src->sx, src->sy);
+  if (dst == nullptr)
+  {
+    return nullptr;
+  }
+
+  for (int y = 0; y < src->sy; y++)
+  {
+    if (src->trueColor)
+    {
+      memcpy(dst->tpixels[y], src->tpixels[y], sizeof(int) * src->sx);
+    }
+    else
+    {
+      memcpy(dst->pixels[y], src->pixels[y], sizeof(unsigned char) * src->sx);
+    }
+  }
+
+  if (!src->trueColor)
+  {
+    dst->colorsTotal = src->colorsTotal;
+    for (int i = 0; i < gdMaxColors; i++)
+    {
+      dst->red[i] = src->red[i];
+      dst->green[i] = src->green[i];
+      dst->blue[i] = src->blue[i];
+      dst->alpha[i] = src->alpha[i];
+      dst->open[i] = src->open[i];
+    }
+  }
+
+  dst->transparent = src->transparent;
+  dst->cx1 = src->cx1;
+  dst->cy1 = src->cy1;
+  dst->cx2 = src->cx2;
+  dst->cy2 = src->cy2;
+
+  return dst;
+}
+
 Napi::Value Gd::Image::SetBrush(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
   REQ_IMG_ARG(0, brush)
-  gdImageSetBrush(this->_image, brush);
+
+  gdImagePtr copy = CopyForDrawing(brush);
+  if (copy == nullptr)
+  {
+    Napi::Error::New(info.Env(), "Unable to copy brush image.").ThrowAsJavaScriptException();
+    return info.Env().Null();
+  }
+
+  gdImageSetBrush(this->_image, copy);
+  if (this->_brush != nullptr)
+  {
+    gdImageDestroy(this->_brush);
+  }
+  this->_brush = copy;
 
   return info.This();
 }
@@ -1080,7 +1145,20 @@ Napi::Value Gd::Image::SetTile(const Napi::CallbackInfo &info)
   CHECK_IMAGE_EXISTS;
 
   REQ_IMG_ARG(0, tile)
-  gdImageSetTile(this->_image, tile);
+
+  gdImagePtr copy = CopyForDrawing(tile);
+  if (copy == nullptr)
+  {
+    Napi::Error::New(info.Env(), "Unable to copy tile image.").ThrowAsJavaScriptException();
+    return info.Env().Null();
+  }
+
+  gdImageSetTile(this->_image, copy);
+  if (this->_tile != nullptr)
+  {
+    gdImageDestroy(this->_tile);
+  }
+  this->_tile = copy;
 
   return info.This();
 }

@@ -876,6 +876,8 @@ img.destroy();
 
 Set a brush image for subsequent drawing operations.
 
+The brush image is copied when this method is called. Changes made to the brush image afterwards are not used, and the brush image can be destroyed right away.
+
 ```javascript
 const gd = require('node-gd');
 
@@ -906,6 +908,8 @@ brush.destroy();
 - `image` - A gd.Image instance to use as a tile pattern
 
 Set a tile pattern for subsequent fill operations.
+
+The tile image is copied when this method is called. Changes made to the tile image afterwards are not used, and the tile image can be destroyed right away.
 
 ```javascript
 const gd = require('node-gd');

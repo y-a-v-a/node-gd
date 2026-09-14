@@ -416,6 +416,76 @@ describe('Drawing primitives', function () {
       img.destroy();
     });
 
+    it('keeps drawing with the brush after the brush image is destroyed', async function () {
+      const img = await canvas();
+      const brush = await gd.createTrueColor(5, 5);
+      brush.filledRectangle(0, 0, 4, 4, green);
+      img.setBrush(brush);
+      brush.destroy();
+      // allocate images of the same size, likely reusing the freed memory
+      const others = await Promise.all(Array.from({ length: 20 }, () => canvas(5, 5)));
+
+      img.line(10, 50, 90, 50, gdBrushed);
+      assert.equal(img.getTrueColorPixel(50, 50), green);
+      assert.equal(img.getTrueColorPixel(50, 52), green);
+      others.forEach((other) => other.destroy());
+      img.destroy();
+    });
+
+    it('uses the brush as it was when setBrush() was called', async function () {
+      const img = await canvas();
+      const brush = await gd.createTrueColor(5, 5);
+      brush.filledRectangle(0, 0, 4, 4, green);
+      img.setBrush(brush);
+      brush.filledRectangle(0, 0, 4, 4, blue);
+
+      img.line(10, 50, 90, 50, gdBrushed);
+      assert.equal(img.getTrueColorPixel(50, 50), green);
+      brush.destroy();
+      img.destroy();
+    });
+
+    it('does not draw the transparent color of the brush', async function () {
+      const img = await canvas();
+      const brush = await gd.create(5, 5);
+      const clear = brush.colorAllocate(0, 0, 0);
+      const paint = brush.colorAllocate(0, 0, 255);
+      brush.setPixel(2, 2, paint);
+      brush.colorTransparent(clear);
+      img.setBrush(brush);
+      brush.destroy();
+
+      img.setPixel(50, 50, gdBrushed);
+      assert.equal(img.getTrueColorPixel(50, 50), blue);
+      assert.equal(img.getTrueColorPixel(49, 49), white, 'transparent brush pixel');
+      img.destroy();
+    });
+
+    it('can use a brush image that has drawn a polygon', async function () {
+      const img = await canvas();
+      const brush = await gd.createTrueColor(5, 5);
+      brush.filledPolygon([{ x: 0, y: 0 }, { x: 4, y: 0 }, { x: 4, y: 4 }, { x: 0, y: 4 }], green);
+      img.setBrush(brush);
+      brush.destroy();
+
+      img.line(10, 50, 90, 50, gdBrushed);
+      assert.equal(img.getTrueColorPixel(50, 50), green);
+      img.destroy();
+    });
+
+    it('can replace the brush and use the image itself as brush', async function () {
+      const img = await canvas(20, 20);
+      const first = await gd.createTrueColor(3, 3);
+      first.filledRectangle(0, 0, 2, 2, red);
+      img.setBrush(first).setBrush(first);
+      first.destroy();
+
+      img.setPixel(10, 10, gdBrushed);
+      assert.equal(img.getTrueColorPixel(10, 10), red);
+      assert.strictEqual(img.setBrush(img), img);
+      img.destroy();
+    });
+
     it('throws a TypeError when brush is not an image', async function () {
       const img = await canvas();
       assert.throws(() => img.setBrush(), TypeError, /must be an Image object/);
@@ -438,6 +508,34 @@ describe('Drawing primitives', function () {
       assert.equal(img.getTrueColorPixel(2, 2), red);
       assert.equal(img.getTrueColorPixel(20, 20), white);
       tile.destroy();
+      img.destroy();
+    });
+
+    it('keeps filling with the tile after the tile image is destroyed', async function () {
+      const img = await canvas();
+      const tile = await gd.createTrueColor(8, 8);
+      tile.filledRectangle(0, 0, 7, 7, red);
+      img.setTile(tile);
+      tile.destroy();
+      // allocate images of the same size, likely reusing the freed memory
+      const others = await Promise.all(Array.from({ length: 20 }, () => canvas(8, 8)));
+
+      img.filledRectangle(10, 10, 40, 40, gdTiled);
+      assert.equal(img.getTrueColorPixel(20, 20), red);
+      others.forEach((other) => other.destroy());
+      img.destroy();
+    });
+
+    it('can fill with a palette tile on a palette image after the tile image is destroyed', async function () {
+      const img = await gd.create(20, 20);
+      img.colorAllocate(255, 255, 255);
+      const tile = await gd.create(2, 2);
+      tile.colorAllocate(0, 0, 255);
+      img.setTile(tile);
+      tile.destroy();
+
+      img.fill(5, 5, gdTiled);
+      assert.equal(img.getTrueColorPixel(5, 5), blue);
       img.destroy();
     });
 
