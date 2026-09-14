@@ -194,7 +194,9 @@ describe('Image transformations', function () {
 
     it('throws a RangeError for an unsupported mode', async function () {
       const img = await framed(white);
-      assert.throws(() => img.cropAuto(5), RangeError, /Crop mode/);
+      // GD_CROP_THRESHOLD (5) is not handled by gdImageCropAuto(), use cropThreshold()
+      assert.throws(() => img.cropAuto(5), RangeError, /between 0 and 4.*cropThreshold/);
+      assert.throws(() => img.cropAuto(-1), RangeError, /between 0 and 4/);
       img.destroy();
     });
 

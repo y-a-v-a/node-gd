@@ -2096,11 +2096,12 @@ Napi::Value Gd::Image::CropAuto(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_INT_ARG(0, mode, "A value for crop mode should be supplied, between 0 and 5.");
+  REQ_INT_ARG(0, mode, "A value for crop mode should be supplied, between 0 and 4.");
 
-  if (mode > 4)
+  // GD_CROP_THRESHOLD (5) is not handled by gdImageCropAuto()
+  if (mode < GD_CROP_DEFAULT || mode > GD_CROP_SIDES)
   {
-    Napi::RangeError::New(info.Env(), "Crop mode should be between 0 and 5.")
+    Napi::RangeError::New(info.Env(), "Crop mode should be between 0 and 4. Use cropThreshold() to crop by threshold.")
         .ThrowAsJavaScriptException();
     return info.Env().Null();
   }
