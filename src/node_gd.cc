@@ -2447,12 +2447,12 @@ Napi::Value Gd::Image::GifAnimEnd(const Napi::CallbackInfo &info)
   int size;
   char *data = (char *)gdImageGifAnimEndPtr(&size);
 
-  if (data == 0)
+  if (data == nullptr)
   {
     return Napi::Boolean::New(info.Env(), false);
   }
 
-  return Napi::Boolean::New(info.Env(), true);
+  RETURN_DATA;
 }
 
 /**

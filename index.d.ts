@@ -256,7 +256,7 @@ declare namespace gd {
 
         gifAnimAdd(anim: string, localColorMap: number, leftOffset: number, topOffset: number, delay: number, disposal: number, prevFrame: gd.Image | null): boolean;
 
-        gifAnimEnd(anim: string): boolean;
+        gifAnimEnd(): Buffer | false;
 
         // Copying and resizing
 

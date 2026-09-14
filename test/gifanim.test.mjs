@@ -146,9 +146,7 @@ describe('gd.GifAnim', function () {
     anim.frames.forEach((image) => image.destroy());
   });
 
-  // Known issue: gd.Image#gifAnimEnd() discards the data returned by
-  // gdImageGifAnimEndPtr(), so the trailer byte is never appended.
-  it.skip('ends the animated GIF with a trailer byte', async function () {
+  it('ends the animated GIF with a trailer byte', async function () {
     const anim = new gd.GifAnim(await frame(4));
     anim.add(await frame(8));
     const data = await anim.end();
@@ -162,7 +160,21 @@ describe('gd.GifAnim', function () {
     anim.add(await frame(10));
 
     assert.isTrue(await anim.end(target));
-    assert.equal(fs.readFileSync(target).subarray(0, 6).toString('latin1'), 'GIF89a');
+    const data = fs.readFileSync(target);
+    assert.equal(data.subarray(0, 6).toString('latin1'), 'GIF89a');
+    assert.equal(data[data.length - 1], 0x3b, 'GIF trailer');
+    anim.frames.forEach((image) => image.destroy());
+  });
+
+  it('rejects when the animation file cannot be written', async function () {
+    const anim = new gd.GifAnim(await frame(4));
+    let reason;
+    try {
+      await anim.end('./test/output/does/not/exist.gif');
+    } catch (e) {
+      reason = e;
+    }
+    assert.equal(reason, 'Unable to save animation');
     anim.frames.forEach((image) => image.destroy());
   });
 
