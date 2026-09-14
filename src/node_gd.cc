@@ -799,8 +799,8 @@ Napi::Value Gd::Image::Polygon(const Napi::CallbackInfo &info)
     if (!o.Has(x) || !o.Has(y))
       continue;
 
-    points[i].x = o.Get(x).As<Napi::Number>().Int32Value();
-    points[i].y = o.Get(y).As<Napi::Number>().Int32Value();
+    points[_len].x = o.Get(x).As<Napi::Number>().Int32Value();
+    points[_len].y = o.Get(y).As<Napi::Number>().Int32Value();
     _len++;
   }
 
@@ -841,8 +841,8 @@ Napi::Value Gd::Image::OpenPolygon(const Napi::CallbackInfo &info)
     if (!o.Has(x) || !o.Has(y))
       continue;
 
-    points[i].x = o.Get(x).As<Napi::Number>().Int32Value();
-    points[i].y = o.Get(y).As<Napi::Number>().Int32Value();
+    points[_len].x = o.Get(x).As<Napi::Number>().Int32Value();
+    points[_len].y = o.Get(y).As<Napi::Number>().Int32Value();
     _len++;
   }
 
@@ -883,8 +883,8 @@ Napi::Value Gd::Image::FilledPolygon(const Napi::CallbackInfo &info)
     if (!o.Has(x) || !o.Has(y))
       continue;
 
-    points[i].x = o.Get(x).As<Napi::Number>().Int32Value();
-    points[i].y = o.Get(y).As<Napi::Number>().Int32Value();
+    points[_len].x = o.Get(x).As<Napi::Number>().Int32Value();
+    points[_len].y = o.Get(y).As<Napi::Number>().Int32Value();
     _len++;
   }
 
@@ -1089,7 +1089,7 @@ Napi::Value Gd::Image::SetStyle(const Napi::CallbackInfo &info)
     if (!v.IsNumber())
       continue;
 
-    sty[i] = v.As<Napi::Number>().Int32Value();
+    sty[_len] = v.As<Napi::Number>().Int32Value();
     _len++;
   }
 

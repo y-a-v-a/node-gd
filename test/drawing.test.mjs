@@ -199,6 +199,19 @@ describe('Drawing primitives', function () {
       img.destroy();
     });
 
+    it('skips entries that are not points', async function () {
+      const withInvalid = [{ x: 40, y: 40 }, 'skip', { y: 5 }, null, { x: 10, y: 40 }];
+
+      for (const method of ['polygon', 'openPolygon', 'filledPolygon']) {
+        const img = await canvas(50, 50);
+        img[method](withInvalid, red);
+        assert.equal(img.getTrueColorPixel(25, 40), red, `${method}: line between valid points`);
+        assert.equal(img.getTrueColorPixel(0, 0), white, `${method}: no stray point at origin`);
+        assert.equal(img.getTrueColorPixel(25, 20), white, `${method}: nothing drawn elsewhere`);
+        img.destroy();
+      }
+    });
+
     it('throws a TypeError when the points are not an array', async function () {
       const img = await canvas();
       assert.throws(() => img.polygon({ x: 1, y: 1 }, red), TypeError, /must be an array/);
@@ -349,6 +362,17 @@ describe('Drawing primitives', function () {
       assert.equal(img.getTrueColorPixel(2, 10), blue);
       assert.equal(img.getTrueColorPixel(3, 10), blue);
       assert.equal(img.getTrueColorPixel(4, 10), red);
+      img.destroy();
+    });
+
+    it('skips style entries that are not numbers', async function () {
+      const img = await canvas();
+      img.setStyle([red, 'skip', blue]);
+      img.line(0, 10, 99, 10, gdStyled);
+      assert.equal(img.getTrueColorPixel(0, 10), red);
+      assert.equal(img.getTrueColorPixel(1, 10), blue);
+      assert.equal(img.getTrueColorPixel(2, 10), red);
+      assert.equal(img.getTrueColorPixel(3, 10), blue);
       img.destroy();
     });
 
