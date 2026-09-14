@@ -102,17 +102,12 @@
   }                                                          \
   VAR = info[I].ToNumber();
 
-#define REQ_IMG_ARG(I, VAR)                                            \
-  if (info.Length() <= (I) || !info[I].IsObject())                     \
-  {                                                                    \
-    Napi::TypeError::New(info.Env(),                                   \
-                         "Argument " #I " must be an Image object.")   \
-        .ThrowAsJavaScriptException();                                 \
-    return info.Env().Null();                                          \
-  }                                                                    \
-  Gd::Image *_obj_ =                                                   \
-      Napi::ObjectWrap<Gd::Image>::Unwrap(info[I].As<Napi::Object>()); \
-  gdImagePtr VAR = _obj_->getGdImagePtr();
+#define REQ_IMG_ARG(I, VAR)                          \
+  gdImagePtr VAR = Gd::Image::ImageArg(info, (I)); \
+  if (VAR == nullptr)                              \
+  {                                                \
+    return info.Env().Null();                      \
+  }
 
 #define OPT_INT_ARG(I, VAR, DEFAULT)                                  \
   int VAR;                                                            \
@@ -254,6 +249,13 @@ public:
     static Napi::FunctionReference constructor;
 
     gdImagePtr getGdImagePtr() const { return _image; }
+
+    /**
+     * Returns the gdImagePtr of the Image passed as argument at index.
+     * Throws and returns nullptr when the argument is not an Image
+     * or when the Image has been destroyed.
+     */
+    static gdImagePtr ImageArg(const Napi::CallbackInfo &info, size_t index);
 
   private:
     gdImagePtr _image{nullptr};

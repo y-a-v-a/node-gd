@@ -366,9 +366,43 @@ describe('Copying and comparing images', function () {
 
     it('throws a TypeError when the argument is not an object', async function () {
       const a = await filled(10, 10, red);
-      assert.throws(() => a.compare('image'), TypeError, /must be an image/);
+      assert.throws(() => a.compare('image'), TypeError, /must be an Image object/);
       assert.throws(() => a.compare(), Error, /Expected 1 argument/);
       a.destroy();
     });
+  });
+  describe('Image arguments', function () {
+    const methods = {
+      copy: (img, arg) => img.copy(arg, 0, 0, 0, 0, 4, 4),
+      copyResized: (img, arg) => img.copyResized(arg, 0, 0, 0, 0, 4, 4, 4, 4),
+      copyResampled: (img, arg) => img.copyResampled(arg, 0, 0, 0, 0, 4, 4, 4, 4),
+      copyRotated: (img, arg) => img.copyRotated(arg, 2, 2, 0, 0, 4, 4, 90),
+      copyMerge: (img, arg) => img.copyMerge(arg, 0, 0, 0, 0, 4, 4, 50),
+      copyMergeGray: (img, arg) => img.copyMergeGray(arg, 0, 0, 0, 0, 4, 4, 50),
+      paletteCopy: (img, arg) => img.paletteCopy(arg),
+      colorMatch: (img, arg) => img.colorMatch(arg),
+      setBrush: (img, arg) => img.setBrush(arg),
+      setTile: (img, arg) => img.setTile(arg),
+      compare: (img, arg) => img.compare(arg),
+      gifAnimAdd: (img, arg) => img.gifAnimAdd(0, 0, 0, 5, 1, arg),
+    };
+
+    for (const [name, call] of Object.entries(methods)) {
+      it(`gd.Image#${name}() -- throws a TypeError when the image argument is a plain object`, async function () {
+        const img = await filled(4, 4, red);
+        assert.throws(() => call(img, {}), TypeError, /must be an Image object/);
+        assert.throws(() => call(img, []), TypeError, /must be an Image object/);
+        assert.throws(() => call(img, Object.create(gd.Image.prototype)), TypeError, /must be an Image object/);
+        img.destroy();
+      });
+
+      it(`gd.Image#${name}() -- throws an Error when the image argument is destroyed`, async function () {
+        const img = await filled(4, 4, red);
+        const destroyed = await filled(4, 4, blue);
+        destroyed.destroy();
+        assert.throws(() => call(img, destroyed), Error, /already destroyed/);
+        img.destroy();
+      });
+    }
   });
 });

@@ -496,6 +496,34 @@ Gd::Image::~Image()
   }
 }
 
+gdImagePtr Gd::Image::ImageArg(const Napi::CallbackInfo &info, size_t index)
+{
+  Napi::Env env = info.Env();
+  std::string argument = "Argument " + std::to_string(index);
+  void *unwrapped = nullptr;
+
+  // napi_unwrap instead of ObjectWrap::Unwrap, which throws a generic
+  // "Invalid argument" error for objects that are not wrapped
+  if (info.Length() <= index || !info[index].IsObject() ||
+      !info[index].As<Napi::Object>().InstanceOf(constructor.Value()) ||
+      napi_unwrap(env, info[index], &unwrapped) != napi_ok || unwrapped == nullptr)
+  {
+    Napi::TypeError::New(env, argument + " must be an Image object.")
+        .ThrowAsJavaScriptException();
+    return nullptr;
+  }
+
+  Gd::Image *image = static_cast<Gd::Image *>(static_cast<Napi::ObjectWrap<Gd::Image> *>(unwrapped));
+  if (image->_isDestroyed || image->_image == nullptr)
+  {
+    Napi::Error::New(env, argument + " is an Image that is already destroyed.")
+        .ThrowAsJavaScriptException();
+    return nullptr;
+  }
+
+  return image->_image;
+}
+
 /**
  * Destruction, Loading and Saving Functions
  */
@@ -2412,8 +2440,7 @@ Napi::Value Gd::Image::GifAnimAdd(const Napi::CallbackInfo &info)
   }
   else if (info[5].IsObject())
   {
-    Gd::Image *_obj_ = Napi::ObjectWrap<Gd::Image>::Unwrap(info[5].As<Napi::Object>());
-    gdImagePtr prevFrame = _obj_->getGdImagePtr();
+    REQ_IMG_ARG(5, prevFrame);
     data = (char *)gdImageGifAnimAddPtr(this->_image, &size, LocalCM, LeftOfs, TopOfs, Delay, Disposal, prevFrame);
   }
   else
@@ -2450,14 +2477,7 @@ Napi::Value Gd::Image::Compare(const Napi::CallbackInfo &info)
   CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(1, "of type Image.");
-  if (!info[0].IsObject())
-  {
-    Napi::TypeError::New(info.Env(), "Argument 0 must be an image").ThrowAsJavaScriptException();
-    return info.Env().Null();
-  }
-
-  Gd::Image *_obj_ = Napi::ObjectWrap<Gd::Image>::Unwrap(info[0].As<Napi::Object>());
-  gdImagePtr im2 = _obj_->getGdImagePtr();
+  REQ_IMG_ARG(0, im2);
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageCompare(this->_image, im2));
 
