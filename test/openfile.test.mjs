@@ -25,11 +25,14 @@ describe('gd.openFile', () => {
   });
 
   it('throws an exception when file does not exist', async () => {
+    let exception;
     try {
       await gd.openFile(`${source}/abcxyz.jpg`);
-    } catch (exception) {
-      assert.ok(exception instanceof Error);
+    } catch (e) {
+      exception = e;
     }
+    assert.instanceOf(exception, Error);
+    assert.equal(exception.code, 'ENOENT');
   });
 });
 

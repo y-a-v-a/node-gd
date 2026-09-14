@@ -36,9 +36,14 @@ describe('Section Handling file types', function () {
     const img = await gd.openPng(s);
     assert.ok(img instanceof gd.Image);
 
-    img.jpeg('', 100).catch(function (reason) {
-      assert.ok(reason === 'Cannot save JPEG file');
-    });
+    let reason;
+    try {
+      await img.jpeg('', 100);
+    } catch (e) {
+      reason = e;
+    }
+    assert.strictEqual(reason, 'Cannot save JPEG file');
+    img.destroy();
   });
 
   it('gd.Image#saveJpeg() -- can copy a png into a jpeg', async () => {

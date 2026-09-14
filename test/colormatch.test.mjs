@@ -8,48 +8,37 @@ describe('gd.Image#colormatch', function () {
     const baseImage = await gd.create(100, 100);
     const paletteImage = await gd.create(100, 100);
 
-    try {
-      baseImage.colorMatch(paletteImage);
-    } catch (e) {
-      assert.instanceOf(e, Error);
-    }
+    assert.throws(() => baseImage.colorMatch(paletteImage), Error, /should be truecolor/);
+    baseImage.destroy();
+    paletteImage.destroy();
   });
 
   it('throws an Error when argument image is not palette', async function () {
-    const baseImage = await gd.create(100, 100);
+    const baseImage = await gd.createTrueColor(100, 100);
     const trueColorImg = await gd.createTrueColor(100, 100);
 
-    try {
-      baseImage.colorMatch(trueColorImg);
-    } catch (e) {
-      assert.instanceOf(e, Error);
-    }
+    assert.throws(() => baseImage.colorMatch(trueColorImg), Error, /must be palette/);
+    baseImage.destroy();
+    trueColorImg.destroy();
   });
 
   it('expects images to have same dimensions', async function () {
     const baseImage = await gd.createTrueColor(100, 100);
     const paletteImage = await gd.create(90, 90);
+    paletteImage.colorAllocate(0, 0, 0);
 
-    try {
-      baseImage.colorMatch(paletteImage);
-    } catch (e) {
-      baseImage.destroy();
-      paletteImage.destroy();
-      assert.instanceOf(e, Error);
-    }
+    assert.throws(() => baseImage.colorMatch(paletteImage), Error, /same dimensions/);
+    baseImage.destroy();
+    paletteImage.destroy();
   });
 
   it('expects the palette iamge to have at least one color allocated', async function () {
     const baseImage = await gd.createTrueColor(100, 100);
     const paletteImage = await gd.create(100, 100);
 
-    try {
-      baseImage.colorMatch(paletteImage);
-    } catch (e) {
-      baseImage.destroy();
-      paletteImage.destroy();
-      assert.instanceOf(e, Error);
-    }
+    assert.throws(() => baseImage.colorMatch(paletteImage), Error, /At least 1 color/);
+    baseImage.destroy();
+    paletteImage.destroy();
   });
 
   it('can match palette colors to truecolor image', async function () {
