@@ -109,7 +109,7 @@ describe('Creating images containing text', function () {
           extras
         ),
       TypeError,
-      /must be an object/
+      /Argument 7 must be an object/
     );
     image.destroy();
   });
@@ -358,6 +358,17 @@ describe('Creating images containing text', function () {
     );
 
     assert.equal(boundingBox.length, 8);
+    image.destroy();
+  });
+
+  it('gd.Image#stringFTCircle() -- throws an Error when the color argument is missing', async () => {
+    var image = await gd.createTrueColor(300, 300);
+
+    assert.throws(
+      () => image.stringFTCircle(150, 150, 100, 32, 1, fontFile, 24, 'Hello', 'world!'),
+      Error,
+      /Expected 10 argument/
+    );
     image.destroy();
   });
 

@@ -1544,7 +1544,7 @@ Napi::Value Gd::Image::StringFTEx(const Napi::CallbackInfo &info)
 
   if (!info[7].IsObject())
   {
-    Napi::TypeError::New(info.Env(), "Argument 8 must be an object").ThrowAsJavaScriptException();
+    Napi::TypeError::New(info.Env(), "Argument 7 must be an object").ThrowAsJavaScriptException();
     return info.Env().Null();
   }
 
@@ -1744,7 +1744,7 @@ Napi::Value Gd::Image::StringFTCircle(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(9, "center x coordinate, center y coordinate, radius, text radius, fill portion, font list, font size, top distance, bottom distance, color number.");
+  REQ_ARGS(10, "center x coordinate, center y coordinate, radius, text radius, fill portion, font list, font size, top distance, bottom distance, color number.");
   REQ_INT_ARG(0, cx, "A value for the center x coordinate should be supplied.");
   REQ_INT_ARG(1, cy, "A value for the center y coordinate should be supplied.");
   REQ_DOUBLE_ARG(2, radius);
