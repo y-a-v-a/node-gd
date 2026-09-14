@@ -770,6 +770,47 @@ Napi::Value Gd::Image::DashedLine(const Napi::CallbackInfo &info)
   return info.This();
 }
 
+/**
+ * Collect points from an array of objects with x and y properties.
+ * Entries that are not such objects are skipped. Throws a TypeError and
+ * returns false when a point has non numeric coordinates.
+ */
+static bool GetPoints(const Napi::CallbackInfo &info, Napi::Array array, std::vector<gdPoint> &points)
+{
+  Napi::String x = Napi::String::New(info.Env(), "x");
+  Napi::String y = Napi::String::New(info.Env(), "y");
+  unsigned int len = array.Length();
+
+  points.reserve(len);
+
+  for (unsigned int i = 0; i < len; i++)
+  {
+    Napi::Value v = array.Get(i);
+    if (!v.IsObject())
+      continue;
+
+    Napi::Object o = v.ToObject();
+    if (!o.Has(x) || !o.Has(y))
+      continue;
+
+    Napi::Value px = o.Get(x);
+    Napi::Value py = o.Get(y);
+    if (!px.IsNumber() || !py.IsNumber())
+    {
+      Napi::TypeError::New(info.Env(), "Points must have numeric x and y values.")
+          .ThrowAsJavaScriptException();
+      return false;
+    }
+
+    gdPoint point;
+    point.x = px.As<Napi::Number>().Int32Value();
+    point.y = py.As<Napi::Number>().Int32Value();
+    points.push_back(point);
+  }
+
+  return true;
+}
+
 Napi::Value Gd::Image::Polygon(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
@@ -783,31 +824,13 @@ Napi::Value Gd::Image::Polygon(const Napi::CallbackInfo &info)
     return info.Env().Null();
   }
 
-  Napi::String x = Napi::String::New(info.Env(), "x");
-  Napi::String y = Napi::String::New(info.Env(), "y");
-
-  Napi::Array array = info[0].As<Napi::Array>();
-  unsigned int len = array.Length(), _len = 0;
-  gdPoint *points = new gdPoint[len];
-
-  for (unsigned int i = 0; i < len; i++)
+  std::vector<gdPoint> points;
+  if (!GetPoints(info, info[0].As<Napi::Array>(), points))
   {
-    Napi::Value v = array.Get(i);
-    if (!v.IsObject())
-      continue;
-
-    Napi::Object o = v.ToObject();
-    if (!o.Has(x) || !o.Has(y))
-      continue;
-
-    points[_len].x = o.Get(x).As<Napi::Number>().Int32Value();
-    points[_len].y = o.Get(y).As<Napi::Number>().Int32Value();
-    _len++;
+    return info.Env().Null();
   }
 
-  gdImagePolygon(this->_image, points, _len, color);
-
-  delete[] points;
+  gdImagePolygon(this->_image, points.data(), points.size(), color);
 
   return info.This();
 }
@@ -825,31 +848,13 @@ Napi::Value Gd::Image::OpenPolygon(const Napi::CallbackInfo &info)
     return info.Env().Null();
   }
 
-  Napi::String x = Napi::String::New(info.Env(), "x");
-  Napi::String y = Napi::String::New(info.Env(), "y");
-
-  Napi::Array array = info[0].As<Napi::Array>();
-  unsigned int len = array.Length(), _len = 0;
-  gdPoint *points = new gdPoint[len];
-
-  for (unsigned int i = 0; i < len; i++)
+  std::vector<gdPoint> points;
+  if (!GetPoints(info, info[0].As<Napi::Array>(), points))
   {
-    Napi::Value v = array.Get(i);
-    if (!v.IsObject())
-      continue;
-
-    Napi::Object o = v.ToObject();
-    if (!o.Has(x) || !o.Has(y))
-      continue;
-
-    points[_len].x = o.Get(x).As<Napi::Number>().Int32Value();
-    points[_len].y = o.Get(y).As<Napi::Number>().Int32Value();
-    _len++;
+    return info.Env().Null();
   }
 
-  gdImageOpenPolygon(this->_image, points, _len, color);
-
-  delete[] points;
+  gdImageOpenPolygon(this->_image, points.data(), points.size(), color);
 
   return info.This();
 }
@@ -867,31 +872,13 @@ Napi::Value Gd::Image::FilledPolygon(const Napi::CallbackInfo &info)
     return info.Env().Null();
   }
 
-  Napi::String x = Napi::String::New(info.Env(), "x");
-  Napi::String y = Napi::String::New(info.Env(), "y");
-
-  Napi::Array array = info[0].As<Napi::Array>();
-  unsigned int len = array.Length(), _len = 0;
-  gdPoint *points = new gdPoint[len];
-
-  for (unsigned int i = 0; i < len; i++)
+  std::vector<gdPoint> points;
+  if (!GetPoints(info, info[0].As<Napi::Array>(), points))
   {
-    Napi::Value v = array.Get(i);
-    if (!v.IsObject())
-      continue;
-
-    Napi::Object o = v.ToObject();
-    if (!o.Has(x) || !o.Has(y))
-      continue;
-
-    points[_len].x = o.Get(x).As<Napi::Number>().Int32Value();
-    points[_len].y = o.Get(y).As<Napi::Number>().Int32Value();
-    _len++;
+    return info.Env().Null();
   }
 
-  gdImageFilledPolygon(this->_image, points, _len, color);
-
-  delete[] points;
+  gdImageFilledPolygon(this->_image, points.data(), points.size(), color);
 
   return info.This();
 }
@@ -1081,8 +1068,9 @@ Napi::Value Gd::Image::SetStyle(const Napi::CallbackInfo &info)
   }
 
   Napi::Array array = info[0].As<Napi::Array>();
-  unsigned int len = array.Length(), _len = 0;
-  int *sty = new int[len];
+  unsigned int len = array.Length();
+  std::vector<int> style;
+  style.reserve(len);
 
   for (unsigned int i = 0; i < len; i++)
   {
@@ -1090,13 +1078,10 @@ Napi::Value Gd::Image::SetStyle(const Napi::CallbackInfo &info)
     if (!v.IsNumber())
       continue;
 
-    sty[_len] = v.As<Napi::Number>().Int32Value();
-    _len++;
+    style.push_back(v.As<Napi::Number>().Int32Value());
   }
 
-  gdImageSetStyle(this->_image, sty, _len);
-
-  delete[] sty;
+  gdImageSetStyle(this->_image, style.data(), style.size());
 
   return info.This();
 }

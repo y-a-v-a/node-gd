@@ -212,6 +212,23 @@ describe('Drawing primitives', function () {
       }
     });
 
+    it('throws a TypeError when a point has non numeric coordinates', async function () {
+      const img = await canvas();
+      for (const method of ['polygon', 'openPolygon', 'filledPolygon']) {
+        assert.throws(() => img[method]([{ x: 1, y: 1 }, { x: '2', y: 2 }], red), TypeError, /numeric x and y/, method);
+      }
+      img.destroy();
+    });
+
+    it('draws nothing for an empty array of points', async function () {
+      const img = await canvas();
+      for (const method of ['polygon', 'openPolygon', 'filledPolygon']) {
+        assert.strictEqual(img[method]([], red), img, method);
+      }
+      assert.equal(img.getTrueColorPixel(0, 0), white);
+      img.destroy();
+    });
+
     it('throws a TypeError when the points are not an array', async function () {
       const img = await canvas();
       assert.throws(() => img.polygon({ x: 1, y: 1 }, red), TypeError, /must be an array/);
