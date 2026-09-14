@@ -102,17 +102,12 @@
   }                                                          \
   VAR = info[I].ToNumber();
 
-#define REQ_IMG_ARG(I, VAR)                                            \
-  if (info.Length() <= (I) || !info[I].IsObject())                     \
-  {                                                                    \
-    Napi::TypeError::New(info.Env(),                                   \
-                         "Argument " #I " must be an Image object.")   \
-        .ThrowAsJavaScriptException();                                 \
-    return info.Env().Null();                                          \
-  }                                                                    \
-  Gd::Image *_obj_ =                                                   \
-      Napi::ObjectWrap<Gd::Image>::Unwrap(info[I].As<Napi::Object>()); \
-  gdImagePtr VAR = _obj_->getGdImagePtr();
+#define REQ_IMG_ARG(I, VAR)                          \
+  gdImagePtr VAR = Gd::Image::ImageArg(info, (I)); \
+  if (VAR == nullptr)                              \
+  {                                                \
+    return info.Env().Null();                      \
+  }
 
 #define OPT_INT_ARG(I, VAR, DEFAULT)                                  \
   int VAR;                                                            \
@@ -198,6 +193,17 @@
     RETURN_IMAGE(im)                                                    \
   }
 
+#define CHECK_PALETTE_INDEX(COLOR)                                         \
+  if (!gdImageTrueColor(this->_image) &&                                   \
+      ((COLOR) < 0 || (COLOR) >= gdMaxColors))                             \
+  {                                                                        \
+    Napi::RangeError::New(info.Env(),                                      \
+                          "Color must be a palette index between 0 and "   \
+                          "255 for palette images")                        \
+        .ThrowAsJavaScriptException();                                     \
+    return info.Env().Null();                                              \
+  }
+
 #define ASSERT_IS_BUFFER(val)                                 \
   if (!val.IsBuffer())                                        \
   {                                                           \
@@ -244,10 +250,25 @@ public:
 
     gdImagePtr getGdImagePtr() const { return _image; }
 
+    /**
+     * Returns the gdImagePtr of the Image passed as argument at index.
+     * Throws and returns nullptr when the argument is not an Image
+     * or when the Image has been destroyed.
+     */
+    static gdImagePtr ImageArg(const Napi::CallbackInfo &info, size_t index);
+
   private:
     gdImagePtr _image{nullptr};
 
+    // copies of the images set with setBrush() and setTile(), owned by
+    // this instance so libgd never reads a destroyed brush or tile
+    gdImagePtr _brush{nullptr};
+
+    gdImagePtr _tile{nullptr};
+
     bool _isDestroyed{true};
+
+    void DestroyImages();
 
     operator gdImagePtr() const { return _image; }
 

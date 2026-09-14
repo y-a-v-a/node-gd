@@ -96,21 +96,22 @@ describe('Creating images containing text', function () {
     var txtColor = image.colorAllocate(255, 255, 0);
     var extras = '';
 
-    try {
-      image.stringFTEx(
-        txtColor,
-        fontFile,
-        24,
-        0,
-        10,
-        60,
-        'Lorem ipsum',
-        extras
-      );
-    } catch (e) {
-      assert.ok(e instanceof Error);
-      image.destroy();
-    }
+    assert.throws(
+      () =>
+        image.stringFTEx(
+          txtColor,
+          fontFile,
+          24,
+          0,
+          10,
+          60,
+          'Lorem ipsum',
+          extras
+        ),
+      TypeError,
+      /Argument 7 must be an object/
+    );
+    image.destroy();
   });
 
   it('gd.Image#stringFTEx() -- can consume an object with font extras', async () => {
@@ -316,21 +317,22 @@ describe('Creating images containing text', function () {
     };
 
     var txtColor = image.colorAllocate(255, 255, 0);
-    try {
-      image.stringFTEx(
-        txtColor,
-        fontFile,
-        24,
-        0,
-        10,
-        60,
-        'Hello world\nUse unicode!',
-        extras
-      );
-    } catch (e) {
-      assert.ok(e instanceof Error);
-      image.destroy();
-    }
+    assert.throws(
+      () =>
+        image.stringFTEx(
+          txtColor,
+          fontFile,
+          24,
+          0,
+          10,
+          60,
+          'Hello world\nUse unicode!',
+          extras
+        ),
+      Error,
+      /Unknown value for charmap/
+    );
+    image.destroy();
   });
 
   it('gd.Image#stringFTEx() -- returns an array of coordinates of the bounding box when an 8th boolean parameter is given to', async () => {
@@ -356,6 +358,17 @@ describe('Creating images containing text', function () {
     );
 
     assert.equal(boundingBox.length, 8);
+    image.destroy();
+  });
+
+  it('gd.Image#stringFTCircle() -- throws an Error when the color argument is missing', async () => {
+    var image = await gd.createTrueColor(300, 300);
+
+    assert.throws(
+      () => image.stringFTCircle(150, 150, 100, 32, 1, fontFile, 24, 'Hello', 'world!'),
+      Error,
+      /Expected 10 argument/
+    );
     image.destroy();
   });
 

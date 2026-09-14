@@ -50,11 +50,10 @@ describe('Meta information', function () {
   });
 
   it('gd.GD_GIF -- is not writeble', function () {
-    try {
+    assert.throws(() => {
       gd.GD_GIF = 99;
-    } catch (e) {
-      assert.ok(e instanceof Error);
-    }
+    }, TypeError, /read only/);
+    assert.equal(gd.GD_GIF, 1);
   });
 
   it('gd.GD_GIFANIM -- will have built in GIF animation support', function () {
@@ -135,12 +134,9 @@ describe('Image query functions', function () {
     const s = source + 'input.png';
     const coord = [101, 101];
     const image = await gd.openPng(s);
-    let color;
-    try {
-      color = image.imageColorAt(coord[0], coord[1]);
-    } catch (exception) {
-      assert.ok(exception instanceof Error);
-    }
+
+    assert.throws(() => image.imageColorAt(coord[0], coord[1]), Error, /Invalid pixel/);
+    image.destroy();
   });
 });
 

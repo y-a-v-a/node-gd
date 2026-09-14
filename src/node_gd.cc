@@ -19,6 +19,7 @@
 #include <napi.h>
 #include <sstream>
 #include <cstring>
+#include <vector>
 #include "node_gd.h"
 #include "node_gd_workers.cc"
 #include <gd_errors.h>
@@ -486,13 +487,49 @@ Gd::Image::Image(const Napi::CallbackInfo &info)
 
 Gd::Image::~Image()
 {
-  if (this->_image != nullptr)
-  {
-    gdImageDestroy(this->_image);
+  this->DestroyImages();
+}
 
-    this->_isDestroyed = true;
-    this->_image = nullptr;
+void Gd::Image::DestroyImages()
+{
+  for (gdImagePtr *image : {&this->_image, &this->_brush, &this->_tile})
+  {
+    if (*image != nullptr)
+    {
+      gdImageDestroy(*image);
+      *image = nullptr;
+    }
   }
+
+  this->_isDestroyed = true;
+}
+
+gdImagePtr Gd::Image::ImageArg(const Napi::CallbackInfo &info, size_t index)
+{
+  Napi::Env env = info.Env();
+  std::string argument = "Argument " + std::to_string(index);
+  void *unwrapped = nullptr;
+
+  // napi_unwrap instead of ObjectWrap::Unwrap, which throws a generic
+  // "Invalid argument" error for objects that are not wrapped
+  if (info.Length() <= index || !info[index].IsObject() ||
+      !info[index].As<Napi::Object>().InstanceOf(constructor.Value()) ||
+      napi_unwrap(env, info[index], &unwrapped) != napi_ok || unwrapped == nullptr)
+  {
+    Napi::TypeError::New(env, argument + " must be an Image object.")
+        .ThrowAsJavaScriptException();
+    return nullptr;
+  }
+
+  Gd::Image *image = static_cast<Gd::Image *>(static_cast<Napi::ObjectWrap<Gd::Image> *>(unwrapped));
+  if (image->_isDestroyed || image->_image == nullptr)
+  {
+    Napi::Error::New(env, argument + " is an Image that is already destroyed.")
+        .ThrowAsJavaScriptException();
+    return nullptr;
+  }
+
+  return image->_image;
 }
 
 /**
@@ -500,13 +537,8 @@ Gd::Image::~Image()
  */
 Napi::Value Gd::Image::Destroy(const Napi::CallbackInfo &info)
 {
-  if (this->_image != nullptr)
-  {
-    gdImageDestroy(this->_image);
-  }
+  this->DestroyImages();
 
-  this->_isDestroyed = true;
-  this->_image = nullptr;
   return info.Env().Undefined();
 }
 
@@ -769,6 +801,47 @@ Napi::Value Gd::Image::DashedLine(const Napi::CallbackInfo &info)
   return info.This();
 }
 
+/**
+ * Collect points from an array of objects with x and y properties.
+ * Entries that are not such objects are skipped. Throws a TypeError and
+ * returns false when a point has non numeric coordinates.
+ */
+static bool GetPoints(const Napi::CallbackInfo &info, Napi::Array array, std::vector<gdPoint> &points)
+{
+  Napi::String x = Napi::String::New(info.Env(), "x");
+  Napi::String y = Napi::String::New(info.Env(), "y");
+  unsigned int len = array.Length();
+
+  points.reserve(len);
+
+  for (unsigned int i = 0; i < len; i++)
+  {
+    Napi::Value v = array.Get(i);
+    if (!v.IsObject())
+      continue;
+
+    Napi::Object o = v.ToObject();
+    if (!o.Has(x) || !o.Has(y))
+      continue;
+
+    Napi::Value px = o.Get(x);
+    Napi::Value py = o.Get(y);
+    if (!px.IsNumber() || !py.IsNumber())
+    {
+      Napi::TypeError::New(info.Env(), "Points must have numeric x and y values.")
+          .ThrowAsJavaScriptException();
+      return false;
+    }
+
+    gdPoint point;
+    point.x = px.As<Napi::Number>().Int32Value();
+    point.y = py.As<Napi::Number>().Int32Value();
+    points.push_back(point);
+  }
+
+  return true;
+}
+
 Napi::Value Gd::Image::Polygon(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
@@ -782,31 +855,13 @@ Napi::Value Gd::Image::Polygon(const Napi::CallbackInfo &info)
     return info.Env().Null();
   }
 
-  Napi::String x = Napi::String::New(info.Env(), "x");
-  Napi::String y = Napi::String::New(info.Env(), "y");
-
-  Napi::Array array = info[0].As<Napi::Array>();
-  unsigned int len = array.Length(), _len = 0;
-  gdPoint *points = new gdPoint[len];
-
-  for (unsigned int i = 0; i < len; i++)
+  std::vector<gdPoint> points;
+  if (!GetPoints(info, info[0].As<Napi::Array>(), points))
   {
-    Napi::Value v = array.Get(i);
-    if (!v.IsObject())
-      continue;
-
-    Napi::Object o = v.ToObject();
-    if (!o.Has(x) || !o.Has(y))
-      continue;
-
-    points[i].x = o.Get(x).As<Napi::Number>().Int32Value();
-    points[i].y = o.Get(y).As<Napi::Number>().Int32Value();
-    _len++;
+    return info.Env().Null();
   }
 
-  gdImagePolygon(this->_image, points, _len, color);
-
-  delete[] points;
+  gdImagePolygon(this->_image, points.data(), points.size(), color);
 
   return info.This();
 }
@@ -824,31 +879,13 @@ Napi::Value Gd::Image::OpenPolygon(const Napi::CallbackInfo &info)
     return info.Env().Null();
   }
 
-  Napi::String x = Napi::String::New(info.Env(), "x");
-  Napi::String y = Napi::String::New(info.Env(), "y");
-
-  Napi::Array array = info[0].As<Napi::Array>();
-  unsigned int len = array.Length(), _len = 0;
-  gdPoint *points = new gdPoint[len];
-
-  for (unsigned int i = 0; i < len; i++)
+  std::vector<gdPoint> points;
+  if (!GetPoints(info, info[0].As<Napi::Array>(), points))
   {
-    Napi::Value v = array.Get(i);
-    if (!v.IsObject())
-      continue;
-
-    Napi::Object o = v.ToObject();
-    if (!o.Has(x) || !o.Has(y))
-      continue;
-
-    points[i].x = o.Get(x).As<Napi::Number>().Int32Value();
-    points[i].y = o.Get(y).As<Napi::Number>().Int32Value();
-    _len++;
+    return info.Env().Null();
   }
 
-  gdImageOpenPolygon(this->_image, points, _len, color);
-
-  delete[] points;
+  gdImageOpenPolygon(this->_image, points.data(), points.size(), color);
 
   return info.This();
 }
@@ -866,31 +903,13 @@ Napi::Value Gd::Image::FilledPolygon(const Napi::CallbackInfo &info)
     return info.Env().Null();
   }
 
-  Napi::String x = Napi::String::New(info.Env(), "x");
-  Napi::String y = Napi::String::New(info.Env(), "y");
-
-  Napi::Array array = info[0].As<Napi::Array>();
-  unsigned int len = array.Length(), _len = 0;
-  gdPoint *points = new gdPoint[len];
-
-  for (unsigned int i = 0; i < len; i++)
+  std::vector<gdPoint> points;
+  if (!GetPoints(info, info[0].As<Napi::Array>(), points))
   {
-    Napi::Value v = array.Get(i);
-    if (!v.IsObject())
-      continue;
-
-    Napi::Object o = v.ToObject();
-    if (!o.Has(x) || !o.Has(y))
-      continue;
-
-    points[i].x = o.Get(x).As<Napi::Number>().Int32Value();
-    points[i].y = o.Get(y).As<Napi::Number>().Int32Value();
-    _len++;
+    return info.Env().Null();
   }
 
-  gdImageFilledPolygon(this->_image, points, _len, color);
-
-  delete[] points;
+  gdImageFilledPolygon(this->_image, points.data(), points.size(), color);
 
   return info.This();
 }
@@ -1049,12 +1068,74 @@ Napi::Value Gd::Image::SetAntiAliasedDontBlend(const Napi::CallbackInfo &info)
   return info.This();
 }
 
+/**
+ * Copy the parts of an image libgd reads when applying a brush or tile:
+ * pixels, palette, transparent color and clipping rectangle.
+ * gdImageClone() is not used, as in libgd 2.3.3 it writes to unallocated
+ * memory for images that have drawn a filled polygon.
+ */
+static gdImagePtr CopyForDrawing(gdImagePtr src)
+{
+  gdImagePtr dst = src->trueColor ? gdImageCreateTrueColor(src->sx, src->sy)
+                                  : gdImageCreate(src->sx, src->sy);
+  if (dst == nullptr)
+  {
+    return nullptr;
+  }
+
+  for (int y = 0; y < src->sy; y++)
+  {
+    if (src->trueColor)
+    {
+      memcpy(dst->tpixels[y], src->tpixels[y], sizeof(int) * src->sx);
+    }
+    else
+    {
+      memcpy(dst->pixels[y], src->pixels[y], sizeof(unsigned char) * src->sx);
+    }
+  }
+
+  if (!src->trueColor)
+  {
+    dst->colorsTotal = src->colorsTotal;
+    for (int i = 0; i < gdMaxColors; i++)
+    {
+      dst->red[i] = src->red[i];
+      dst->green[i] = src->green[i];
+      dst->blue[i] = src->blue[i];
+      dst->alpha[i] = src->alpha[i];
+      dst->open[i] = src->open[i];
+    }
+  }
+
+  dst->transparent = src->transparent;
+  dst->cx1 = src->cx1;
+  dst->cy1 = src->cy1;
+  dst->cx2 = src->cx2;
+  dst->cy2 = src->cy2;
+
+  return dst;
+}
+
 Napi::Value Gd::Image::SetBrush(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
   REQ_IMG_ARG(0, brush)
-  gdImageSetBrush(this->_image, brush);
+
+  gdImagePtr copy = CopyForDrawing(brush);
+  if (copy == nullptr)
+  {
+    Napi::Error::New(info.Env(), "Unable to copy brush image.").ThrowAsJavaScriptException();
+    return info.Env().Null();
+  }
+
+  gdImageSetBrush(this->_image, copy);
+  if (this->_brush != nullptr)
+  {
+    gdImageDestroy(this->_brush);
+  }
+  this->_brush = copy;
 
   return info.This();
 }
@@ -1064,7 +1145,20 @@ Napi::Value Gd::Image::SetTile(const Napi::CallbackInfo &info)
   CHECK_IMAGE_EXISTS;
 
   REQ_IMG_ARG(0, tile)
-  gdImageSetTile(this->_image, tile);
+
+  gdImagePtr copy = CopyForDrawing(tile);
+  if (copy == nullptr)
+  {
+    Napi::Error::New(info.Env(), "Unable to copy tile image.").ThrowAsJavaScriptException();
+    return info.Env().Null();
+  }
+
+  gdImageSetTile(this->_image, copy);
+  if (this->_tile != nullptr)
+  {
+    gdImageDestroy(this->_tile);
+  }
+  this->_tile = copy;
 
   return info.This();
 }
@@ -1080,8 +1174,9 @@ Napi::Value Gd::Image::SetStyle(const Napi::CallbackInfo &info)
   }
 
   Napi::Array array = info[0].As<Napi::Array>();
-  unsigned int len = array.Length(), _len = 0;
-  int *sty = new int[len];
+  unsigned int len = array.Length();
+  std::vector<int> style;
+  style.reserve(len);
 
   for (unsigned int i = 0; i < len; i++)
   {
@@ -1089,13 +1184,10 @@ Napi::Value Gd::Image::SetStyle(const Napi::CallbackInfo &info)
     if (!v.IsNumber())
       continue;
 
-    sty[i] = v.As<Napi::Number>().Int32Value();
-    _len++;
+    style.push_back(v.As<Napi::Number>().Int32Value());
   }
 
-  gdImageSetStyle(this->_image, sty, _len);
-
-  delete[] sty;
+  gdImageSetStyle(this->_image, style.data(), style.size());
 
   return info.This();
 }
@@ -1195,17 +1287,12 @@ Napi::Value Gd::Image::GetPixel(const Napi::CallbackInfo &info)
   int imageX = gdImageSX(this->_image);
   int imageY = gdImageSY(this->_image);
 
-  Napi::Number result;
-  if (x > imageX || y > imageY)
+  if (x >= imageX || y >= imageY)
   {
-    result = Napi::Number::New(info.Env(), 0);
-  }
-  else
-  {
-    result = Napi::Number::New(info.Env(), gdImageGetPixel(this->_image, x, y));
+    return Napi::Number::New(info.Env(), 0);
   }
 
-  return result;
+  return Napi::Number::New(info.Env(), gdImageGetPixel(this->_image, x, y));
 }
 
 Napi::Value Gd::Image::GetTrueColorPixel(const Napi::CallbackInfo &info)
@@ -1225,18 +1312,14 @@ Napi::Value Gd::Image::GetTrueColorPixel(const Napi::CallbackInfo &info)
   int imageX = gdImageSX(this->_image);
   int imageY = gdImageSY(this->_image);
 
-  Napi::Number result;
-  if (x > imageX || y > imageY)
+  // gdImageGetTrueColorPixel() returns the color of palette index 0 for
+  // out of bounds coordinates on palette images, so check bounds here
+  if (x >= imageX || y >= imageY)
   {
-    result = Napi::Number::New(info.Env(), 0);
-  }
-  else
-  {
-    result = Napi::Number::New(info.Env(), gdImageGetPixel(this->_image, x, y));
+    return Napi::Number::New(info.Env(), 0);
   }
 
-  result = Napi::Number::New(info.Env(), gdImageGetTrueColorPixel(this->_image, x, y));
-  return result;
+  return Napi::Number::New(info.Env(), gdImageGetTrueColorPixel(this->_image, x, y));
 }
 
 // This is implementation of the PHP-GD specific method imagecolorat
@@ -1343,6 +1426,7 @@ void Gd::Image::InterpolationIdSetter(const Napi::CallbackInfo &info, const Napi
   {
     Napi::Error::New(info.Env(), "Image is already destroyed.")
         .ThrowAsJavaScriptException();
+    return;
   }
 
   if (value.IsNumber())
@@ -1352,6 +1436,7 @@ void Gd::Image::InterpolationIdSetter(const Napi::CallbackInfo &info, const Napi
     if (id > 30)
     {
       Napi::Error::New(info.Env(), "Interpolation method cannot be higher than 30. GD implements 30 different interpolation methods.").ThrowAsJavaScriptException();
+      return;
     }
     gdInterpolationMethod method = static_cast<gdInterpolationMethod>(id);
 
@@ -1459,7 +1544,7 @@ Napi::Value Gd::Image::StringFTEx(const Napi::CallbackInfo &info)
 
   if (!info[7].IsObject())
   {
-    Napi::TypeError::New(info.Env(), "Argument 8 must be an object").ThrowAsJavaScriptException();
+    Napi::TypeError::New(info.Env(), "Argument 7 must be an object").ThrowAsJavaScriptException();
     return info.Env().Null();
   }
 
@@ -1659,7 +1744,7 @@ Napi::Value Gd::Image::StringFTCircle(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_ARGS(9, "center x coordinate, center y coordinate, radius, text radius, fill portion, font list, font size, top distance, bottom distance, color number.");
+  REQ_ARGS(10, "center x coordinate, center y coordinate, radius, text radius, fill portion, font list, font size, top distance, bottom distance, color number.");
   REQ_INT_ARG(0, cx, "A value for the center x coordinate should be supplied.");
   REQ_INT_ARG(1, cy, "A value for the center y coordinate should be supplied.");
   REQ_DOUBLE_ARG(2, radius);
@@ -1815,6 +1900,7 @@ Napi::Value Gd::Image::Red(const Napi::CallbackInfo &info)
   CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, color, "A color number should supplied.");
+  CHECK_PALETTE_INDEX(color);
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageRed(this->_image, color));
   return result;
@@ -1825,6 +1911,7 @@ Napi::Value Gd::Image::Blue(const Napi::CallbackInfo &info)
   CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, color, "A color number should supplied.");
+  CHECK_PALETTE_INDEX(color);
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageBlue(this->_image, color));
   return result;
@@ -1835,6 +1922,7 @@ Napi::Value Gd::Image::Green(const Napi::CallbackInfo &info)
   CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, color, "A color number should supplied.");
+  CHECK_PALETTE_INDEX(color);
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageGreen(this->_image, color));
   return result;
@@ -1845,6 +1933,7 @@ Napi::Value Gd::Image::Alpha(const Napi::CallbackInfo &info)
   CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, color, "A color number should supplied.");
+  CHECK_PALETTE_INDEX(color);
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageAlpha(this->_image, color));
   return result;
@@ -1874,6 +1963,7 @@ void Gd::Image::InterlaceSetter(const Napi::CallbackInfo &info, const Napi::Valu
   {
     Napi::Error::New(info.Env(), "Image is already destroyed.")
         .ThrowAsJavaScriptException();
+    return;
   }
 
   if (value.IsBoolean())
@@ -1946,38 +2036,47 @@ Napi::Value Gd::Image::ColorReplaceArray(const Napi::CallbackInfo &info)
 
   REQ_ARGS(2, "array of 'from' colors, array of 'to' colors.");
 
+  for (unsigned int i = 0; i < 2; i++)
+  {
+    if (!info[i].IsArray())
+    {
+      Napi::TypeError::New(info.Env(), "Argument " + std::to_string(i) + " must be an array of colors.")
+          .ThrowAsJavaScriptException();
+      return info.Env().Null();
+    }
+  }
+
   Napi::Array fromArray = info[0].As<Napi::Array>();
-  unsigned int flen = fromArray.Length(), _flen = 0;
-  int *fromColors = new int[flen];
-
-  for (unsigned int i = 0; i < flen; i++)
-  {
-    Napi::Value v = fromArray.Get(i);
-    fromColors[i] = v.As<Napi::Number>().Int32Value();
-    _flen++;
-  }
-
   Napi::Array toArray = info[1].As<Napi::Array>();
-  unsigned int tlen = toArray.Length(), _tlen = 0;
-  int *toColors = new int[tlen];
+  unsigned int len = fromArray.Length();
 
-  for (unsigned int j = 0; j < tlen; j++)
-  {
-    Napi::Value v = toArray.Get(j);
-    toColors[j] = v.As<Napi::Number>().Int32Value();
-    _tlen++;
-  }
-
-  if (_flen != _tlen)
+  if (len != toArray.Length())
   {
     Napi::Error::New(info.Env(), "Color arrays should have same length.")
         .ThrowAsJavaScriptException();
     return info.Env().Null();
   }
 
+  std::vector<int> fromColors(len);
+  std::vector<int> toColors(len);
+
+  for (unsigned int i = 0; i < len; i++)
+  {
+    Napi::Value from = fromArray.Get(i);
+    Napi::Value to = toArray.Get(i);
+    if (!from.IsNumber() || !to.IsNumber())
+    {
+      Napi::TypeError::New(info.Env(), "Color arrays must only contain numbers.")
+          .ThrowAsJavaScriptException();
+      return info.Env().Null();
+    }
+    fromColors[i] = from.As<Napi::Number>().Int32Value();
+    toColors[i] = to.As<Napi::Number>().Int32Value();
+  }
+
   Napi::Number result =
       Napi::Number::New(info.Env(),
-                        gdImageColorReplaceArray(this->_image, _flen, fromColors, toColors));
+                        gdImageColorReplaceArray(this->_image, len, fromColors.data(), toColors.data()));
 
   return result;
 }
@@ -2073,14 +2172,14 @@ Napi::Value Gd::Image::Crop(const Napi::CallbackInfo &info)
   REQ_INT_ARG(2, width, "A value for 'width' should be supplied.");
   REQ_INT_ARG(3, height, "A value for 'height' should be supplied.");
 
-  gdRect *rect = new gdRect;
+  gdRect rect;
 
-  rect->x = x;
-  rect->y = y;
-  rect->width = (width == 0) ? 100 : width;
-  rect->height = (height == 0) ? 100 : height;
+  rect.x = x;
+  rect.y = y;
+  rect.width = (width == 0) ? 100 : width;
+  rect.height = (height == 0) ? 100 : height;
 
-  gdImagePtr newImage = gdImageCrop(this->_image, rect);
+  gdImagePtr newImage = gdImageCrop(this->_image, &rect);
 
   RETURN_IMAGE(newImage);
 }
@@ -2089,11 +2188,12 @@ Napi::Value Gd::Image::CropAuto(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  REQ_INT_ARG(0, mode, "A value for crop mode should be supplied, between 0 and 5.");
+  REQ_INT_ARG(0, mode, "A value for crop mode should be supplied, between 0 and 4.");
 
-  if (mode > 4)
+  // GD_CROP_THRESHOLD (5) is not handled by gdImageCropAuto()
+  if (mode < GD_CROP_DEFAULT || mode > GD_CROP_SIDES)
   {
-    Napi::RangeError::New(info.Env(), "Crop mode should be between 0 and 5.")
+    Napi::RangeError::New(info.Env(), "Crop mode should be between 0 and 4. Use cropThreshold() to crop by threshold.")
         .ThrowAsJavaScriptException();
     return info.Env().Null();
   }
@@ -2418,8 +2518,7 @@ Napi::Value Gd::Image::GifAnimAdd(const Napi::CallbackInfo &info)
   }
   else if (info[5].IsObject())
   {
-    Gd::Image *_obj_ = Napi::ObjectWrap<Gd::Image>::Unwrap(info[5].As<Napi::Object>());
-    gdImagePtr prevFrame = _obj_->getGdImagePtr();
+    REQ_IMG_ARG(5, prevFrame);
     data = (char *)gdImageGifAnimAddPtr(this->_image, &size, LocalCM, LeftOfs, TopOfs, Delay, Disposal, prevFrame);
   }
   else
@@ -2440,12 +2539,12 @@ Napi::Value Gd::Image::GifAnimEnd(const Napi::CallbackInfo &info)
   int size;
   char *data = (char *)gdImageGifAnimEndPtr(&size);
 
-  if (data == 0)
+  if (data == nullptr)
   {
     return Napi::Boolean::New(info.Env(), false);
   }
 
-  return Napi::Boolean::New(info.Env(), true);
+  RETURN_DATA;
 }
 
 /**
@@ -2456,14 +2555,7 @@ Napi::Value Gd::Image::Compare(const Napi::CallbackInfo &info)
   CHECK_IMAGE_EXISTS;
 
   REQ_ARGS(1, "of type Image.");
-  if (!info[0].IsObject())
-  {
-    Napi::TypeError::New(info.Env(), "Argument 0 must be an image").ThrowAsJavaScriptException();
-    return info.Env().Null();
-  }
-
-  Gd::Image *_obj_ = Napi::ObjectWrap<Gd::Image>::Unwrap(info[0].As<Napi::Object>());
-  gdImagePtr im2 = _obj_->getGdImagePtr();
+  REQ_IMG_ARG(0, im2);
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageCompare(this->_image, im2));
 

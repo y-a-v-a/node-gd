@@ -876,6 +876,8 @@ img.destroy();
 
 Set a brush image for subsequent drawing operations.
 
+The brush image is copied when this method is called. Changes made to the brush image afterwards are not used, and the brush image can be destroyed right away.
+
 ```javascript
 const gd = require('node-gd');
 
@@ -906,6 +908,8 @@ brush.destroy();
 - `image` - A gd.Image instance to use as a tile pattern
 
 Set a tile pattern for subsequent fill operations.
+
+The tile image is copied when this method is called. Changes made to the tile image afterwards are not used, and the tile image can be destroyed right away.
 
 ```javascript
 const gd = require('node-gd');
@@ -1866,60 +1870,142 @@ await palette.file('/path/to/result.gif');
 palette.destroy();
 ```
 
-### gd.Image#gifAnimBegin(anim, useGlobalColorMap, loops)
+# Animated GIFs
 
-Create an animated GIF.
+### gd.GifAnim(image, options)
 
-- `anim` is a `String` referencing a filename to be created, like `./anim.gif`
-- `useGlobalColorMap` a value being `-1`, `0` or `1` which determines if the colorMap of the current image will be used as the global colorMap for the whole animation. `-1` indicates `do default`.
-- The value for `loops` can be `-1` for no looping, `0` means infinite looping, any other value the amount of loops the animation should run.
+#### Parameters
 
-### gd.Image#gifAnimAdd(anim, localColorMap, leftOffset, topOffset, delay, disposal, prevFrame)
+- `image` - A `gd.Image` instance used as the first frame. Its width and height determine the size of the animation.
+- `options` - An optional `Object` with the following properties:
+  - `globalColorMap` - `1` (default) to use the palette of the first frame as global color map, `0` to write none, `-1` for the libgd default.
+  - `loops` - `-1` (default) to play the animation once, `0` to loop forever, or the number of times the animation should repeat.
+  - `localColorMap`, `leftOffset`, `topOffset`, `delay` and `disposal` for the first frame, see `gd.GifAnim#add()`.
 
-- Add current image to the specified `anim`.
-- `localColorMap` is a flag indicating wether GD should use this image's colorMap
-- `leftOffset` and `topOffset` indicate the offset of this frame
-- the `delay` is the delay before next frame (in 1/100 sec)
-- `disposal` defines how this frame is handled when the next frame is loads. Usually this value should be set to `0`, quote from gd's source: _meaning that the pixels changed by this frame should remain on the display when the next frame begins to render_
-- `prevFrame` should refer to the previous frame. If the current image is the first frame, supply `null`.
-
-### gd.Image#gifAnimEnd(anim)
-
-Write and close the GIF animation. A complete working example could look like this:
+Creates an animated GIF, starting with `image` as its first frame. Throws an `Error` when `image` is not a `gd.Image`. True color frames are converted to a palette by libgd when they are added.
 
 ```javascript
-const gd = require('node-gd');
-var anim = './anim.gif';
+import gd from 'node-gd';
 
-// create first frame
-var firstFrame = await gd.create(200, 200);
-
-// allocate some colors
-var whiteBackground = firstFrame.colorAllocate(255, 255, 255);
-var pink = firstFrame.colorAllocate(255, 0, 255);
-
-// create first frame and draw an ellipse
-firstFrame.ellipse(100, -50, 100, 100, pink);
-// start animation
-firstFrame.gifAnimBegin(anim, 1, -1);
-firstFrame.gifAnimAdd(anim, 0, 0, 0, 5, 1, null);
-
-var totalFrames = [];
-for (var i = 0; i < 30; i++) {
-  totalFrames.push(i);
+const frames = [];
+for (let i = 0; i < 10; i++) {
+  const frame = await gd.create(200, 200);
+  frame.colorAllocate(255, 255, 255);
+  const pink = frame.colorAllocate(255, 0, 255);
+  frame.filledEllipse(100, 100, 20 + i * 15, 20 + i * 15, pink);
+  frames.push(frame);
 }
 
-totalFrames.forEach(async (i, idx, arr) => {
-  var frame = await gd.create(200, 200);
-  arr[idx] = frame;
-  frame.ellipse(100, i * 10 - 40, 100, 100, pink);
-  var lastFrame = i === 0 ? firstFrame : arr[i - 1];
-  frame.gifAnimAdd(anim, 0, 0, 0, 5, 1, lastFrame);
-  frame.destroy();
-});
+// loop forever, show each frame for 0.1 seconds
+const anim = new gd.GifAnim(frames[0], { loops: 0, delay: 10 });
+frames.slice(1).forEach((frame) => anim.add(frame, { delay: 10 }));
 
-firstFrame.gifAnimEnd(anim);
-firstFrame.destroy();
+await anim.end('./animation.gif');
+anim.frames.forEach((frame) => frame.destroy());
+```
+
+### gd.GifAnim#add(image, options)
+
+#### Parameters
+
+- `image` - A `gd.Image` instance to add as the next frame.
+- `options` - An optional `Object` with the following properties:
+  - `localColorMap` - `1` to write the palette of this frame with the frame, `0` (default) to use the global color map.
+  - `leftOffset` and `topOffset` - The position of this frame within the animation, both `0` by default.
+  - `delay` - The time before the next frame is shown, in 1/100 seconds. Defaults to `100`.
+  - `disposal` - How this frame is treated when the next frame is shown:
+    - `0` - unspecified, not recommended;
+    - `1` (default) - leave this frame in place;
+    - `2` - restore the area of this frame to the background color;
+    - `3` - restore the area of this frame to what was there before.
+
+Adds a frame to the animation. The previous frame is passed to libgd, which then only stores the area that changed. Throws an `Error` when `image` is not a `gd.Image`, or when `gd.GifAnim#end()` has already been called.
+
+Do not destroy frames before the animation has ended. All frames, including the first one, are available as `anim.frames`.
+
+### gd.GifAnim#end(path)
+
+#### Parameters
+
+- `path` - Optional `String` with the path of the file to write the animation to.
+
+#### Return value
+
+- `Promise`
+  - Resolves to `true` after writing the animation to `path`.
+  - Resolves to a `Buffer` containing the animation when no `path` is given.
+
+Completes the animation. The `Promise` is rejected with the message `'gd.GifAnim#end() already called'` when called more than once, and with `'Unable to save animation'` when the file cannot be written. The frames are not destroyed, call `destroy()` on each of them when done.
+
+```javascript
+import gd from 'node-gd';
+
+const first = await gd.create(100, 100);
+first.colorAllocate(255, 255, 255);
+const second = await gd.create(100, 100);
+second.colorAllocate(0, 0, 0);
+
+const anim = new gd.GifAnim(first, { loops: 0, delay: 50 });
+anim.add(second, { delay: 50 });
+
+const data = await anim.end();
+// data is a Buffer starting with 'GIF89a'
+
+first.destroy();
+second.destroy();
+```
+
+### gd.Image#gifAnimBegin(globalColorMap, loops)
+
+#### Parameters
+
+- `globalColorMap` - `1` to use the palette of this image as global color map, `0` to write none, `-1` for the libgd default.
+- `loops` - `-1` to play the animation once, `0` to loop forever, or the number of times the animation should repeat.
+
+#### Return value
+
+- `Buffer` containing the start of the GIF data, or `false` on failure.
+
+This and the next two methods are the low level functions `gd.GifAnim` is built on. They return the parts of an animated GIF as `Buffer`s, which together form the animation when concatenated in order. This image determines the width and height of the animation; it is not added as a frame, call `gd.Image#gifAnimAdd()` for that.
+
+### gd.Image#gifAnimAdd(localColorMap, leftOffset, topOffset, delay, disposal, prevFrame)
+
+#### Parameters
+
+- `localColorMap`, `leftOffset`, `topOffset`, `delay` and `disposal` - See the options of `gd.GifAnim#add()`.
+- `prevFrame` - The `gd.Image` added as previous frame, or `null` for the first frame.
+
+#### Return value
+
+- `Buffer` containing this image as a frame, or `false` on failure.
+
+Throws a `TypeError` when `prevFrame` is an object that is not a `gd.Image`, and an `Error` when `prevFrame` has been destroyed.
+
+### gd.Image#gifAnimEnd()
+
+#### Return value
+
+- `Buffer` containing the end of the GIF data, or `false` on failure.
+
+```javascript
+import fs from 'fs';
+import gd from 'node-gd';
+
+const first = await gd.create(100, 100);
+first.colorAllocate(255, 255, 255);
+const second = await gd.create(100, 100);
+second.colorAllocate(0, 0, 0);
+
+const parts = [
+  first.gifAnimBegin(1, 0),
+  first.gifAnimAdd(0, 0, 0, 50, 1, null),
+  second.gifAnimAdd(0, 0, 0, 50, 1, first),
+  second.gifAnimEnd(),
+];
+
+fs.writeFileSync('./animation.gif', Buffer.concat(parts));
+first.destroy();
+second.destroy();
 ```
 
 # Copying and resizing

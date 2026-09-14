@@ -5,7 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# 3.1.0 - 2026-01-30 (current)
+# 3.2.0 - 2026-09-14 (current)
+
+### Added
+- Test coverage for drawing primitives, color functions, transformations and filters, copying and comparing images, encoding and decoding all supported formats, and `gd.GifAnim`.
+- TypeScript types for `gd.GifAnim`.
+- Documentation of `gd.GifAnim`.
+
+### Changed
+- `gd.Image#gifAnimEnd()` returns a `Buffer` with the end of the GIF data instead of `true`.
+- `gd.Image#setBrush()` and `gd.Image#setTile()` copy the given image. Changes made to it afterwards no longer affect drawing, and it can be destroyed right away.
+- `gd.Image#getPixel()` and `gd.Image#getTrueColorPixel()` return `0` for coordinates at or beyond the width or height. Previously `getTrueColorPixel()` on a palette image returned the color of palette index `0`.
+- Methods taking an image argument throw a `TypeError` for anything that is not a `gd.Image`, and an `Error` for a destroyed image. This includes the previous frame of `gd.Image#gifAnimAdd()`.
+- `gd.Image#colorReplaceArray()` and the polygon methods throw a `TypeError` for invalid arrays or values instead of a generic error.
+- `gd.Image#cropAuto()` reports the valid mode range as 0 to 4 and rejects negative modes. Use `gd.Image#cropThreshold()` to crop by threshold.
+
+### Fixed
+- Crash when calling `red()`, `green()`, `blue()` or `alpha()` on a palette image with a value that is not a palette index. A `RangeError` is thrown instead.
+- Crash when setting `interlace` on a destroyed image. Setting `interpolationId` above 30 no longer applies the value after throwing.
+- Crash when passing a destroyed image to `copy()`, `compare()`, `colorMatch()` or `paletteCopy()`.
+- Use after free when drawing with a brush or tile whose image was destroyed or garbage collected.
+- Animated GIFs created with `gd.GifAnim` missing the trailing `0x3B` byte.
+- `gd.GifAnim#end()` continuing after rejecting when called twice or when the file could not be written.
+- Stray lines and style pixels when polygon points or style arrays contain invalid entries.
+- Memory leaks in `crop()`, `colorReplaceArray()` and the polygon methods.
+- Wrong argument index in the `stringFTEx()` error and missing argument count check in `stringFTCircle()`.
+- Tests that passed without asserting anything when the expected error was not thrown.
+- Outdated GIF animation documentation and TypeScript declarations.
+- Release workflow flattening prebuilds into a single directory, which left only one unusable prebuild in the npm package.
+
+# 3.1.0 - 2026-01-30
 
 ### Added
 - Prebuilt binary packaging via prebuildify, with prebuilds bundled in the npm package.

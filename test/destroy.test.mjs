@@ -9,11 +9,7 @@ describe('Image destroy', function () {
     assert.instanceOf(img, gd.Image, 'Object not instance of gd.Image');
     img.destroy();
 
-    try {
-      img.width;
-    } catch (e) {
-      assert.instanceOf(e, Error);
-    }
+    assert.throws(() => img.width, Error, /already destroyed/);
   });
 
   it("gd.Image#destroy() -- accessing 'height' property after destroy throws an Error", async function () {
@@ -21,11 +17,7 @@ describe('Image destroy', function () {
     assert.strictEqual(img.height, 200);
     img.destroy();
 
-    try {
-      img.height;
-    } catch (e) {
-      assert.ok(e instanceof Error);
-    }
+    assert.throws(() => img.height, Error, /already destroyed/);
   });
 
   it("gd.Image#destroy() -- accessing 'trueColor' property after destroy throws an Error", async function () {
@@ -33,23 +25,33 @@ describe('Image destroy', function () {
     assert.strictEqual(img.trueColor, 0);
     img.destroy();
 
-    try {
-      img.trueColor;
-    } catch (e) {
-      assert.ok(e instanceof Error);
-    }
+    assert.throws(() => img.trueColor, Error, /already destroyed/);
   });
 
-  it("gd.Image#destroy() -- accessing 'trueColor' property after destroy throws an Error", async function () {
+  it("gd.Image#destroy() -- calling 'getPixel' after destroy throws an Error", async function () {
     const img = await gd.create(200, 200);
     assert.strictEqual(img.trueColor, 0);
     img.destroy();
 
-    try {
-      img.getPixel(1, 1);
-    } catch (e) {
-      assert.ok(e instanceof Error);
-    }
+    assert.throws(() => img.getPixel(1, 1), Error, /already destroyed/);
+  });
+
+  it("gd.Image#destroy() -- setting 'interlace' after destroy throws an Error", async function () {
+    const img = await gd.create(200, 200);
+    img.destroy();
+
+    assert.throws(() => {
+      img.interlace = true;
+    }, Error, /already destroyed/);
+  });
+
+  it("gd.Image#destroy() -- setting 'interpolationId' after destroy throws an Error", async function () {
+    const img = await gd.createTrueColor(200, 200);
+    img.destroy();
+
+    assert.throws(() => {
+      img.interpolationId = 16;
+    }, Error, /already destroyed/);
   });
 
   // it("gd.Image#destroy() -- ", async function() {
