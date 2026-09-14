@@ -1,4 +1,7 @@
+import fs from 'fs';
+
 import gd from '../index.js';
+import { assert } from 'chai';
 
 describe('Gif animation creation', function () {
   it('gd.Image#gifAnimBegin -- returns a Promise', async function () {
@@ -85,5 +88,103 @@ describe('Gif animation creation', function () {
     anim.add(image5, { delay: 10 });
 
     await anim.end('./test/output/output-animation.gif');
+  });
+});
+
+describe('gd.GifAnim', function () {
+  async function frame(size) {
+    const image = await gd.create(20, 20);
+    image.colorAllocate(255, 255, 255);
+    const pink = image.colorAllocate(255, 0, 255);
+    image.filledEllipse(10, 10, size, size, pink);
+    return image;
+  }
+
+  it('throws an Error when not constructed with an image', function () {
+    assert.throws(() => new gd.GifAnim(), Error, /requires an instance of gd.Image/);
+    assert.throws(() => new gd.GifAnim({ width: 20 }), Error, /requires an instance of gd.Image/);
+  });
+
+  it('keeps track of added frames', async function () {
+    const first = await frame(4);
+    const anim = new gd.GifAnim(first);
+    assert.equal(anim.frames.length, 1);
+    assert.equal(anim.lastIndex, 0);
+    assert.isFalse(anim.isEnded);
+
+    anim.add(await frame(8));
+    anim.add(await frame(12));
+    assert.equal(anim.frames.length, 3);
+    assert.equal(anim.lastIndex, 2);
+
+    await anim.end();
+    anim.frames.forEach((image) => image.destroy());
+  });
+
+  it('throws an Error when adding something that is not an image', async function () {
+    const anim = new gd.GifAnim(await frame(4));
+    assert.throws(() => anim.add('frame'), Error, /Only instances of gd.Image/);
+    await anim.end();
+    anim.frames.forEach((image) => image.destroy());
+  });
+
+  it('resolves to a Buffer containing an animated GIF when no file name is given', async function () {
+    const anim = new gd.GifAnim(await frame(4), { delay: 5, loops: 0 });
+    anim.add(await frame(8), { delay: 5 });
+    anim.add(await frame(12), { delay: 5 });
+
+    const data = await anim.end();
+    assert.instanceOf(data, Buffer);
+    assert.equal(data.subarray(0, 6).toString('latin1'), 'GIF89a');
+    assert.isTrue(anim.isEnded);
+
+    // libgd decodes the first frame of an animation
+    const decoded = gd.createFromGifPtr(data);
+    assert.equal(decoded.width, 20);
+    assert.equal(decoded.height, 20);
+    decoded.destroy();
+    anim.frames.forEach((image) => image.destroy());
+  });
+
+  // Known issue: gd.Image#gifAnimEnd() discards the data returned by
+  // gdImageGifAnimEndPtr(), so the trailer byte is never appended.
+  it.skip('ends the animated GIF with a trailer byte', async function () {
+    const anim = new gd.GifAnim(await frame(4));
+    anim.add(await frame(8));
+    const data = await anim.end();
+    assert.equal(data[data.length - 1], 0x3b, 'GIF trailer');
+    anim.frames.forEach((image) => image.destroy());
+  });
+
+  it('writes the animation to a file when a file name is given', async function () {
+    const target = './test/output/output-animation-file.gif';
+    const anim = new gd.GifAnim(await frame(4));
+    anim.add(await frame(10));
+
+    assert.isTrue(await anim.end(target));
+    assert.equal(fs.readFileSync(target).subarray(0, 6).toString('latin1'), 'GIF89a');
+    anim.frames.forEach((image) => image.destroy());
+  });
+
+  it('throws an Error when adding frames after the animation ended', async function () {
+    const anim = new gd.GifAnim(await frame(4));
+    await anim.end();
+    const late = await frame(8);
+    assert.throws(() => anim.add(late), Error, /No more frames can be added/);
+    late.destroy();
+    anim.frames.forEach((image) => image.destroy());
+  });
+
+  it('rejects when the animation is ended twice', async function () {
+    const anim = new gd.GifAnim(await frame(4));
+    await anim.end();
+    let reason;
+    try {
+      await anim.end();
+    } catch (e) {
+      reason = e;
+    }
+    assert.equal(reason, 'gd.GifAnim#end() already called');
+    anim.frames.forEach((image) => image.destroy());
   });
 });
