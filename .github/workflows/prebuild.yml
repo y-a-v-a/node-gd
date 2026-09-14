@@ -176,9 +176,16 @@ jobs:
       - name: Reorganize prebuilds
         run: |
           mkdir -p prebuilds
-          # Copy all prebuilds to the prebuilds directory
-          find all-prebuilds -name "*.node" -exec cp {} prebuilds/ \;
-          ls -la prebuilds/
+          # Keep the <platform>-<arch> directories node-gyp-build looks for,
+          # every prebuild file is named node-gd.node
+          cp -R all-prebuilds/. prebuilds/
+          find prebuilds -type f
+          for platform in linux-x64 darwin-x64 darwin-arm64; do
+            if [ ! -f "prebuilds/$platform/node-gd.node" ]; then
+              echo "Missing prebuild for $platform"
+              exit 1
+            fi
+          done
 
       - name: Create release package
         run: |
