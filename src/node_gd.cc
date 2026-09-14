@@ -2071,14 +2071,14 @@ Napi::Value Gd::Image::Crop(const Napi::CallbackInfo &info)
   REQ_INT_ARG(2, width, "A value for 'width' should be supplied.");
   REQ_INT_ARG(3, height, "A value for 'height' should be supplied.");
 
-  gdRect *rect = new gdRect;
+  gdRect rect;
 
-  rect->x = x;
-  rect->y = y;
-  rect->width = (width == 0) ? 100 : width;
-  rect->height = (height == 0) ? 100 : height;
+  rect.x = x;
+  rect.y = y;
+  rect.width = (width == 0) ? 100 : width;
+  rect.height = (height == 0) ? 100 : height;
 
-  gdImagePtr newImage = gdImageCrop(this->_image, rect);
+  gdImagePtr newImage = gdImageCrop(this->_image, &rect);
 
   RETURN_IMAGE(newImage);
 }
