@@ -280,6 +280,7 @@ describe('Image transformations', function () {
       assert.throws(() => {
         img.interpolationId = 31;
       }, Error, /cannot be higher than 30/);
+      assert.equal(img.interpolationId, GD_BILINEAR_FIXED, 'invalid value is not applied');
       img.destroy();
     });
   });

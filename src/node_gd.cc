@@ -1343,6 +1343,7 @@ void Gd::Image::InterpolationIdSetter(const Napi::CallbackInfo &info, const Napi
   {
     Napi::Error::New(info.Env(), "Image is already destroyed.")
         .ThrowAsJavaScriptException();
+    return;
   }
 
   if (value.IsNumber())
@@ -1352,6 +1353,7 @@ void Gd::Image::InterpolationIdSetter(const Napi::CallbackInfo &info, const Napi
     if (id > 30)
     {
       Napi::Error::New(info.Env(), "Interpolation method cannot be higher than 30. GD implements 30 different interpolation methods.").ThrowAsJavaScriptException();
+      return;
     }
     gdInterpolationMethod method = static_cast<gdInterpolationMethod>(id);
 
@@ -1878,6 +1880,7 @@ void Gd::Image::InterlaceSetter(const Napi::CallbackInfo &info, const Napi::Valu
   {
     Napi::Error::New(info.Env(), "Image is already destroyed.")
         .ThrowAsJavaScriptException();
+    return;
   }
 
   if (value.IsBoolean())

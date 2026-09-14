@@ -52,6 +52,24 @@ describe('Image destroy', function () {
     }
   });
 
+  it("gd.Image#destroy() -- setting 'interlace' after destroy throws an Error", async function () {
+    const img = await gd.create(200, 200);
+    img.destroy();
+
+    assert.throws(() => {
+      img.interlace = true;
+    }, Error, /already destroyed/);
+  });
+
+  it("gd.Image#destroy() -- setting 'interpolationId' after destroy throws an Error", async function () {
+    const img = await gd.createTrueColor(200, 200);
+    img.destroy();
+
+    assert.throws(() => {
+      img.interpolationId = 16;
+    }, Error, /already destroyed/);
+  });
+
   // it("gd.Image#destroy() -- ", async function() {
 
   // });
