@@ -67,4 +67,37 @@ describe('Section querying image information', function () {
       '0 should be returned when querying above upper bounds'
     );
   });
+  it('gd.Image#getPixel() and gd.Image#getTrueColorPixel() -- return the pixel on the last row and column', async function () {
+    const image = await gd.createTrueColor(10, 10);
+    const color = gd.trueColor(1, 2, 3);
+    image.setPixel(9, 9, color);
+
+    assert.equal(image.getPixel(9, 9), color);
+    assert.equal(image.getTrueColorPixel(9, 9), color);
+    image.destroy();
+  });
+
+  it('gd.Image#getPixel() and gd.Image#getTrueColorPixel() -- return 0 at and beyond the width and height of a true color image', async function () {
+    const image = await gd.createTrueColor(10, 10);
+    image.filledRectangle(0, 0, 9, 9, gd.trueColor(1, 2, 3));
+
+    for (const [x, y] of [[10, 0], [0, 10], [10, 10], [50, 50]]) {
+      assert.strictEqual(image.getPixel(x, y), 0, `getPixel(${x}, ${y})`);
+      assert.strictEqual(image.getTrueColorPixel(x, y), 0, `getTrueColorPixel(${x}, ${y})`);
+    }
+    image.destroy();
+  });
+
+  it('gd.Image#getTrueColorPixel() -- returns 0 at and beyond the width and height of a palette image', async function () {
+    const image = await gd.create(10, 10);
+    // index 0 is white, so an out of bounds lookup of index 0 would not be 0
+    image.colorAllocate(255, 255, 255);
+
+    assert.equal(image.getTrueColorPixel(9, 9), gd.trueColor(255, 255, 255));
+    for (const [x, y] of [[10, 0], [0, 10], [10, 10], [50, 50]]) {
+      assert.strictEqual(image.getTrueColorPixel(x, y), 0, `getTrueColorPixel(${x}, ${y})`);
+      assert.strictEqual(image.getPixel(x, y), 0, `getPixel(${x}, ${y})`);
+    }
+    image.destroy();
+  });
 });

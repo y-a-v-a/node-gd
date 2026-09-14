@@ -1195,17 +1195,12 @@ Napi::Value Gd::Image::GetPixel(const Napi::CallbackInfo &info)
   int imageX = gdImageSX(this->_image);
   int imageY = gdImageSY(this->_image);
 
-  Napi::Number result;
-  if (x > imageX || y > imageY)
+  if (x >= imageX || y >= imageY)
   {
-    result = Napi::Number::New(info.Env(), 0);
-  }
-  else
-  {
-    result = Napi::Number::New(info.Env(), gdImageGetPixel(this->_image, x, y));
+    return Napi::Number::New(info.Env(), 0);
   }
 
-  return result;
+  return Napi::Number::New(info.Env(), gdImageGetPixel(this->_image, x, y));
 }
 
 Napi::Value Gd::Image::GetTrueColorPixel(const Napi::CallbackInfo &info)
@@ -1225,18 +1220,14 @@ Napi::Value Gd::Image::GetTrueColorPixel(const Napi::CallbackInfo &info)
   int imageX = gdImageSX(this->_image);
   int imageY = gdImageSY(this->_image);
 
-  Napi::Number result;
-  if (x > imageX || y > imageY)
+  // gdImageGetTrueColorPixel() returns the color of palette index 0 for
+  // out of bounds coordinates on palette images, so check bounds here
+  if (x >= imageX || y >= imageY)
   {
-    result = Napi::Number::New(info.Env(), 0);
-  }
-  else
-  {
-    result = Napi::Number::New(info.Env(), gdImageGetPixel(this->_image, x, y));
+    return Napi::Number::New(info.Env(), 0);
   }
 
-  result = Napi::Number::New(info.Env(), gdImageGetTrueColorPixel(this->_image, x, y));
-  return result;
+  return Napi::Number::New(info.Env(), gdImageGetTrueColorPixel(this->_image, x, y));
 }
 
 // This is implementation of the PHP-GD specific method imagecolorat
