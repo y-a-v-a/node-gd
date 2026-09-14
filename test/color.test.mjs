@@ -264,6 +264,22 @@ describe('Color functions', function () {
       assert.throws(() => img.colorReplaceArray([red, green], [blue]), Error, /same length/);
     });
 
+    it('gd.Image#colorReplaceArray() -- throws a TypeError when an argument is not an array', function () {
+      assert.throws(() => img.colorReplaceArray(red, [green]), TypeError, /Argument 0 must be an array/);
+      assert.throws(() => img.colorReplaceArray([red], green), TypeError, /Argument 1 must be an array/);
+    });
+
+    it('gd.Image#colorReplaceArray() -- throws a TypeError when a color is not a Number', function () {
+      assert.throws(() => img.colorReplaceArray([red, 'blue'], [green, red]), TypeError, /must only contain numbers/);
+      assert.throws(() => img.colorReplaceArray([red], [null]), TypeError, /must only contain numbers/);
+    });
+
+    it('gd.Image#colorReplaceArray() -- returns 0 for empty arrays', function () {
+      img.filledRectangle(0, 0, 9, 9, red);
+      assert.equal(img.colorReplaceArray([], []), 0);
+      assert.equal(img.getTrueColorPixel(1, 1), red);
+    });
+
     it('gd.Image#colorReplaceArray() -- throws an Error when too few arguments are supplied', function () {
       assert.throws(() => img.colorReplaceArray([red]), Error, /Expected 2 argument/);
     });

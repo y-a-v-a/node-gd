@@ -19,6 +19,7 @@
 #include <napi.h>
 #include <sstream>
 #include <cstring>
+#include <vector>
 #include "node_gd.h"
 #include "node_gd_workers.cc"
 #include <gd_errors.h>
@@ -1944,38 +1945,47 @@ Napi::Value Gd::Image::ColorReplaceArray(const Napi::CallbackInfo &info)
 
   REQ_ARGS(2, "array of 'from' colors, array of 'to' colors.");
 
+  for (unsigned int i = 0; i < 2; i++)
+  {
+    if (!info[i].IsArray())
+    {
+      Napi::TypeError::New(info.Env(), "Argument " + std::to_string(i) + " must be an array of colors.")
+          .ThrowAsJavaScriptException();
+      return info.Env().Null();
+    }
+  }
+
   Napi::Array fromArray = info[0].As<Napi::Array>();
-  unsigned int flen = fromArray.Length(), _flen = 0;
-  int *fromColors = new int[flen];
-
-  for (unsigned int i = 0; i < flen; i++)
-  {
-    Napi::Value v = fromArray.Get(i);
-    fromColors[i] = v.As<Napi::Number>().Int32Value();
-    _flen++;
-  }
-
   Napi::Array toArray = info[1].As<Napi::Array>();
-  unsigned int tlen = toArray.Length(), _tlen = 0;
-  int *toColors = new int[tlen];
+  unsigned int len = fromArray.Length();
 
-  for (unsigned int j = 0; j < tlen; j++)
-  {
-    Napi::Value v = toArray.Get(j);
-    toColors[j] = v.As<Napi::Number>().Int32Value();
-    _tlen++;
-  }
-
-  if (_flen != _tlen)
+  if (len != toArray.Length())
   {
     Napi::Error::New(info.Env(), "Color arrays should have same length.")
         .ThrowAsJavaScriptException();
     return info.Env().Null();
   }
 
+  std::vector<int> fromColors(len);
+  std::vector<int> toColors(len);
+
+  for (unsigned int i = 0; i < len; i++)
+  {
+    Napi::Value from = fromArray.Get(i);
+    Napi::Value to = toArray.Get(i);
+    if (!from.IsNumber() || !to.IsNumber())
+    {
+      Napi::TypeError::New(info.Env(), "Color arrays must only contain numbers.")
+          .ThrowAsJavaScriptException();
+      return info.Env().Null();
+    }
+    fromColors[i] = from.As<Napi::Number>().Int32Value();
+    toColors[i] = to.As<Napi::Number>().Int32Value();
+  }
+
   Napi::Number result =
       Napi::Number::New(info.Env(),
-                        gdImageColorReplaceArray(this->_image, _flen, fromColors, toColors));
+                        gdImageColorReplaceArray(this->_image, len, fromColors.data(), toColors.data()));
 
   return result;
 }
