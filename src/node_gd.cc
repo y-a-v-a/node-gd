@@ -1815,6 +1815,7 @@ Napi::Value Gd::Image::Red(const Napi::CallbackInfo &info)
   CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, color, "A color number should supplied.");
+  CHECK_PALETTE_INDEX(color);
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageRed(this->_image, color));
   return result;
@@ -1825,6 +1826,7 @@ Napi::Value Gd::Image::Blue(const Napi::CallbackInfo &info)
   CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, color, "A color number should supplied.");
+  CHECK_PALETTE_INDEX(color);
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageBlue(this->_image, color));
   return result;
@@ -1835,6 +1837,7 @@ Napi::Value Gd::Image::Green(const Napi::CallbackInfo &info)
   CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, color, "A color number should supplied.");
+  CHECK_PALETTE_INDEX(color);
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageGreen(this->_image, color));
   return result;
@@ -1845,6 +1848,7 @@ Napi::Value Gd::Image::Alpha(const Napi::CallbackInfo &info)
   CHECK_IMAGE_EXISTS;
 
   REQ_INT_ARG(0, color, "A color number should supplied.");
+  CHECK_PALETTE_INDEX(color);
 
   Napi::Number result = Napi::Number::New(info.Env(), gdImageAlpha(this->_image, color));
   return result;

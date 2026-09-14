@@ -198,6 +198,17 @@
     RETURN_IMAGE(im)                                                    \
   }
 
+#define CHECK_PALETTE_INDEX(COLOR)                                         \
+  if (!gdImageTrueColor(this->_image) &&                                   \
+      ((COLOR) < 0 || (COLOR) >= gdMaxColors))                             \
+  {                                                                        \
+    Napi::RangeError::New(info.Env(),                                      \
+                          "Color must be a palette index between 0 and "   \
+                          "255 for palette images")                        \
+        .ThrowAsJavaScriptException();                                     \
+    return info.Env().Null();                                              \
+  }
+
 #define ASSERT_IS_BUFFER(val)                                 \
   if (!val.IsBuffer())                                        \
   {                                                           \

@@ -120,6 +120,19 @@ describe('Color functions', function () {
       assert.equal(img.colorsTotal, 1);
     });
 
+    it('gd.Image#red(), #green(), #blue() and #alpha() -- throw a RangeError for an index outside the palette', function () {
+      img.colorAllocate(255, 0, 0);
+      const trueColorValue = gd.trueColor(252, 1, 4);
+
+      for (const method of ['red', 'green', 'blue', 'alpha']) {
+        assert.throws(() => img[method](trueColorValue), RangeError, /palette/, method);
+        assert.throws(() => img[method](256), RangeError, /palette/, method);
+        assert.throws(() => img[method](-1), RangeError, /palette/, method);
+      }
+      assert.equal(img.red(0), 255);
+      assert.equal(img.red(255), 0, 'unallocated but valid index');
+    });
+
     it('gd.Image#colorAllocateAlpha() -- defaults alpha to 100', function () {
       const color = img.colorAllocateAlpha(10, 20, 30);
       assert.equal(img.alpha(color), 100);
