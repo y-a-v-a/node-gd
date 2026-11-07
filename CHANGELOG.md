@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# Unreleased
+
+### Changed
+- `node-gyp` updated from 11 to 12.4.0. Building from source needs Node.js 20.17.0 or newer on the 20.x line, or 22.9.0 or newer on later lines. When a prebuilt binary is used, `node-gyp` does not run.
+- `mocha` updated to 12.0.3 for the test suite.
+
+### Security
+- The `node-gyp` update removes the vulnerable `glob` and `minimatch` versions it installed (GHSA-3g3m-2fjr-6pw4, GHSA-g3hv-75wg-m249). `mocha` still uses affected versions, but it is only installed for development and not for users of this package.
+
 # 3.2.0 - 2026-09-14 (current)
 
 ### Added
