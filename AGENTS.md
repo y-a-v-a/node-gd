@@ -21,7 +21,7 @@ Short, consolidated instructions for working on this repo.
 - **Build system**: `node-gyp`, `binding.gyp`, and `util.sh` feature detection
 
 ## Prereqs
-- Node.js 20+.
+- Node.js `^20.17.0 || >=22.9.0`, the same range as `node-gyp`.
 - System libgd and build tools.
   - macOS: `brew install pkg-config gd`
   - Debian/Ubuntu: `apt-get install build-essential pkg-config libgd-dev`

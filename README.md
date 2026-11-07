@@ -73,7 +73,7 @@ $ npm install # This will fallback to building from source if no prebuilt binary
 
 ### Supported Node.js Versions
 
-Prebuilt binaries are available for Node.js versions 20, 22, and 24. The package supports Node.js 20+ and prebuilt binaries are only provided for actively maintained versions.
+Prebuilt binaries are available for Node.js versions 20, 22, and 24. The package supports Node.js 20.17.0 or newer on the 20.x line, and 22.9.0 or newer from 22 on. Prebuilt binaries are only provided for actively maintained versions.
 
 ## Usage
 

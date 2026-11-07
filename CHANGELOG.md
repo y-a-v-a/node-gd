@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 # Unreleased
 
 ### Changed
-- `node-gyp` updated from 11 to 12.4.0. Building from source needs Node.js 20.17.0 or newer on the 20.x line, or 22.9.0 or newer on later lines. When a prebuilt binary is used, `node-gyp` does not run.
+- `node-gyp` updated from 11 to 12.4.0.
+- Supported Node.js versions changed from `>=20` to `^20.17.0 || >=22.9.0`, the range `node-gyp` 12 requires. Node.js 21 and versions of 20 before 20.17.0 are no longer supported.
 - `mocha` updated to 12.0.3 for the test suite.
 
 ### Security
