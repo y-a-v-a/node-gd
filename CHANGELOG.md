@@ -8,12 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 # Unreleased
 
 ### Changed
-- `node-gyp` updated from 11 to 12.4.0.
-- Supported Node.js versions changed from `>=20` to `^20.17.0 || >=22.9.0`, the range `node-gyp` 12 requires. Node.js 21 and versions of 20 before 20.17.0 are no longer supported.
+- `node-gyp` is no longer installed with node-gd. When no prebuilt binary is available, the build uses the `node-gyp` your package manager provides. Development builds use `node-gyp` 13.1.0.
+- Supported Node.js versions changed from `>=20` to `^22.22.2 || ^24.15.0 || >=26.0.0`, the range `node-gyp` 13 requires. Yarn 4 installs the latest `node-gyp` for packages that don't list it, and that version no longer supports these older Node.js versions. Node.js 20, 21, 23 and 25 are no longer supported, nor are versions of 22 before 22.22.2 and of 24 before 24.15.0.
+- Prebuilt binaries are no longer built and tested on Node.js 20.
 - `mocha` updated to 12.0.3 for the test suite.
 
 ### Security
-- The `node-gyp` update removes the vulnerable `glob` and `minimatch` versions it installed (GHSA-3g3m-2fjr-6pw4, GHSA-g3hv-75wg-m249).
+- Installing node-gd no longer installs `node-gyp`, and with it the vulnerable `glob` and `minimatch` versions `node-gyp` 11 depended on (GHSA-3g3m-2fjr-6pw4, GHSA-g3hv-75wg-m249).
 - `mocha` 12.0.3 still requires the affected `glob` 13 and `minimatch` 10, so an npm override makes it use `glob` 14 and `minimatch` 11 instead. The override only applies to `mocha`, which is only installed for development. Remove it once `mocha` depends on these versions itself.
 
 # 3.2.0 - 2026-09-14 (current)

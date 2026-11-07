@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20, 22, 24]
+        node-version: [22, 24]
         architecture: [x64]
 
     steps:
@@ -75,17 +75,11 @@ jobs:
       matrix:
         include:
           - os: macos-15-intel
-            node-version: 20
-            architecture: x64
-          - os: macos-15-intel
             node-version: 22
             architecture: x64
           - os: macos-15-intel
             node-version: 24
             architecture: x64
-          - os: macos-latest
-            node-version: 20
-            architecture: arm64
           - os: macos-latest
             node-version: 22
             architecture: arm64
