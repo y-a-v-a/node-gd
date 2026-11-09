@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 - The `node-gyp` update removes the vulnerable `glob` and `minimatch` versions it installed (GHSA-3g3m-2fjr-6pw4, GHSA-g3hv-75wg-m249).
 - `mocha` 12.0.3 still requires the affected `glob` 13 and `minimatch` 10, so an npm override makes it use `glob` 14 and `minimatch` 11 instead. The override only applies to `mocha`, which is only installed for development. Remove it once `mocha` depends on these versions itself.
+- Releases are published to npm from GitHub Actions with npm trusted publishing instead of an npm token, and get a provenance statement.
 
 # 3.2.0 - 2026-09-14 (current)
 
