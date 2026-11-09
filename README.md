@@ -73,7 +73,15 @@ $ npm install # This will fallback to building from source if no prebuilt binary
 
 ### Supported Node.js Versions
 
-Prebuilt binaries are available for Node.js versions 20, 22, and 24. The package supports Node.js 20.17.0 or newer on the 20.x line, and 22.9.0 or newer from 22 on. Prebuilt binaries are only provided for actively maintained versions.
+Prebuilt binaries are available for Node.js versions 22 and 24. The package supports Node.js 22.22.2 or newer on the 22.x line, 24.15.0 or newer on the 24.x line, and 26.0.0 or newer. Prebuilt binaries are only provided for actively maintained versions.
+
+When no prebuilt binary is available, node-gd is built from source with the `node-gyp` your package manager provides:
+
+- npm and pnpm include their own `node-gyp`.
+- Yarn 1 uses the `node-gyp` that comes with npm.
+- Yarn 4 installs the latest `node-gyp`.
+
+pnpm 12 and Yarn 4 don't run build scripts of dependencies by default. Allow the node-gd build with `pnpm approve-builds` (pnpm), or with `enableScripts: true` in `.yarnrc.yml` (Yarn).
 
 ## Usage
 
