@@ -48,7 +48,7 @@ Short, consolidated instructions for working on this repo.
 - Ensure prebuild workflow ran on release publish.
 - Verify `prebuilds/` exists in the npm tarball (`npm pack` + `tar -tf`).
 - Publishing to npm uses trusted publishing (OIDC) from the `collect-prebuilds` job in `prebuild.yml`. There is no npm token.
-- The release tag must be `v` plus the `package.json` version, for example `v3.2.1`.
+- The release tag must be `v` plus the `package.json` version, for example `v4.0.0`.
 - The trusted publisher on npmjs.com is configured for `y-a-v-a/node-gd` and the workflow file `prebuild.yml`. Renaming the file breaks publishing.
 
 ## Development notes

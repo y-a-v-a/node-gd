@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# Unreleased
+# 4.0.0 - 2026-11-09 (current)
+
+This is the first release on npm since 3.0.0. Versions 3.1.0 and 3.2.0 were only released on GitHub, so when you upgrade from 3.0.0 on npm, also read the changes of 3.1.0 and 3.2.0 below. Among them, 3.2.0 changes the return value of `gd.Image#gifAnimEnd()` and makes methods taking an image argument throw a `TypeError` for anything that is not a `gd.Image`.
 
 ### Changed
 - `node-gyp` is no longer installed with node-gd. When no prebuilt binary is available, the build uses the `node-gyp` your package manager provides. Development builds use `node-gyp` 13.1.0.
@@ -18,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `mocha` 12.0.3 still requires the affected `glob` 13 and `minimatch` 10, so an npm override makes it use `glob` 14 and `minimatch` 11 instead. The override only applies to `mocha`, which is only installed for development. Remove it once `mocha` depends on these versions itself.
 - Releases are published to npm from GitHub Actions with npm trusted publishing instead of an npm token, and get a provenance statement.
 
-# 3.2.0 - 2026-09-14 (current)
+# 3.2.0 - 2026-09-14
 
 ### Added
 - Test coverage for drawing primitives, color functions, transformations and filters, copying and comparing images, encoding and decoding all supported formats, and `gd.GifAnim`.
