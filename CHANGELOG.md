@@ -5,7 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# 4.0.0 - 2026-11-09 (current)
+# 4.0.1 - 2026-11-09 (current)
+
+### Fixed
+- Node.js being killed by macOS when loading node-gd on Apple Silicon. The `darwin-arm64` prebuilt binary had an invalid code signature, because the binaries are stripped after the linker signs them. The macOS binaries are now signed again after stripping.
+- The release workflow loading the freshly compiled binary instead of the prebuilt one when testing prebuilds, which hid the problem above.
+- README claiming prebuilt binaries for Linux arm64 and that no system dependencies are needed. The prebuilt binaries need the libgd shared library.
+
+# 4.0.0 - 2026-11-09
 
 This is the first release on npm since 3.0.0. Versions 3.1.0 and 3.2.0 were only released on GitHub, so when you upgrade from 3.0.0 on npm, also read the changes of 3.1.0 and 3.2.0 below. Among them, 3.2.0 changes the return value of `gd.Image#gifAnimEnd()` and makes methods taking an image argument throw a `TypeError` for anything that is not a `gd.Image`.
 

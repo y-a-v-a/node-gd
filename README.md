@@ -14,7 +14,10 @@ For most users, installation is now much simpler thanks to prebuilt binaries:
 $ npm install node-gd
 ```
 
-This will automatically download and install a precompiled binary for your platform (macOS x64/arm64, Linux x64/arm64) and Node.js version. No build tools or system dependencies required!
+The npm package includes precompiled binaries for macOS x64 and arm64 and for Linux x64, so no build tools are needed on these platforms. The binaries do use the libgd shared library of your system, so install libgd first:
+
+- macOS: `brew install gd`. The binaries look for libgd in Homebrew's default location, `/opt/homebrew` on Apple Silicon and `/usr/local` on Intel.
+- Debian/Ubuntu: `sudo apt-get install libgd3`. The Linux binary is built on Debian 12 (bookworm).
 
 ### Manual Installation
 
@@ -57,7 +60,7 @@ $ npm install node-gd
 ### Platform Support
 
 - **✅ macOS** - x64 and arm64 (Apple Silicon) - prebuilt binaries available
-- **✅ Linux** - x64 and arm64 - prebuilt binaries available  
+- **✅ Linux** - x64 prebuilt binary available, arm64 manual build only
 - **✅ FreeBSD** - manual build only
 - **❌ Windows** - Not supported
 
