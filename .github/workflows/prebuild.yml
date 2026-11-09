@@ -58,6 +58,8 @@ jobs:
           retention-days: 30
 
       - name: Verify prebuild works
+        env:
+          PREBUILDS_ONLY: 1
         run: |
           # Test that the prebuild can be loaded
           node -e "
@@ -124,6 +126,13 @@ jobs:
         run: |
           npx prebuildify --napi --strip
 
+      - name: Re-sign prebuilds after strip
+        run: |
+          for file in prebuilds/*/node-gd.node; do
+            codesign --force --sign - "$file"
+            codesign --verify --verbose "$file"
+          done
+
       - name: Upload prebuilds
         uses: actions/upload-artifact@v4
         with:
@@ -132,6 +141,8 @@ jobs:
           retention-days: 30
 
       - name: Verify prebuild works
+        env:
+          PREBUILDS_ONLY: 1
         run: |
           # Test that the prebuild can be loaded
           node -e "
