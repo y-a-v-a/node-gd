@@ -154,17 +154,36 @@ jobs:
   collect-prebuilds:
     needs: [prebuild-linux, prebuild-macos]
     runs-on: ubuntu-latest
-    container: debian:bookworm-slim
     if: github.event_name == 'release' && github.event.action == 'published'
+    permissions:
+      contents: write
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use Node.js 22
+      - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           registry-url: https://registry.npmjs.org/
+
+      - name: Check npm version and release tag
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          node -e '
+            const [major, minor, patch] = process.argv[1].split(".").map(Number);
+            if (major < 11 || (major === 11 && (minor < 5 || (minor === 5 && patch < 1)))) {
+              console.error(`npm ${process.argv[1]} is too old for trusted publishing, 11.5.1 or newer is required`);
+              process.exit(1);
+            }
+            const version = require("./package.json").version;
+            if (process.argv[2] !== `v${version}`) {
+              console.error(`Release tag ${process.argv[2]} does not match package.json version ${version}`);
+              process.exit(1);
+            }
+          ' "$(npm -v)" "$TAG"
 
       - name: Download all prebuilds
         uses: actions/download-artifact@v4
@@ -200,5 +219,3 @@ jobs:
 
       - name: Publish to npm (includes prebuilds/)
         run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
