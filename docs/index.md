@@ -1882,7 +1882,7 @@ palette.destroy();
   - `loops` - `-1` (default) to play the animation once, `0` to loop forever, or the number of times the animation should repeat.
   - `localColorMap`, `leftOffset`, `topOffset`, `delay` and `disposal` for the first frame, see `gd.GifAnim#add()`.
 
-Creates an animated GIF, starting with `image` as its first frame. Throws an `Error` when `image` is not a `gd.Image`. True color frames are converted to a palette by libgd when they are added.
+Creates an animated GIF, starting with `image` as its first frame. Throws an `Error` when `image` is not a `gd.Image`. True color frames are converted to a palette by libgd when they are added, so each of them gets its own local color map by default. The alpha channel of true color frames is not kept: transparent pixels get their color without transparency. For a transparent animation, use palette images and mark the transparent color with `gd.Image#colorTransparent()`.
 
 ```javascript
 import gd from 'node-gd';
@@ -1910,7 +1910,7 @@ anim.frames.forEach((frame) => frame.destroy());
 
 - `image` - A `gd.Image` instance to add as the next frame.
 - `options` - An optional `Object` with the following properties:
-  - `localColorMap` - `1` to write the palette of this frame with the frame, `0` (default) to use the global color map.
+  - `localColorMap` - `1` to write the palette of this frame with the frame, `0` to use the global color map. Defaults to `1` for true color images and `0` for palette images.
   - `leftOffset` and `topOffset` - The position of this frame within the animation, both `0` by default.
   - `delay` - The time before the next frame is shown, in 1/100 seconds. Defaults to `100`.
   - `disposal` - How this frame is treated when the next frame is shown:
