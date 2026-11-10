@@ -18,7 +18,7 @@ Short, consolidated instructions for working on this repo.
   - `bindings.js` native binding loader
   - `GifAnim.js` animated GIF support
 - **Entry point** (`index.js`) exports the main API
-- **Build system**: `node-gyp`, `binding.gyp`, and `util.sh` feature detection
+- **Build system**: `node-gyp`, `binding.gyp`, and feature detection with `util.sh` (macOS, Linux, FreeBSD) or `util-win.mjs` (Windows)
 
 ## Prereqs
 - Node.js `^22.22.2 || ^24.15.0 || >=26.0.0`, the same range as `node-gyp` 13.
@@ -26,6 +26,7 @@ Short, consolidated instructions for working on this repo.
 - System libgd and build tools.
   - macOS: `brew install pkg-config gd`
   - Debian/Ubuntu: `apt-get install build-essential pkg-config libgd-dev`
+  - Windows: Visual Studio C++ build tools and libgd from vcpkg for the `x64-windows-static` or `arm64-windows-static` triplet, with `VCPKG_ROOT` set. See the README.
 
 ## Install
 - `npm ci` (or `npm install`) in repo root.
@@ -40,7 +41,9 @@ Short, consolidated instructions for working on this repo.
 ## Prebuilds (CI model)
 - CI builds per OS/arch and bundles `prebuilds/` into npm publish.
 - Linux prebuilds are built for glibc (Debian bookworm) and musl (Alpine) on x64 and arm64 by `.github/scripts/build-linux.sh`, in containers started with `docker run`. JavaScript actions don't run in Alpine containers on arm64 runners, so don't move these builds to a job `container:`.
-- Linux prebuild files are tagged with their libc (`node-gd.glibc.node`, `node-gd.musl.node`), macOS files are `node-gd.node`.
+- Windows prebuilds are built by `prebuild-windows`. `.github/actions/libgd-windows` builds libgd with vcpkg (pinned to a release tag) as static libraries and caches the vcpkg binaries, keyed on a hash of the action file. `util-win.mjs` reads `gdlib.pc` and the `.pc` files it requires, and gives `binding.gyp` the include directory, the libraries and the feature flags. The libraries are linked into `node-gd.node`, so the Windows prebuild needs no DLLs.
+- Linux prebuild files are tagged with their libc (`node-gd.glibc.node`, `node-gd.musl.node`), macOS and Windows files are `node-gd.node`.
+- `test-package-windows` installs the packed package on a Windows runner without vcpkg.
 - The `test-package` job installs the packed package on systems with only the libgd runtime library (`.github/scripts/test-package.sh`). `.github/scripts/verify-prebuild.mjs` checks that the prebuild, not `build/Release`, is loaded and works.
 - Local prebuild test:
   1. `npm run prebuild`
@@ -60,7 +63,7 @@ Short, consolidated instructions for working on this repo.
   - True color images via `gd.createTrueColor()` (millions of colors, black background).
 - **Memory**: Always call `image.destroy()` to free C-level memory.
 - **Async vs sync**: File I/O is async (Promises); drawing is sync.
-- **Platform**: Windows is not supported; requires libgd headers.
+- **Platform**: macOS, Linux and FreeBSD use the system libgd. Windows uses libgd from vcpkg, linked statically.
 - **Testing**: Mocha with ES modules; tests in `test/*.test.mjs`, fixtures in `test/fixtures/`.
-- **Conditional features**: AVIF/HEIF/TIFF/WebP/FreeType/Fontconfig via `util.sh` detection.
+- **Conditional features**: AVIF/HEIF/TIFF/WebP/FreeType/Fontconfig via `util.sh` or `util-win.mjs` detection.
   - Check runtime support with `gd.getGDVersion()` and feature flags like `gd.GD_TIFF`.

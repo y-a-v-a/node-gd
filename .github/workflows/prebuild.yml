@@ -157,6 +157,7 @@ jobs:
         node-version: [22, 24]
         target:
           - { arch: x64, runner: windows-latest }
+          - { arch: arm64, runner: windows-11-arm }
 
     steps:
       - uses: actions/checkout@v4
@@ -200,6 +201,7 @@ jobs:
       matrix:
         target:
           - { arch: x64, runner: windows-latest }
+          - { arch: arm64, runner: windows-11-arm }
 
     steps:
       - uses: actions/checkout@v4
@@ -285,7 +287,7 @@ jobs:
           for file in linux-x64/node-gd.glibc.node linux-x64/node-gd.musl.node \
             linux-arm64/node-gd.glibc.node linux-arm64/node-gd.musl.node \
             darwin-x64/node-gd.node darwin-arm64/node-gd.node \
-            win32-x64/node-gd.node; do
+            win32-x64/node-gd.node win32-arm64/node-gd.node; do
             if [ ! -f "prebuilds/$file" ]; then
               echo "Missing prebuild $file"
               exit 1
