@@ -42,7 +42,7 @@
     "rebuild": "node-gyp rebuild -j max",
     "pretest": "node-gyp build -j max",
     "test": "mocha --reporter spec --bail --ui bdd --colors --file ./test/main.test.mjs",
-    "install": "node-gyp-build || node-gyp rebuild -j max",
+    "install": "node lib/install-check.js || node-gyp rebuild -j max",
     "prebuild": "prebuildify --napi --strip",
     "prebuild-all": "prebuildify --napi --strip --arch x64 --arch arm64",
     "prebuild-upload": "prebuildify --napi --strip --upload-all",
