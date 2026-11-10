@@ -34,14 +34,12 @@ jobs:
       - name: Install packages
         run: |
           sudo apt-get update
-          sudo apt-get -y install build-essential pkg-config libgd-dev
+          sudo apt-get -y install build-essential pkg-config libgd-dev libheif-plugin-libde265 libheif-plugin-x265
       - name: Show detected libgd features
         run: |
           echo "libgd $(pkg-config --modversion gdlib): $(pkg-config --static --libs-only-l gdlib)"
           for feature in heif avif tiff webp jpeg png16 freetype fontconfig xpm; do
             echo "$feature: $(./util.sh $feature)"
           done
-          dpkg-query -W -f='${Package} ${Version}\n' 'libheif*'
-          ls /usr/lib/*/libheif/plugins 2>/dev/null || echo "no libheif plugin directory"
       - name: Build and test
-        run: npm ci && npm run rebuild && npx mocha --reporter dot --ui bdd --file ./test/main.test.mjs
+        run: npm ci && npm run rebuild && npm test
