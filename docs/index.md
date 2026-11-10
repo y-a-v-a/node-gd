@@ -7,7 +7,7 @@ title: Node-gd Documentation
 
 ## Version information
 
-This is the documentation for the 2.x version. The 2.x version dropped support for `gd.createSync` and `gd.createTrueColorSync`. Also, all functions that used to accept a callback are changed. They return a Promise now. Effort is put into respecting Node's asynchronous nature by implementing N-API's AsyncWorker classes for all gd functions that utilize file I/O.
+This is the documentation for version 5. Functions that read or write files return a `Promise` and do their work in a background thread. Since version 5, failures are always reported with an `Error`: promises are rejected with one, and functions that return a new image or data throw one instead of returning `null` or `false`.
 
 # Creating and opening graphic images
 
@@ -1696,7 +1696,7 @@ Crop the supplied image from a certain point to a certain size. Will return a ne
 
 #### Return value
 
-- `gd.Image` - New cropped image instance
+- `gd.Image` - New cropped image instance. Throws an `Error` when all pixels have the border color, because nothing would be left.
 
 The mode parameter is a value from 0 to 4, so there are 5 modes:
 
@@ -1728,7 +1728,7 @@ cropped.destroy();
 
 #### Return value
 
-- `gd.Image` - New cropped image instance
+- `gd.Image` - New cropped image instance. Throws a `RangeError` when `threshold` is greater than 100 or, for palette images, `color` is not an allocated palette index. Throws an `Error` when all pixels match `color`.
 
 Crop by color, with a threshold. Use for color an integer and for threshold a number.
 
@@ -1966,7 +1966,7 @@ second.destroy();
 
 #### Return value
 
-- `Buffer` containing the start of the GIF data, or `false` on failure.
+- `Buffer` containing the start of the GIF data. Throws an `Error` when libgd fails.
 
 This and the next two methods are the low level functions `gd.GifAnim` is built on. They return the parts of an animated GIF as `Buffer`s, which together form the animation when concatenated in order. This image determines the width and height of the animation; it is not added as a frame, call `gd.Image#gifAnimAdd()` for that.
 
@@ -1979,7 +1979,7 @@ This and the next two methods are the low level functions `gd.GifAnim` is built 
 
 #### Return value
 
-- `Buffer` containing this image as a frame, or `false` on failure.
+- `Buffer` containing this image as a frame. Throws an `Error` when libgd fails.
 
 Throws a `TypeError` when `prevFrame` is an object that is not a `gd.Image`, and an `Error` when `prevFrame` has been destroyed.
 
@@ -1987,7 +1987,7 @@ Throws a `TypeError` when `prevFrame` is an object that is not a `gd.Image`, and
 
 #### Return value
 
-- `Buffer` containing the end of the GIF data, or `false` on failure.
+- `Buffer` containing the end of the GIF data. Throws an `Error` when libgd fails.
 
 ```javascript
 import fs from 'fs';
@@ -2245,9 +2245,9 @@ dest.destroy();
 
 #### Return value
 
-- `gd.Image` - Returns the current image instance for method chaining
+- `gd.Image` - A new image
 
-Transform the image from a square to a circle with specified radius.
+Transforms a square image to a circle with the given radius, in a new image. Throws a `RangeError` when the image is not square.
 
 ```javascript
 const gd = require('node-gd');

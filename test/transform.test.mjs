@@ -173,11 +173,11 @@ describe('Image transformations', function () {
       img.destroy();
     });
 
-    it('returns null when the whole image is the border color', async function () {
+    it('throws an Error when the whole image is the border color', async function () {
       const img = await gd.createTrueColor(20, 20);
       img.filledRectangle(0, 0, 19, 19, white);
-      assert.isNull(img.cropAuto(GD_CROP_WHITE));
-      assert.isNull(img.cropAuto(GD_CROP_SIDES));
+      assert.throws(() => img.cropAuto(GD_CROP_WHITE), Error, /^Cannot crop image, all pixels have the border color$/);
+      assert.throws(() => img.cropAuto(GD_CROP_SIDES), Error, /^Cannot crop image, all pixels have the border color$/);
       img.destroy();
     });
 
@@ -224,6 +224,40 @@ describe('Image transformations', function () {
     it('throws a TypeError when threshold is missing', async function () {
       const img = await cornerImage();
       assert.throws(() => img.cropThreshold(white), TypeError, /Argument 1 must be a Number/);
+      img.destroy();
+    });
+
+    it('throws a RangeError when threshold is greater than 100', async function () {
+      const img = await cornerImage();
+      assert.throws(() => img.cropThreshold(white, 101), RangeError, /^Threshold must be 100 or less$/);
+      img.destroy();
+    });
+
+    it('throws a RangeError for a palette color that is not allocated', async function () {
+      const img = await gd.create(10, 10);
+      img.colorAllocate(255, 255, 255);
+      assert.throws(() => img.cropThreshold(5, 0.5), RangeError, /^Color must be an allocated palette index for palette images$/);
+      img.destroy();
+    });
+
+    it('throws an Error when all pixels match the color', async function () {
+      const img = await gd.createTrueColor(20, 20);
+      img.filledRectangle(0, 0, 19, 19, white);
+      assert.throws(() => img.cropThreshold(white, 0.5), Error, /^Cannot crop image, all pixels match the color$/);
+      img.destroy();
+    });
+  });
+
+  describe('Operations libgd cannot perform', function () {
+    it('gd.Image#scale() -- throws an Error for a width and height of 0', async function () {
+      const img = await cornerImage();
+      assert.throws(() => img.scale(0, 0), Error, /^Cannot scale image$/);
+      img.destroy();
+    });
+
+    it('gd.Image#crop() -- throws an Error for a negative width and height', async function () {
+      const img = await cornerImage();
+      assert.throws(() => img.crop(0, 0, -5, -5), Error, /^Cannot crop image$/);
       img.destroy();
     });
   });
@@ -511,9 +545,9 @@ describe('Image transformations', function () {
       img.destroy();
     });
 
-    it('returns null for non square images', async function () {
+    it('throws a RangeError for non square images', async function () {
       const img = await cornerImage();
-      assert.isNull(img.squareToCircle(10));
+      assert.throws(() => img.squareToCircle(10), RangeError, /^Image must be square$/);
       img.destroy();
     });
 

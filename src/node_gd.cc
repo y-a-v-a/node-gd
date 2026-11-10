@@ -206,7 +206,7 @@ Napi::Value Gd::ImageCreateSync(const Napi::CallbackInfo &info)
 
   gdImagePtr img = gdImageCreate(width, height);
 
-  RETURN_IMAGE(img);
+  RETURN_IMAGE(img, "Cannot create image");
 }
 
 Napi::Value Gd::ImageCreateTrueColorSync(const Napi::CallbackInfo &info)
@@ -220,7 +220,7 @@ Napi::Value Gd::ImageCreateTrueColorSync(const Napi::CallbackInfo &info)
 
   gdImagePtr img = gdImageCreateTrueColor(width, height);
 
-  RETURN_IMAGE(img);
+  RETURN_IMAGE(img, "Cannot create image");
 }
 
 /**
@@ -237,10 +237,10 @@ DECLARE_CREATE_FROM(Webp, "WEBP");
 #endif
 
 #if HAS_LIBHEIF
-DECLARE_CREATE_FROM(Heif, "Heif");
+DECLARE_CREATE_FROM(Heif, "HEIF");
 #endif
 #if HAS_LIBAVIF
-DECLARE_CREATE_FROM(Avif, "Avif");
+DECLARE_CREATE_FROM(Avif, "AVIF");
 #endif
 #if HAS_LIBTIFF
 DECLARE_CREATE_FROM(Tiff, "TIFF");
@@ -2181,7 +2181,7 @@ Napi::Value Gd::Image::Crop(const Napi::CallbackInfo &info)
 
   gdImagePtr newImage = gdImageCrop(this->_image, &rect);
 
-  RETURN_IMAGE(newImage);
+  RETURN_IMAGE(newImage, "Cannot crop image");
 }
 
 Napi::Value Gd::Image::CropAuto(const Napi::CallbackInfo &info)
@@ -2200,7 +2200,7 @@ Napi::Value Gd::Image::CropAuto(const Napi::CallbackInfo &info)
 
   gdImagePtr newImage = gdImageCropAuto(this->_image, mode);
 
-  RETURN_IMAGE(newImage);
+  RETURN_IMAGE(newImage, "Cannot crop image, all pixels have the border color");
 }
 
 Napi::Value Gd::Image::CropThreshold(const Napi::CallbackInfo &info)
@@ -2210,8 +2210,19 @@ Napi::Value Gd::Image::CropThreshold(const Napi::CallbackInfo &info)
   REQ_INT_ARG(0, color, "A color number should supplied.");
   REQ_DOUBLE_ARG(1, threshold);
 
+  if (threshold > 100)
+  {
+    Napi::RangeError::New(info.Env(), "Threshold must be 100 or less").ThrowAsJavaScriptException();
+    return info.Env().Null();
+  }
+  if (!gdImageTrueColor(this->_image) && color >= gdImageColorsTotal(this->_image))
+  {
+    Napi::RangeError::New(info.Env(), "Color must be an allocated palette index for palette images").ThrowAsJavaScriptException();
+    return info.Env().Null();
+  }
+
   gdImagePtr newImage = gdImageCropThreshold(this->_image, color, threshold);
-  RETURN_IMAGE(newImage);
+  RETURN_IMAGE(newImage, "Cannot crop image, all pixels match the color");
 }
 
 Napi::Value Gd::Image::Emboss(const Napi::CallbackInfo &info)
@@ -2357,9 +2368,15 @@ Napi::Value Gd::Image::SquareToCircle(const Napi::CallbackInfo &info)
 
   REQ_INT_ARG(0, radius, "A value for the radius of the new image should be supplied.");
 
+  if (gdImageSX(this->_image) != gdImageSY(this->_image))
+  {
+    Napi::RangeError::New(info.Env(), "Image must be square").ThrowAsJavaScriptException();
+    return info.Env().Null();
+  }
+
   gdImagePtr newImage = gdImageSquareToCircle(this->_image, radius);
 
-  RETURN_IMAGE(newImage);
+  RETURN_IMAGE(newImage, "Cannot create circle image");
 }
 
 Napi::Value Gd::Image::Sharpen(const Napi::CallbackInfo &info)
@@ -2382,7 +2399,7 @@ Napi::Value Gd::Image::CreatePaletteFromTrueColor(const Napi::CallbackInfo &info
 
   gdImagePtr newImage = gdImageCreatePaletteFromTrueColor(this->_image, ditherFlag, colorsWanted);
 
-  RETURN_IMAGE(newImage);
+  RETURN_IMAGE(newImage, "Cannot create palette image");
 }
 
 Napi::Value Gd::Image::TrueColorToPalette(const Napi::CallbackInfo &info)
@@ -2449,7 +2466,7 @@ Napi::Value Gd::Image::Scale(const Napi::CallbackInfo &info)
 
   gdImagePtr newImage = gdImageScale(this->_image, new_width, new_height);
 
-  RETURN_IMAGE(newImage);
+  RETURN_IMAGE(newImage, "Cannot scale image");
 }
 
 Napi::Value Gd::Image::Pixelate(const Napi::CallbackInfo &info)
@@ -2474,7 +2491,7 @@ Napi::Value Gd::Image::RotateInterpolated(const Napi::CallbackInfo &info)
 
   gdImagePtr newImage = gdImageRotateInterpolated(this->_image, angle, bgcolor);
 
-  RETURN_IMAGE(newImage);
+  RETURN_IMAGE(newImage, "Cannot rotate image");
 }
 
 Napi::Value Gd::Image::GifAnimBegin(const Napi::CallbackInfo &info)
@@ -2491,7 +2508,8 @@ Napi::Value Gd::Image::GifAnimBegin(const Napi::CallbackInfo &info)
 
   if (data == nullptr)
   {
-    return Napi::Boolean::New(info.Env(), false);
+    Napi::Error::New(info.Env(), "Cannot begin GIF animation").ThrowAsJavaScriptException();
+    return info.Env().Null();
   }
 
   RETURN_DATA;
@@ -2528,7 +2546,8 @@ Napi::Value Gd::Image::GifAnimAdd(const Napi::CallbackInfo &info)
 
   if (data == nullptr)
   {
-    return Napi::Boolean::New(info.Env(), false);
+    Napi::Error::New(info.Env(), "Cannot add frame to GIF animation").ThrowAsJavaScriptException();
+    return info.Env().Null();
   }
 
   RETURN_DATA;
@@ -2541,7 +2560,8 @@ Napi::Value Gd::Image::GifAnimEnd(const Napi::CallbackInfo &info)
 
   if (data == nullptr)
   {
-    return Napi::Boolean::New(info.Env(), false);
+    Napi::Error::New(info.Env(), "Cannot end GIF animation").ThrowAsJavaScriptException();
+    return info.Env().Null();
   }
 
   RETURN_DATA;

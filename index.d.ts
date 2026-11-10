@@ -252,11 +252,11 @@ declare namespace gd {
 
         colorMatch(image: gd.Image): number;
 
-        gifAnimBegin(globalColorMap: -1 | 0 | 1, loops: number): Buffer | false;
+        gifAnimBegin(globalColorMap: -1 | 0 | 1, loops: number): Buffer;
 
-        gifAnimAdd(localColorMap: -1 | 0 | 1, leftOffset: number, topOffset: number, delay: number, disposal: GifDisposal, prevFrame: gd.Image | null): Buffer | false;
+        gifAnimAdd(localColorMap: -1 | 0 | 1, leftOffset: number, topOffset: number, delay: number, disposal: GifDisposal, prevFrame: gd.Image | null): Buffer;
 
-        gifAnimEnd(): Buffer | false;
+        gifAnimEnd(): Buffer;
 
         // Copying and resizing
 
