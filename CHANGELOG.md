@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# Unreleased
+
+### Fixed
+- Importing node-gd when its native addon can't be loaded, for example because libgd is missing or there is no binary for the platform, throws an error with the reason. Previously it printed unrelated "Cannot find module" messages and ended the process.
+
 # 4.1.0 - 2026-11-10 (current)
 
 ### Added

@@ -35,7 +35,7 @@
     "clean": "rm -rf test/output/* build/ prebuilds/",
     "rebuild": "node-gyp rebuild -j max",
     "pretest": "node-gyp build -j max",
-    "test": "./node_modules/.bin/mocha --reporter spec --bail --ui bdd --colors --file ./test/main.test.mjs",
+    "test": "mocha --reporter spec --bail --ui bdd --colors --file ./test/main.test.mjs",
     "install": "node-gyp-build || node-gyp rebuild -j max",
     "prebuild": "prebuildify --napi --strip",
     "prebuild-all": "prebuildify --napi --strip --arch x64 --arch arm64",
