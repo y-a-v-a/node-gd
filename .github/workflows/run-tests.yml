@@ -43,5 +43,10 @@ jobs:
           for feature in heif avif tiff webp jpeg png16 freetype fontconfig xpm; do
             echo "$feature: $(./util.sh $feature)"
           done
+      - name: Debug TIFF
+        run: |
+          dpkg-query -W -f='${Package} ${Version}\n' libgd3 libtiff6 libtiff-dev
+          npm ci && npm run rebuild
+          node .github/scripts/debug-tiff.mjs
       - name: Build and test
         run: npm ci && npm run rebuild && npm test -- --grep "HEIF format tests|save it as heif|open a heif file" --invert
