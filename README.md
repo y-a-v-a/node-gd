@@ -14,10 +14,11 @@ For most users, installation is now much simpler thanks to prebuilt binaries:
 $ npm install node-gd
 ```
 
-The npm package includes precompiled binaries for macOS x64 and arm64 and for Linux x64, so no build tools are needed on these platforms. The binaries do use the libgd shared library of your system, so install libgd first:
+The npm package includes precompiled binaries for macOS x64 and arm64, and for Linux x64 and arm64 with glibc (Debian, Ubuntu and most other distributions) or musl (Alpine). No build tools are needed on these platforms. The binaries do use the libgd shared library of your system, so install libgd first:
 
 - macOS: `brew install gd`. The binaries look for libgd in Homebrew's default location, `/opt/homebrew` on Apple Silicon and `/usr/local` on Intel.
-- Debian/Ubuntu: `sudo apt-get install libgd3`. The Linux binary is built on Debian 12 (bookworm).
+- Debian/Ubuntu: `sudo apt-get install libgd3`. The glibc binaries are built on Debian 12 (bookworm).
+- Alpine: `apk add libgd`. The musl binaries are built on Alpine 3.24. Alpine's libgd doesn't support HEIF, so `gd.GD_HEIF` is not set there.
 
 ### Manual Installation
 
@@ -31,6 +32,14 @@ Have environment-specific build tools available. Next to that: to take full adva
 
 ```bash
 $ sudo apt-get install libgd-dev # libgd
+$ npm install node-gd
+```
+
+#### On Alpine
+
+```bash
+$ apk add build-base python3 pkgconf gd-dev libpng-dev libjpeg-turbo-dev libwebp-dev \
+    tiff-dev libheif-dev libavif-dev libxpm-dev freetype-dev fontconfig-dev
 $ npm install node-gd
 ```
 
@@ -60,7 +69,7 @@ $ npm install node-gd
 ### Platform Support
 
 - **✅ macOS** - x64 and arm64 (Apple Silicon) - prebuilt binaries available
-- **✅ Linux** - x64 prebuilt binary available, arm64 manual build only
+- **✅ Linux** - x64 and arm64, glibc and musl (Alpine) - prebuilt binaries available
 - **✅ FreeBSD** - manual build only
 - **❌ Windows** - Not supported
 

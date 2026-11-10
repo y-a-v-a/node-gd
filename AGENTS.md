@@ -39,6 +39,9 @@ Short, consolidated instructions for working on this repo.
 
 ## Prebuilds (CI model)
 - CI builds per OS/arch and bundles `prebuilds/` into npm publish.
+- Linux prebuilds are built for glibc (Debian bookworm) and musl (Alpine) on x64 and arm64 by `.github/scripts/build-linux.sh`, in containers started with `docker run`. JavaScript actions don't run in Alpine containers on arm64 runners, so don't move these builds to a job `container:`.
+- Linux prebuild files are tagged with their libc (`node-gd.glibc.node`, `node-gd.musl.node`), macOS files are `node-gd.node`.
+- The `test-package` job installs the packed package on systems with only the libgd runtime library (`.github/scripts/test-package.sh`). `.github/scripts/verify-prebuild.mjs` checks that the prebuild, not `build/Release`, is loaded and works.
 - Local prebuild test:
   1. `npm run prebuild`
   2. `npm pack`
