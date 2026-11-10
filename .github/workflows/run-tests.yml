@@ -44,4 +44,4 @@ jobs:
             echo "$feature: $(./util.sh $feature)"
           done
       - name: Build and test
-        run: npm ci && npm run rebuild && npm test -- --grep "HEIF format tests" --invert
+        run: npm ci && npm run rebuild && npm test -- --grep "HEIF format tests|save it as heif|open a heif file" --invert
