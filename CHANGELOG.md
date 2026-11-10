@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Importing node-gd when its native addon can't be loaded, for example because libgd is missing or there is no binary for the platform, throws an error with the reason. Previously it printed unrelated "Cannot find module" messages and ended the process.
 - Animated GIFs made with `gd.GifAnim` from true color images showing wrong colors, mostly black (issue #85). libgd converts each true color frame to its own palette but only writes it with a local color map, so true color frames now use a local color map by default. Pass `localColorMap: 0` to get the previous behavior.
+- Node.js crashing with a segmentation fault when libgd can't encode an image, for example `webpPtr()`, `avifPtr()` or `heifPtr()` on a palette image, or `heifPtr()` without a HEIF encoder. The `*Ptr()` methods now throw an `Error` with the message "Cannot encode image in this format", and the `save*()` methods reject with it.
 
 # 4.1.0 - 2026-11-10 (current)
 

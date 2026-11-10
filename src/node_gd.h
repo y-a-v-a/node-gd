@@ -212,10 +212,16 @@
     return info.Env().Null();                                 \
   }
 
-#define RETURN_DATA                                     \
-  Napi::Buffer<char> result =                           \
-      Napi::Buffer<char>::Copy(info.Env(), data, size); \
-  gdFree(data);                                         \
+#define RETURN_DATA                                                    \
+  if (data == nullptr)                                                 \
+  {                                                                    \
+    Napi::Error::New(info.Env(), "Cannot encode image in this format") \
+        .ThrowAsJavaScriptException();                                 \
+    return info.Env().Null();                                          \
+  }                                                                    \
+  Napi::Buffer<char> result =                                          \
+      Napi::Buffer<char>::Copy(info.Env(), data, size);                \
+  gdFree(data);                                                        \
   return result;
 
 

@@ -448,4 +448,47 @@ describe('Encoding and decoding images', function () {
       assert.doesNotThrow(() => img.destroy());
     });
   });
+
+  describe('Encoding fails in libgd', function () {
+    async function paletteImage() {
+      const img = await gd.create(4, 4);
+      img.colorAllocate(255, 255, 255);
+      return img;
+    }
+
+    const encoders = [
+      ['webpPtr', 'GD_WEBP', 'saveWebp'],
+      ['avifPtr', 'GD_AVIF', 'saveAvif'],
+      ['heifPtr', 'GD_HEIF', 'saveHeif'],
+    ];
+
+    for (const [method, flag, save] of encoders) {
+      it(`gd.Image#${method}() -- throws an Error for a palette image`, async function () {
+        if (!gd[flag]) {
+          this.skip();
+        }
+        const img = await paletteImage();
+        assert.throws(() => img[method](), Error, /Cannot encode image in this format/);
+        img.destroy();
+      });
+
+      it(`gd.Image#${save}() -- rejects with an Error for a palette image`, async function () {
+        if (!gd[flag]) {
+          this.skip();
+        }
+        const t = `${target}output-palette-${method}.bin`;
+        const img = await paletteImage();
+        let error;
+        try {
+          await img[save](t);
+        } catch (e) {
+          error = e;
+        }
+        assert.instanceOf(error, Error);
+        assert.match(error.message, /Cannot encode image in this format/);
+        assert.isFalse(fs.existsSync(t));
+        img.destroy();
+      });
+    }
+  });
 });
