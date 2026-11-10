@@ -47,3 +47,56 @@ jobs:
           done
       - name: Build and test
         run: npm ci && npm run rebuild && npm test -- --grep "HEIF format tests|save it as heif|open a heif file|images TIFF|Handling TIFF files" --invert
+
+  # Windows has no system libgd, so libgd and its libraries are built with vcpkg
+  # as static libraries and linked into node-gd.node (issues #56 and #86).
+  windows:
+    runs-on: windows-latest
+    name: Windows x64
+    env:
+      VCPKG_VERSION: '2026.10.16'
+      VCPKG_PACKAGES: 'libgd[core,png,jpeg,tiff,webp,freetype,fontconfig,avif-aom]:x64-windows-static'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Set up vcpkg
+        shell: pwsh
+        run: |
+          $root = "$env:RUNNER_TEMP\vcpkg"
+          git clone --quiet --depth 1 --branch $env:VCPKG_VERSION https://github.com/microsoft/vcpkg.git $root
+          & "$root\bootstrap-vcpkg.bat" -disableMetrics
+          New-Item -ItemType Directory -Force "$env:RUNNER_TEMP\vcpkg-cache" | Out-Null
+          "VCPKG_ROOT=$root" >> $env:GITHUB_ENV
+          "VCPKG_BINARY_SOURCES=clear;files,$env:RUNNER_TEMP\vcpkg-cache,readwrite" >> $env:GITHUB_ENV
+      - name: Restore vcpkg binary cache
+        id: vcpkg-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}\vcpkg-cache
+          key: vcpkg-${{ env.VCPKG_VERSION }}-${{ env.VCPKG_PACKAGES }}
+      - name: Build libgd with vcpkg
+        id: vcpkg-install
+        shell: pwsh
+        run: |
+          & "$env:VCPKG_ROOT\vcpkg.exe" install $env:VCPKG_PACKAGES --clean-after-build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Save vcpkg binary cache
+        if: always() && steps.vcpkg-install.outcome == 'success' && steps.vcpkg-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}\vcpkg-cache
+          key: vcpkg-${{ env.VCPKG_VERSION }}-${{ env.VCPKG_PACKAGES }}
+      - name: Show detected libgd features
+        shell: pwsh
+        run: |
+          Get-Content "$env:VCPKG_ROOT\installed\x64-windows-static\lib\pkgconfig\gdlib.pc"
+          Get-ChildItem "$env:VCPKG_ROOT\installed\x64-windows-static\lib\*.lib" | ForEach-Object Name
+          node util-win.mjs x64 libraries
+          foreach ($feature in 'heif','avif','tiff','webp','jpeg','png16','freetype','fontconfig','xpm') {
+            "${feature}: $(node util-win.mjs x64 feature $feature)"
+          }
+      - name: Build and test
+        run: npm ci && npm run rebuild && npm test

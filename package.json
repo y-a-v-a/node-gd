@@ -14,14 +14,12 @@
     "src",
     "binding.gyp",
     "util.sh",
+    "util-win.mjs",
     "CONTRIBUTORS.md",
     "index.d.ts",
     "test/*.test.js",
     "test/fixtures/*",
     "prebuilds"
-  ],
-  "os": [
-    "!win32"
   ],
   "engines": {
     "node": "^22.22.2 || ^24.15.0 || >=26.0.0"

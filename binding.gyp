@@ -13,6 +13,20 @@
         'with_webp%': '<!(./util.sh webp)',
         'with_vpx%': '<!(./util.sh vpx)'
       }
+    }],
+    ['OS=="win"', {
+      'variables': {
+        'with_avif%': '<!(node util-win.mjs <(target_arch) feature avif)',
+        'with_heif%': '<!(node util-win.mjs <(target_arch) feature heif)',
+        'with_tiff%': '<!(node util-win.mjs <(target_arch) feature tiff)',
+        'with_xpm%': '<!(node util-win.mjs <(target_arch) feature xpm)',
+        'with_jpeg%': '<!(node util-win.mjs <(target_arch) feature jpeg)',
+        'with_fontconfig%': '<!(node util-win.mjs <(target_arch) feature fontconfig)',
+        'with_freetype%': '<!(node util-win.mjs <(target_arch) feature freetype)',
+        'with_png%': '<!(node util-win.mjs <(target_arch) feature png16)',
+        'with_webp%': '<!(node util-win.mjs <(target_arch) feature webp)',
+        'with_vpx%': '<!(node util-win.mjs <(target_arch) feature vpx)'
+      }
     }]
   ],
   "targets": [
@@ -21,13 +35,25 @@
       "sources": [
         "src/addon.cc"
       ],
-      "libraries": ["-lgd"],
       "include_dirs": [
         "<!@(node -p \"require('node-addon-api').include\")"
       ],
       'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
       'defines': [ 'NAPI_CPP_EXCEPTIONS' ],
       "conditions": [
+        [ "OS!='win'", {
+          "libraries": ["-lgd"]
+        }],
+        [ "OS=='win'", {
+          "libraries": ["<!@(node util-win.mjs <(target_arch) libraries)"],
+          "library_dirs": ["<!(node util-win.mjs <(target_arch) libdir)"],
+          "include_dirs": ["<!(node util-win.mjs <(target_arch) include)"],
+          "msvs_settings": {
+            "VCCLCompilerTool": {
+              "ExceptionHandling": 1
+            }
+          }
+        }],
         [ "OS=='linux'", {
           "cflags!": [ '-fno-exceptions' ],
           "cflags_cc!": [ "-fno-exceptions" ]
