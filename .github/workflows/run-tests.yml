@@ -20,3 +20,30 @@ jobs:
           gdlib-config --features || gdlib-config --all || true
       - name: Run npm tasks
         run: npm install && npm run test
+
+  # Issue #104: building against the system libgd of Ubuntu 24.04 failed.
+  # The HEIF file tests are left out: Ubuntu installs no HEVC codecs for libheif
+  # by default, and with them libgd 2.3.3 crashes in libheif (libgd/libgd#788).
+  # The TIFF reading tests are left out: libgd 2.3.3 reports a file size of 0 to
+  # libtiff, which libtiff 4.5.1 rejects (fixed in libgd e66ea2b46b, not released).
+  ubuntu-system-libgd:
+    runs-on: ubuntu-24.04
+    name: Ubuntu 24.04 system libgd
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install packages
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install build-essential pkg-config libgd-dev
+      - name: Show detected libgd features
+        run: |
+          echo "libgd $(pkg-config --modversion gdlib): $(pkg-config --static --libs-only-l gdlib)"
+          for feature in heif avif tiff webp jpeg png16 freetype fontconfig xpm; do
+            echo "$feature: $(./util.sh $feature)"
+          done
+      - name: Build and test
+        run: npm ci && npm run rebuild && npm test -- --grep "HEIF format tests|save it as heif|open a heif file|images TIFF|Handling TIFF files" --invert

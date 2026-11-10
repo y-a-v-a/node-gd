@@ -27,7 +27,15 @@
     "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
   },
   "binary": {
-    "napi_versions": [3, 4, 5, 6, 7, 8, 9]
+    "napi_versions": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ]
   },
   "homepage": "https://github.com/y-a-v-a/node-gd",
   "bugs": "https://github.com/y-a-v-a/node-gd/issues",
@@ -35,7 +43,7 @@
     "clean": "rm -rf test/output/* build/ prebuilds/",
     "rebuild": "node-gyp rebuild -j max",
     "pretest": "node-gyp build -j max",
-    "test": "./node_modules/.bin/mocha --reporter spec --bail --ui bdd --colors --file ./test/main.test.mjs",
+    "test": "mocha --reporter spec --bail --ui bdd --colors --file ./test/main.test.mjs",
     "install": "node-gyp-build || node-gyp rebuild -j max",
     "prebuild": "prebuildify --napi --strip",
     "prebuild-all": "prebuildify --napi --strip --arch x64 --arch arm64",

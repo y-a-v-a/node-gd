@@ -174,7 +174,8 @@ describe('gd.GifAnim', function () {
     } catch (e) {
       reason = e;
     }
-    assert.equal(reason, 'Unable to save animation');
+    assert.instanceOf(reason, Error);
+    assert.equal(reason.message, 'Unable to save animation');
     anim.frames.forEach((image) => image.destroy());
   });
 
@@ -187,6 +188,48 @@ describe('gd.GifAnim', function () {
     anim.frames.forEach((image) => image.destroy());
   });
 
+  function hasLocalColorMap(frameBuffer) {
+    const descriptor = frameBuffer[0] === 0x21 && frameBuffer[1] === 0xf9 ? 8 : 0;
+    assert.equal(frameBuffer[descriptor], 0x2c, 'image descriptor');
+    return (frameBuffer[descriptor + 9] & 0x80) === 0x80;
+  }
+
+  it('keeps the colors of true color frames (issue #85)', async function () {
+    const red = await gd.createTrueColor(8, 8);
+    red.filledRectangle(0, 0, 7, 7, 0xff0000);
+    const blue = await gd.createTrueColor(8, 8);
+    blue.filledRectangle(0, 0, 7, 7, 0x0000ff);
+
+    const anim = new gd.GifAnim(red);
+    anim.add(blue);
+    const data = await anim.end();
+
+    assert.isTrue(anim.frameBuffers.slice(1, -1).every(hasLocalColorMap));
+    const decoded = gd.createFromGifPtr(data);
+    const pixel = decoded.getPixel(2, 2);
+    assert.closeTo(decoded.red(pixel), 255, 10);
+    assert.closeTo(decoded.green(pixel), 0, 10);
+    assert.closeTo(decoded.blue(pixel), 0, 10);
+    decoded.destroy();
+    anim.frames.forEach((image) => image.destroy());
+  });
+
+  it('uses the global color map for palette frames by default', async function () {
+    const anim = new gd.GifAnim(await frame(4));
+    anim.add(await frame(8));
+    await anim.end();
+    assert.isTrue(anim.frameBuffers.slice(1, -1).every((buffer) => !hasLocalColorMap(buffer)));
+    anim.frames.forEach((image) => image.destroy());
+  });
+
+  it('uses the localColorMap option when given for true color frames', async function () {
+    const image = await gd.createTrueColor(8, 8);
+    const anim = new gd.GifAnim(image, { localColorMap: 0 });
+    await anim.end();
+    assert.isFalse(hasLocalColorMap(anim.frameBuffers[1]));
+    image.destroy();
+  });
+
   it('rejects when the animation is ended twice', async function () {
     const anim = new gd.GifAnim(await frame(4));
     await anim.end();
@@ -196,7 +239,8 @@ describe('gd.GifAnim', function () {
     } catch (e) {
       reason = e;
     }
-    assert.equal(reason, 'gd.GifAnim#end() already called');
+    assert.instanceOf(reason, Error);
+    assert.equal(reason.message, 'gd.GifAnim#end() already called');
     anim.frames.forEach((image) => image.destroy());
   });
 });

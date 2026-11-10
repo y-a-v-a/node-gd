@@ -17,7 +17,7 @@ $ npm install node-gd
 The npm package includes precompiled binaries for macOS x64 and arm64, and for Linux x64 and arm64 with glibc (Debian, Ubuntu and most other distributions) or musl (Alpine). No build tools are needed on these platforms. The binaries do use the libgd shared library of your system, so install libgd first:
 
 - macOS: `brew install gd`. The binaries look for libgd in Homebrew's default location, `/opt/homebrew` on Apple Silicon and `/usr/local` on Intel.
-- Debian/Ubuntu: `sudo apt-get install libgd3`. The glibc binaries are built on Debian 12 (bookworm).
+- Debian/Ubuntu: `sudo apt-get install libgd3`. The glibc binaries are built on Debian 12 (bookworm). On Ubuntu 24.04, reading HEIF files crashes Node.js once the HEVC plugins of libheif (`libheif-plugin-libde265`, `libheif-plugin-x265`) are installed. This is a bug in libgd 2.3.3 ([libgd/libgd#788](https://github.com/libgd/libgd/issues/788)) that node-gd can't work around. Without those plugins, reading and writing HEIF fails with an error. Ubuntu 24.04 also can't read TIFF files: libgd 2.3.3 tells libtiff 4.5.1 the file is empty, and libtiff rejects it. Reading fails with an error. This is fixed in libgd, but not in a released version yet.
 - Alpine: `apk add libgd`. The musl binaries are built on Alpine 3.24. Alpine's libgd doesn't support HEIF, so `gd.GD_HEIF` is not set there.
 
 ### Manual Installation

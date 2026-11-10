@@ -16,55 +16,55 @@ declare namespace gd {
 
     function createFromJpeg(path: string): Promise<gd.Image>;
 
-    function createFromJpegPtr(data: Ptr): Promise<gd.Image>;
+    function createFromJpegPtr(data: Ptr): gd.Image;
 
     function openPng(path: string): Promise<gd.Image>;
 
     function createFromPng(path: string): Promise<gd.Image>;
 
-    function createFromPngPtr(data: Ptr): Promise<gd.Image>;
+    function createFromPngPtr(data: Ptr): gd.Image;
 
     function openGif(path: string): Promise<gd.Image>;
 
     function createFromGif(path: string): Promise<gd.Image>;
 
-    function createFromGifPtr(data: Ptr): Promise<gd.Image>;
+    function createFromGifPtr(data: Ptr): gd.Image;
 
     function openWBMP(path: string): Promise<gd.Image>;
 
     function createFromWBMP(path: string): Promise<gd.Image>;
 
-    function createFromWBMPPtr(data: Ptr): Promise<gd.Image>;
+    function createFromWBMPPtr(data: Ptr): gd.Image;
 
     function openBmp(path: string): Promise<gd.Image>;
 
     function createFromBmp(path: string): Promise<gd.Image>;
 
-    function createFromBmpPtr(data: Ptr): Promise<gd.Image>;
+    function createFromBmpPtr(data: Ptr): gd.Image;
 
     function openTiff(path: string): Promise<gd.Image>;
 
     function createFromTiff(path: string): Promise<gd.Image>;
 
-    function createFromTiffPtr(data: Ptr): Promise<gd.Image>;
+    function createFromTiffPtr(data: Ptr): gd.Image;
 
     function openWebp(path: string): Promise<gd.Image>;
 
     function createFromWebp(path: string): Promise<gd.Image>;
 
-    function createFromWebpPtr(data: Ptr): Promise<gd.Image>;
+    function createFromWebpPtr(data: Ptr): gd.Image;
 
     function openHeif(path: string): Promise<gd.Image>;
 
     function createFromHeif(path: string): Promise<gd.Image>;
 
-    function createFromHeifPtr(data: Ptr): Promise<gd.Image>;
+    function createFromHeifPtr(data: Ptr): gd.Image;
 
     function openAvif(path: string): Promise<gd.Image>;
 
     function createFromAvif(path: string): Promise<gd.Image>;
 
-    function createFromAvifPtr(data: Ptr): Promise<gd.Image>;
+    function createFromAvifPtr(data: Ptr): gd.Image;
 
     function openFile(path: string): Promise<gd.Image>;
 
@@ -252,11 +252,11 @@ declare namespace gd {
 
         colorMatch(image: gd.Image): number;
 
-        gifAnimBegin(globalColorMap: -1 | 0 | 1, loops: number): Buffer | false;
+        gifAnimBegin(globalColorMap: -1 | 0 | 1, loops: number): Buffer;
 
-        gifAnimAdd(localColorMap: -1 | 0 | 1, leftOffset: number, topOffset: number, delay: number, disposal: GifDisposal, prevFrame: gd.Image | null): Buffer | false;
+        gifAnimAdd(localColorMap: -1 | 0 | 1, leftOffset: number, topOffset: number, delay: number, disposal: GifDisposal, prevFrame: gd.Image | null): Buffer;
 
-        gifAnimEnd(): Buffer | false;
+        gifAnimEnd(): Buffer;
 
         // Copying and resizing
 

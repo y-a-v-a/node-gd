@@ -7,9 +7,11 @@ title: Node-gd Documentation
 
 ## Version information
 
-This is the documentation for the 2.x version. The 2.x version dropped support for `gd.createSync` and `gd.createTrueColorSync`. Also, all functions that used to accept a callback are changed. They return a Promise now. Effort is put into respecting Node's asynchronous nature by implementing N-API's AsyncWorker classes for all gd functions that utilize file I/O.
+This is the documentation for version 5. Functions that read or write files return a `Promise` and do their work in a background thread. Since version 5, failures are always reported with an `Error`: promises are rejected with one, and functions that return a new image or data throw one instead of returning `null` or `false`.
 
 # Creating and opening graphic images
+
+The functions that open or read a file return a `Promise`, which is rejected with an `Error` when the file can't be opened or isn't in the expected format, for example `Cannot read PNG file` when `gd.openPng()` gets a JPEG. The `gd.createFrom*Ptr()` functions read a `Buffer` synchronously and throw an `Error`, for example `Cannot read PNG data`.
 
 ### gd.create(width, height)
 
@@ -124,7 +126,7 @@ img.destroy();
 
 #### Return value
 
-- `Promise<gd.Image>` - Promise that resolves to an image instance
+- `gd.Image` - The image. Throws an `Error` when `data` can't be read in this format.
 
 Load an image from a resource which is an instance of `Buffer`.
 
@@ -133,7 +135,7 @@ const gd = require('node-gd');
 const fs = require('fs');
 
 const jpegData = fs.readFileSync('./input.jpg');
-const img = await gd.createFromJpegPtr(jpegData);
+const img = gd.createFromJpegPtr(jpegData);
 
 await img.savePng('./output.png', 0);
 img.destroy();
@@ -155,7 +157,7 @@ Asynchronously load a Png from disk. Returns a Promise.
 
 #### Return value
 
-- `Promise<gd.Image>` - Promise that resolves to an image instance
+- `gd.Image` - The image. Throws an `Error` when `data` can't be read in this format.
 
 Load an image from a resource.
 
@@ -164,7 +166,7 @@ const gd = require('node-gd');
 const fs = require('fs');
 
 const pngData = fs.readFileSync('./input.png');
-const img = await gd.createFromPngPtr(pngData);
+const img = gd.createFromPngPtr(pngData);
 
 await img.saveJpeg('./output.jpg', 90);
 img.destroy();
@@ -186,7 +188,7 @@ Asynchronously load a Gif from disk. Returns a Promise.
 
 #### Return value
 
-- `Promise<gd.Image>` - Promise that resolves to an image instance
+- `gd.Image` - The image. Throws an `Error` when `data` can't be read in this format.
 
 Load a GIF image from a Buffer resource.
 
@@ -195,7 +197,7 @@ const gd = require('node-gd');
 const fs = require('fs');
 
 const gifData = fs.readFileSync('./input.gif');
-const img = await gd.createFromGifPtr(gifData);
+const img = gd.createFromGifPtr(gifData);
 
 await img.savePng('./output.png', 0);
 img.destroy();
@@ -217,7 +219,7 @@ Asynchronously load a WBMP from disk. Returns a Promise.
 
 #### Return value
 
-- `Promise<gd.Image>` - Promise that resolves to an image instance
+- `gd.Image` - The image. Throws an `Error` when `data` can't be read in this format.
 
 Load a WBMP image from a Buffer resource.
 
@@ -226,7 +228,7 @@ const gd = require('node-gd');
 const fs = require('fs');
 
 const wbmpData = fs.readFileSync('./input.wbmp');
-const img = await gd.createFromWBMPPtr(wbmpData);
+const img = gd.createFromWBMPPtr(wbmpData);
 
 await img.savePng('./output.png', 0);
 img.destroy();
@@ -248,7 +250,7 @@ Asynchronously load a Bmp from disk. Returns a Promise.
 
 #### Return value
 
-- `Promise<gd.Image>` - Promise that resolves to an image instance
+- `gd.Image` - The image. Throws an `Error` when `data` can't be read in this format.
 
 Load a BMP image from a Buffer resource.
 
@@ -257,7 +259,7 @@ const gd = require('node-gd');
 const fs = require('fs');
 
 const bmpData = fs.readFileSync('./input.bmp');
-const img = await gd.createFromBmpPtr(bmpData);
+const img = gd.createFromBmpPtr(bmpData);
 
 await img.saveJpeg('./output.jpg', 85);
 img.destroy();
@@ -279,7 +281,7 @@ Asynchronously load a Tiff from disk. Returns a Promise.
 
 #### Return value
 
-- `Promise<gd.Image>` - Promise that resolves to an image instance
+- `gd.Image` - The image. Throws an `Error` when `data` can't be read in this format.
 
 Load a TIFF image from a Buffer resource.
 
@@ -288,7 +290,7 @@ const gd = require('node-gd');
 const fs = require('fs');
 
 const tiffData = fs.readFileSync('./input.tiff');
-const img = await gd.createFromTiffPtr(tiffData);
+const img = gd.createFromTiffPtr(tiffData);
 
 await img.saveJpeg('./output.jpg', 90);
 img.destroy();
@@ -350,7 +352,7 @@ const gd = require('node-gd');
 const fs = require('fs');
 
 const webpData = fs.readFileSync('./input.webp');
-const img = await gd.createFromWebpPtr(webpData);
+const img = gd.createFromWebpPtr(webpData);
 await img.saveJpeg('./output.jpg', 90);
 img.destroy();
 ```
@@ -1694,7 +1696,7 @@ Crop the supplied image from a certain point to a certain size. Will return a ne
 
 #### Return value
 
-- `gd.Image` - New cropped image instance
+- `gd.Image` - New cropped image instance. Throws an `Error` when all pixels have the border color, because nothing would be left.
 
 The mode parameter is a value from 0 to 4, so there are 5 modes:
 
@@ -1726,7 +1728,7 @@ cropped.destroy();
 
 #### Return value
 
-- `gd.Image` - New cropped image instance
+- `gd.Image` - New cropped image instance. Throws a `RangeError` when `threshold` is greater than 100 or, for palette images, `color` is not an allocated palette index. Throws an `Error` when all pixels match `color`.
 
 Crop by color, with a threshold. Use for color an integer and for threshold a number.
 
@@ -1882,7 +1884,7 @@ palette.destroy();
   - `loops` - `-1` (default) to play the animation once, `0` to loop forever, or the number of times the animation should repeat.
   - `localColorMap`, `leftOffset`, `topOffset`, `delay` and `disposal` for the first frame, see `gd.GifAnim#add()`.
 
-Creates an animated GIF, starting with `image` as its first frame. Throws an `Error` when `image` is not a `gd.Image`. True color frames are converted to a palette by libgd when they are added.
+Creates an animated GIF, starting with `image` as its first frame. Throws an `Error` when `image` is not a `gd.Image`. True color frames are converted to a palette by libgd when they are added, so each of them gets its own local color map by default. The alpha channel of true color frames is not kept: transparent pixels get their color without transparency. For a transparent animation, use palette images and mark the transparent color with `gd.Image#colorTransparent()`.
 
 ```javascript
 import gd from 'node-gd';
@@ -1910,7 +1912,7 @@ anim.frames.forEach((frame) => frame.destroy());
 
 - `image` - A `gd.Image` instance to add as the next frame.
 - `options` - An optional `Object` with the following properties:
-  - `localColorMap` - `1` to write the palette of this frame with the frame, `0` (default) to use the global color map.
+  - `localColorMap` - `1` to write the palette of this frame with the frame, `0` to use the global color map. Defaults to `1` for true color images and `0` for palette images.
   - `leftOffset` and `topOffset` - The position of this frame within the animation, both `0` by default.
   - `delay` - The time before the next frame is shown, in 1/100 seconds. Defaults to `100`.
   - `disposal` - How this frame is treated when the next frame is shown:
@@ -1935,7 +1937,7 @@ Do not destroy frames before the animation has ended. All frames, including the 
   - Resolves to `true` after writing the animation to `path`.
   - Resolves to a `Buffer` containing the animation when no `path` is given.
 
-Completes the animation. The `Promise` is rejected with the message `'gd.GifAnim#end() already called'` when called more than once, and with `'Unable to save animation'` when the file cannot be written. The frames are not destroyed, call `destroy()` on each of them when done.
+Completes the animation. The `Promise` is rejected with an `Error` with the message `gd.GifAnim#end() already called` when called more than once, and `Unable to save animation` when the file cannot be written. The frames are not destroyed, call `destroy()` on each of them when done.
 
 ```javascript
 import gd from 'node-gd';
@@ -1964,7 +1966,7 @@ second.destroy();
 
 #### Return value
 
-- `Buffer` containing the start of the GIF data, or `false` on failure.
+- `Buffer` containing the start of the GIF data. Throws an `Error` when libgd fails.
 
 This and the next two methods are the low level functions `gd.GifAnim` is built on. They return the parts of an animated GIF as `Buffer`s, which together form the animation when concatenated in order. This image determines the width and height of the animation; it is not added as a frame, call `gd.Image#gifAnimAdd()` for that.
 
@@ -1977,7 +1979,7 @@ This and the next two methods are the low level functions `gd.GifAnim` is built 
 
 #### Return value
 
-- `Buffer` containing this image as a frame, or `false` on failure.
+- `Buffer` containing this image as a frame. Throws an `Error` when libgd fails.
 
 Throws a `TypeError` when `prevFrame` is an object that is not a `gd.Image`, and an `Error` when `prevFrame` has been destroyed.
 
@@ -1985,7 +1987,7 @@ Throws a `TypeError` when `prevFrame` is an object that is not a `gd.Image`, and
 
 #### Return value
 
-- `Buffer` containing the end of the GIF data, or `false` on failure.
+- `Buffer` containing the end of the GIF data. Throws an `Error` when libgd fails.
 
 ```javascript
 import fs from 'fs';
@@ -2243,9 +2245,9 @@ dest.destroy();
 
 #### Return value
 
-- `gd.Image` - Returns the current image instance for method chaining
+- `gd.Image` - A new image
 
-Transform the image from a square to a circle with specified radius.
+Transforms a square image to a circle with the given radius, in a new image. Throws a `RangeError` when the image is not square.
 
 ```javascript
 const gd = require('node-gd');

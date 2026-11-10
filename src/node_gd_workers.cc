@@ -49,8 +49,7 @@ protected:
 
   virtual void OnError(const Napi::Error &e) override
   {
-    // reject Promise with error message
-    _deferred.Reject(Napi::String::New(Env(), e.Message()));
+    _deferred.Reject(e.Value());
   }
 
   gdImagePtr image;
@@ -363,7 +362,7 @@ class CreateFromAvifWorker : public CreateFromWorker
 public:
   static Value DoWork(const CallbackInfo &info)
   {
-    REQ_STR_ARG(0, path, "Argument should be a path to the Avif file to load.");
+    REQ_STR_ARG(0, path, "Argument should be a path to the AVIF file to load.");
 
     CreateFromAvifWorker *worker = new CreateFromAvifWorker(info.Env(),
                                                             "CreateFromAvifWorkerResource");
@@ -381,13 +380,13 @@ protected:
     in = fopen(path.c_str(), "rb");
     if (in == nullptr)
     {
-      return SetError("Cannot open Avif file");
+      return SetError("Cannot open AVIF file");
     }
     image = gdImageCreateFromAvif(in);
     if (!image)
     {
       fclose(in);
-      return SetError("Cannot read Avif file");
+      return SetError("Cannot read AVIF file");
     }
     fclose(in);
   }
@@ -407,7 +406,7 @@ class CreateFromHeifWorker : public CreateFromWorker
 public:
   static Value DoWork(const CallbackInfo &info)
   {
-    REQ_STR_ARG(0, path, "Argument should be a path to the Heif file to load.");
+    REQ_STR_ARG(0, path, "Argument should be a path to the HEIF file to load.");
 
     CreateFromHeifWorker *worker = new CreateFromHeifWorker(info.Env(),
                                                             "CreateFromHeifWorkerResource");
@@ -425,13 +424,13 @@ protected:
     in = fopen(path.c_str(), "rb");
     if (in == nullptr)
     {
-      return SetError("Cannot open Heif file");
+      return SetError("Cannot open HEIF file");
     }
     image = gdImageCreateFromHeif(in);
     if (!image)
     {
       fclose(in);
-      return SetError("Cannot read Heif file");
+      return SetError("Cannot read HEIF file");
     }
     fclose(in);
   }
@@ -482,8 +481,7 @@ protected:
 
   virtual void OnError(const Napi::Error &e) override
   {
-    // reject Promise with error message
-    _deferred.Reject(Napi::String::New(Env(), e.Message()));
+    _deferred.Reject(e.Value());
   }
 
 private:
@@ -543,7 +541,7 @@ protected:
 
   virtual void OnError(const Napi::Error &e) override
   {
-    _deferred.Reject(Napi::String::New(Env(), e.Message()));
+    _deferred.Reject(e.Value());
   }
 
   gdImagePtr image;
@@ -586,7 +584,7 @@ protected:
     }
     if (!image)
     {
-      return SetError("No image created!");
+      return SetError("Cannot create image");
     }
   }
 
@@ -600,7 +598,7 @@ protected:
 
   virtual void OnError(const Napi::Error &e) override
   {
-    _deferred.Reject(Napi::String::New(Env(), e.Message()));
+    _deferred.Reject(e.Value());
   }
 
 private:
@@ -632,7 +630,7 @@ protected:
 
   virtual void OnError(const Napi::Error &e) override
   {
-    _deferred.Reject(Napi::String::New(Env(), e.Message()));
+    _deferred.Reject(e.Value());
   }
 
   gdImagePtr *_gdImage;
@@ -912,7 +910,7 @@ class SaveHeifWorker : public SaveWorker
 public:
   static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
   {
-    REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the Heif.");
+    REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the HEIF.");
     OPT_INT_ARG(1, quality, -1);
     OPT_INT_ARG(2, codec_param, 1);
     OPT_STR_ARG(3, chroma_param, "444");
@@ -946,7 +944,7 @@ protected:
     FILE *out = fopen(path.c_str(), "wb");
     if (out == nullptr)
     {
-      return SetError("Cannot save Heif file");
+      return SetError("Cannot save HEIF file");
     }
     gdImageHeifEx(*_gdImage, out, quality, codec, chroma.c_str());
     fclose(out);
@@ -970,7 +968,7 @@ class SaveAvifWorker : public SaveWorker
 public:
   static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
   {
-    REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the Avif.");
+    REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the AVIF.");
     OPT_INT_ARG(1, quality, -1);
     OPT_INT_ARG(2, speed, -1);
 
@@ -991,7 +989,7 @@ protected:
     FILE *out = fopen(path.c_str(), "wb");
     if (out == nullptr)
     {
-      return SetError("Cannot save Avif file");
+      return SetError("Cannot save AVIF file");
     }
     
     // Check if image is valid

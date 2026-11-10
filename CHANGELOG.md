@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# Unreleased
+
+This will be released as 5.0.0.
+
+### Breaking
+- Promises returned by node-gd are rejected with an `Error` instead of a string (issue #50). The message is the string that was used before, so use `error.message`. This applies to opening and reading files (`gd.openPng()`, `gd.createFromPng()`, `gd.openFile()` and the other formats), saving files (`gd.Image#png()`, `gd.Image#file()` and the other formats) and `gd.GifAnim#end()`.
+- `gd.createFromJpegPtr()`, `gd.createFromPngPtr()` and the other `gd.createFrom*Ptr()` functions throw an `Error` when the data can't be read in that format, for example "Cannot read PNG data", instead of returning `null` (issue #50).
+- Methods that return a new image throw an `Error` when libgd can't create it, instead of returning `null`: `gd.createSync()` and `gd.createTrueColorSync()` ("Cannot create image"), `gd.Image#crop()`, `gd.Image#scale()`, `gd.Image#rotateInterpolated()` and `gd.Image#createPaletteFromTrueColor()`.
+- `gd.Image#cropAuto()` throws an `Error` when all pixels have the border color, and `gd.Image#cropThreshold()` when all pixels match the color, instead of returning `null`. `gd.Image#cropThreshold()` throws a `RangeError` for a threshold greater than 100 and, for palette images, a color that is not an allocated palette index.
+- `gd.Image#squareToCircle()` throws a `RangeError` for images that are not square, instead of returning `null`.
+- `gd.Image#gifAnimBegin()`, `gd.Image#gifAnimAdd()` and `gd.Image#gifAnimEnd()` throw an `Error` when libgd fails, instead of returning `false`.
+- Error messages name HEIF and AVIF in capitals, like the other formats, for example "Cannot read HEIF file" instead of "Cannot read Heif file". The async `gd.create()` and `gd.createTrueColor()` reject with "Cannot create image" instead of "No image created!".
+
+### Fixed
+- The TypeScript declarations of `gd.createFrom*Ptr()` return `gd.Image` instead of `Promise<gd.Image>`. These functions have always been synchronous.
+- `gd.GD_XPM` not being set when libgd supports XPM. The build looked for the library `xpm`, but libgd links `Xpm`.
+- Importing node-gd when its native addon can't be loaded, for example because libgd is missing or there is no binary for the platform, throws an error with the reason. Previously it printed unrelated "Cannot find module" messages and ended the process.
+- Animated GIFs made with `gd.GifAnim` from true color images showing wrong colors, mostly black (issue #85). libgd converts each true color frame to its own palette but only writes it with a local color map, so true color frames now use a local color map by default. Pass `localColorMap: 0` to get the previous behavior.
+- Node.js crashing with a segmentation fault when libgd can't encode an image, for example `webpPtr()`, `avifPtr()` or `heifPtr()` on a palette image, or `heifPtr()` without a HEIF encoder. The `*Ptr()` methods now throw an `Error` with the message "Cannot encode image in this format", and the `save*()` methods reject with it.
+
 # 4.1.0 - 2026-11-10 (current)
 
 ### Added

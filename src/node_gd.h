@@ -163,20 +163,17 @@
     return info.Env().Null();                                          \
   }
 
-#define RETURN_IMAGE(IMG)                                       \
-  if (!IMG)                                                     \
-  {                                                             \
-    return info.Env().Null();                                   \
-  }                                                             \
-  else                                                          \
-  {                                                             \
-    Napi::Value argv =                                          \
-        Napi::External<gdImagePtr>::New(info.Env(), &IMG);      \
-    Napi::Object instance = Gd::Image::constructor.New({argv}); \
-    return instance;                                            \
-  }
+#define RETURN_IMAGE(IMG, MESSAGE)                                      \
+  if (!IMG)                                                             \
+  {                                                                     \
+    Napi::Error::New(info.Env(), MESSAGE).ThrowAsJavaScriptException(); \
+    return info.Env().Null();                                           \
+  }                                                                     \
+  Napi::Value argv = Napi::External<gdImagePtr>::New(info.Env(), &IMG); \
+  Napi::Object instance = Gd::Image::constructor.New({argv});           \
+  return instance;
 
-#define DECLARE_CREATE_FROM(TYPE)                                       \
+#define DECLARE_CREATE_FROM(TYPE, NAME)                                 \
   Napi::Value Gd::CreateFrom##TYPE(const Napi::CallbackInfo &info)      \
   {                                                                     \
     return CreateFrom##TYPE##Worker::DoWork(info);                      \
@@ -190,7 +187,7 @@
     char *buffer_data = buffer.Data();                                  \
     size_t buffer_length = buffer.Length();                             \
     im = gdImageCreateFrom##TYPE##Ptr(buffer_length, buffer_data);      \
-    RETURN_IMAGE(im)                                                    \
+    RETURN_IMAGE(im, "Cannot read " NAME " data")                     \
   }
 
 #define CHECK_PALETTE_INDEX(COLOR)                                         \
@@ -212,10 +209,16 @@
     return info.Env().Null();                                 \
   }
 
-#define RETURN_DATA                                     \
-  Napi::Buffer<char> result =                           \
-      Napi::Buffer<char>::Copy(info.Env(), data, size); \
-  gdFree(data);                                         \
+#define RETURN_DATA                                                    \
+  if (data == nullptr)                                                 \
+  {                                                                    \
+    Napi::Error::New(info.Env(), "Cannot encode image in this format") \
+        .ThrowAsJavaScriptException();                                 \
+    return info.Env().Null();                                          \
+  }                                                                    \
+  Napi::Buffer<char> result =                                          \
+      Napi::Buffer<char>::Copy(info.Env(), data, size);                \
+  gdFree(data);                                                        \
   return result;
 
 
