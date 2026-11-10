@@ -176,7 +176,7 @@
     return instance;                                            \
   }
 
-#define DECLARE_CREATE_FROM(TYPE)                                       \
+#define DECLARE_CREATE_FROM(TYPE, NAME)                                 \
   Napi::Value Gd::CreateFrom##TYPE(const Napi::CallbackInfo &info)      \
   {                                                                     \
     return CreateFrom##TYPE##Worker::DoWork(info);                      \
@@ -190,6 +190,12 @@
     char *buffer_data = buffer.Data();                                  \
     size_t buffer_length = buffer.Length();                             \
     im = gdImageCreateFrom##TYPE##Ptr(buffer_length, buffer_data);      \
+    if (!im)                                                            \
+    {                                                                   \
+      Napi::Error::New(info.Env(), "Cannot read " NAME " data")         \
+          .ThrowAsJavaScriptException();                                \
+      return info.Env().Null();                                         \
+    }                                                                   \
     RETURN_IMAGE(im)                                                    \
   }
 

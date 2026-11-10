@@ -174,7 +174,8 @@ describe('gd.GifAnim', function () {
     } catch (e) {
       reason = e;
     }
-    assert.equal(reason, 'Unable to save animation');
+    assert.instanceOf(reason, Error);
+    assert.equal(reason.message, 'Unable to save animation');
     anim.frames.forEach((image) => image.destroy());
   });
 
@@ -238,7 +239,8 @@ describe('gd.GifAnim', function () {
     } catch (e) {
       reason = e;
     }
-    assert.equal(reason, 'gd.GifAnim#end() already called');
+    assert.instanceOf(reason, Error);
+    assert.equal(reason.message, 'gd.GifAnim#end() already called');
     anim.frames.forEach((image) => image.destroy());
   });
 });

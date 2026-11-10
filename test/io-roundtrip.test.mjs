@@ -67,8 +67,8 @@ describe('Encoding and decoding images', function () {
       img.destroy();
     });
 
-    it('gd.createFromPngPtr() -- returns null for invalid data', function () {
-      assert.isNull(gd.createFromPngPtr(Buffer.from('this is not a png')));
+    it('gd.createFromPngPtr() -- throws an Error for invalid data', function () {
+      assert.throws(() => gd.createFromPngPtr(Buffer.from('this is not a png')), Error, /^Cannot read PNG data$/);
     });
 
     it('gd.createFromPngPtr() -- throws an Error without arguments', function () {
@@ -102,7 +102,8 @@ describe('Encoding and decoding images', function () {
       } catch (e) {
         reason = e;
       }
-      assert.equal(reason, 'Cannot save PNG file');
+      assert.instanceOf(reason, Error);
+      assert.equal(reason.message, 'Cannot save PNG file');
       img.destroy();
     });
 
@@ -148,7 +149,8 @@ describe('Encoding and decoding images', function () {
       } catch (e) {
         reason = e;
       }
-      assert.equal(reason, 'Cannot open JPEG file');
+      assert.instanceOf(reason, Error);
+      assert.equal(reason.message, 'Cannot open JPEG file');
     });
 
     it('gd.openJpeg() -- rejects with a message when the file is not a JPEG', async function () {
@@ -158,7 +160,8 @@ describe('Encoding and decoding images', function () {
       } catch (e) {
         reason = e;
       }
-      assert.equal(reason, 'Cannot read JPEG file');
+      assert.instanceOf(reason, Error);
+      assert.equal(reason.message, 'Cannot read JPEG file');
     });
 
     it('gd.createFromJpeg() -- throws a TypeError when the path is not a String', function () {
@@ -342,7 +345,8 @@ describe('Encoding and decoding images', function () {
       } catch (e) {
         reason = e;
       }
-      assert.equal(reason, 'Cannot save file');
+      assert.instanceOf(reason, Error);
+      assert.equal(reason.message, 'Cannot save file');
       img.destroy();
     });
 
@@ -353,7 +357,8 @@ describe('Encoding and decoding images', function () {
       } catch (e) {
         reason = e;
       }
-      assert.equal(reason, 'Cannot read image file');
+      assert.instanceOf(reason, Error);
+      assert.equal(reason.message, 'Cannot read image file');
     });
   });
 
@@ -447,6 +452,40 @@ describe('Encoding and decoding images', function () {
       img.destroy();
       assert.doesNotThrow(() => img.destroy());
     });
+  });
+
+  describe('Reading a JPEG as another format (issue #50)', function () {
+    const formats = [
+      ['Png', 'PNG', 'GD_PNG'],
+      ['Gif', 'GIF', 'GD_GIF'],
+      ['Bmp', 'BMP', null],
+      ['Webp', 'WEBP', 'GD_WEBP'],
+      ['Tiff', 'TIFF', 'GD_TIFF'],
+    ];
+
+    for (const [format, name, flag] of formats) {
+      it(`gd.open${format}() -- rejects with an Error`, async function () {
+        if (flag && !gd[flag]) {
+          this.skip();
+        }
+        let error;
+        try {
+          await gd[`open${format}`](source + 'input.jpg');
+        } catch (e) {
+          error = e;
+        }
+        assert.instanceOf(error, Error);
+        assert.equal(error.message, `Cannot read ${name} file`);
+      });
+
+      it(`gd.createFrom${format}Ptr() -- throws an Error`, function () {
+        if (flag && !gd[flag]) {
+          this.skip();
+        }
+        const data = fs.readFileSync(source + 'input.jpg');
+        assert.throws(() => gd[`createFrom${format}Ptr`](data), Error, new RegExp(`^Cannot read ${name} data$`));
+      });
+    }
   });
 
   describe('Encoding fails in libgd', function () {

@@ -49,8 +49,7 @@ protected:
 
   virtual void OnError(const Napi::Error &e) override
   {
-    // reject Promise with error message
-    _deferred.Reject(Napi::String::New(Env(), e.Message()));
+    _deferred.Reject(e.Value());
   }
 
   gdImagePtr image;
@@ -482,8 +481,7 @@ protected:
 
   virtual void OnError(const Napi::Error &e) override
   {
-    // reject Promise with error message
-    _deferred.Reject(Napi::String::New(Env(), e.Message()));
+    _deferred.Reject(e.Value());
   }
 
 private:
@@ -543,7 +541,7 @@ protected:
 
   virtual void OnError(const Napi::Error &e) override
   {
-    _deferred.Reject(Napi::String::New(Env(), e.Message()));
+    _deferred.Reject(e.Value());
   }
 
   gdImagePtr image;
@@ -600,7 +598,7 @@ protected:
 
   virtual void OnError(const Napi::Error &e) override
   {
-    _deferred.Reject(Napi::String::New(Env(), e.Message()));
+    _deferred.Reject(e.Value());
   }
 
 private:
@@ -632,7 +630,7 @@ protected:
 
   virtual void OnError(const Napi::Error &e) override
   {
-    _deferred.Reject(Napi::String::New(Env(), e.Message()));
+    _deferred.Reject(e.Value());
   }
 
   gdImagePtr *_gdImage;

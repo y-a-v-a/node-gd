@@ -42,7 +42,8 @@ describe('Section Handling file types', function () {
     } catch (e) {
       reason = e;
     }
-    assert.strictEqual(reason, 'Cannot save JPEG file');
+    assert.instanceOf(reason, Error);
+    assert.equal(reason.message, 'Cannot save JPEG file');
     img.destroy();
   });
 

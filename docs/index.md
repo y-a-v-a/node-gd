@@ -11,6 +11,8 @@ This is the documentation for the 2.x version. The 2.x version dropped support f
 
 # Creating and opening graphic images
 
+The functions that open or read a file return a `Promise`, which is rejected with an `Error` when the file can't be opened or isn't in the expected format, for example `Cannot read PNG file` when `gd.openPng()` gets a JPEG. The `gd.createFrom*Ptr()` functions read a `Buffer` synchronously and throw an `Error`, for example `Cannot read PNG data`.
+
 ### gd.create(width, height)
 
 #### Parameters
@@ -124,7 +126,7 @@ img.destroy();
 
 #### Return value
 
-- `Promise<gd.Image>` - Promise that resolves to an image instance
+- `gd.Image` - The image. Throws an `Error` when `data` can't be read in this format.
 
 Load an image from a resource which is an instance of `Buffer`.
 
@@ -133,7 +135,7 @@ const gd = require('node-gd');
 const fs = require('fs');
 
 const jpegData = fs.readFileSync('./input.jpg');
-const img = await gd.createFromJpegPtr(jpegData);
+const img = gd.createFromJpegPtr(jpegData);
 
 await img.savePng('./output.png', 0);
 img.destroy();
@@ -155,7 +157,7 @@ Asynchronously load a Png from disk. Returns a Promise.
 
 #### Return value
 
-- `Promise<gd.Image>` - Promise that resolves to an image instance
+- `gd.Image` - The image. Throws an `Error` when `data` can't be read in this format.
 
 Load an image from a resource.
 
@@ -164,7 +166,7 @@ const gd = require('node-gd');
 const fs = require('fs');
 
 const pngData = fs.readFileSync('./input.png');
-const img = await gd.createFromPngPtr(pngData);
+const img = gd.createFromPngPtr(pngData);
 
 await img.saveJpeg('./output.jpg', 90);
 img.destroy();
@@ -186,7 +188,7 @@ Asynchronously load a Gif from disk. Returns a Promise.
 
 #### Return value
 
-- `Promise<gd.Image>` - Promise that resolves to an image instance
+- `gd.Image` - The image. Throws an `Error` when `data` can't be read in this format.
 
 Load a GIF image from a Buffer resource.
 
@@ -195,7 +197,7 @@ const gd = require('node-gd');
 const fs = require('fs');
 
 const gifData = fs.readFileSync('./input.gif');
-const img = await gd.createFromGifPtr(gifData);
+const img = gd.createFromGifPtr(gifData);
 
 await img.savePng('./output.png', 0);
 img.destroy();
@@ -217,7 +219,7 @@ Asynchronously load a WBMP from disk. Returns a Promise.
 
 #### Return value
 
-- `Promise<gd.Image>` - Promise that resolves to an image instance
+- `gd.Image` - The image. Throws an `Error` when `data` can't be read in this format.
 
 Load a WBMP image from a Buffer resource.
 
@@ -226,7 +228,7 @@ const gd = require('node-gd');
 const fs = require('fs');
 
 const wbmpData = fs.readFileSync('./input.wbmp');
-const img = await gd.createFromWBMPPtr(wbmpData);
+const img = gd.createFromWBMPPtr(wbmpData);
 
 await img.savePng('./output.png', 0);
 img.destroy();
@@ -248,7 +250,7 @@ Asynchronously load a Bmp from disk. Returns a Promise.
 
 #### Return value
 
-- `Promise<gd.Image>` - Promise that resolves to an image instance
+- `gd.Image` - The image. Throws an `Error` when `data` can't be read in this format.
 
 Load a BMP image from a Buffer resource.
 
@@ -257,7 +259,7 @@ const gd = require('node-gd');
 const fs = require('fs');
 
 const bmpData = fs.readFileSync('./input.bmp');
-const img = await gd.createFromBmpPtr(bmpData);
+const img = gd.createFromBmpPtr(bmpData);
 
 await img.saveJpeg('./output.jpg', 85);
 img.destroy();
@@ -279,7 +281,7 @@ Asynchronously load a Tiff from disk. Returns a Promise.
 
 #### Return value
 
-- `Promise<gd.Image>` - Promise that resolves to an image instance
+- `gd.Image` - The image. Throws an `Error` when `data` can't be read in this format.
 
 Load a TIFF image from a Buffer resource.
 
@@ -288,7 +290,7 @@ const gd = require('node-gd');
 const fs = require('fs');
 
 const tiffData = fs.readFileSync('./input.tiff');
-const img = await gd.createFromTiffPtr(tiffData);
+const img = gd.createFromTiffPtr(tiffData);
 
 await img.saveJpeg('./output.jpg', 90);
 img.destroy();
@@ -350,7 +352,7 @@ const gd = require('node-gd');
 const fs = require('fs');
 
 const webpData = fs.readFileSync('./input.webp');
-const img = await gd.createFromWebpPtr(webpData);
+const img = gd.createFromWebpPtr(webpData);
 await img.saveJpeg('./output.jpg', 90);
 img.destroy();
 ```
@@ -1935,7 +1937,7 @@ Do not destroy frames before the animation has ended. All frames, including the 
   - Resolves to `true` after writing the animation to `path`.
   - Resolves to a `Buffer` containing the animation when no `path` is given.
 
-Completes the animation. The `Promise` is rejected with the message `'gd.GifAnim#end() already called'` when called more than once, and with `'Unable to save animation'` when the file cannot be written. The frames are not destroyed, call `destroy()` on each of them when done.
+Completes the animation. The `Promise` is rejected with an `Error` with the message `gd.GifAnim#end() already called` when called more than once, and `Unable to save animation` when the file cannot be written. The frames are not destroyed, call `destroy()` on each of them when done.
 
 ```javascript
 import gd from 'node-gd';
