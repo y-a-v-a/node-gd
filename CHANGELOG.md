@@ -5,9 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# Unreleased
-
-This will be released as 5.0.0.
+# 5.0.0 - 2026-11-10 (current)
 
 ### Breaking
 - Promises returned by node-gd are rejected with an `Error` instead of a string (issue #50). The message is the string that was used before, so use `error.message`. This applies to opening and reading files (`gd.openPng()`, `gd.createFromPng()`, `gd.openFile()` and the other formats), saving files (`gd.Image#png()`, `gd.Image#file()` and the other formats) and `gd.GifAnim#end()`.
@@ -25,7 +23,7 @@ This will be released as 5.0.0.
 - Animated GIFs made with `gd.GifAnim` from true color images showing wrong colors, mostly black (issue #85). libgd converts each true color frame to its own palette but only writes it with a local color map, so true color frames now use a local color map by default. Pass `localColorMap: 0` to get the previous behavior.
 - Node.js crashing with a segmentation fault when libgd can't encode an image, for example `webpPtr()`, `avifPtr()` or `heifPtr()` on a palette image, or `heifPtr()` without a HEIF encoder. The `*Ptr()` methods now throw an `Error` with the message "Cannot encode image in this format", and the `save*()` methods reject with it.
 
-# 4.1.0 - 2026-11-10 (current)
+# 4.1.0 - 2026-11-10
 
 ### Added
 - Prebuilt binaries for Linux arm64, and for Linux x64 and arm64 with musl (Alpine). The musl binaries are built on Alpine 3.24 and need its `libgd` package.
