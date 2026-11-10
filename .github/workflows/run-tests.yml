@@ -41,5 +41,7 @@ jobs:
           for feature in heif avif tiff webp jpeg png16 freetype fontconfig xpm; do
             echo "$feature: $(./util.sh $feature)"
           done
+          dpkg-query -W -f='${Package} ${Version}\n' 'libheif*'
+          ls /usr/lib/*/libheif/plugins 2>/dev/null || echo "no libheif plugin directory"
       - name: Build and test
-        run: npm ci && npm run rebuild && npm test
+        run: npm ci && npm run rebuild && npx mocha --reporter dot --ui bdd --file ./test/main.test.mjs
