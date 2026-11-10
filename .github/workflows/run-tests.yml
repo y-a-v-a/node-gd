@@ -41,5 +41,11 @@ jobs:
           for feature in heif avif tiff webp jpeg png16 freetype fontconfig xpm; do
             echo "$feature: $(./util.sh $feature)"
           done
+      - name: Backtrace of reading HEIF
+        run: |
+          npm ci && npm run rebuild
+          sudo apt-get -y install gdb
+          gdb -batch -ex run -ex bt --args node -e "import('./index.js').then(async ({ default: gd }) => { const img = await gd.createFromHeif('test/fixtures/input.heif'); console.log('async ok', img.width) })" || true
+          gdb -batch -ex run -ex bt --args node -e "import('./index.js').then(({ default: gd }) => { const img = gd.createFromHeifPtr(require('fs').readFileSync('test/fixtures/input.heif')); console.log('sync ok', img && img.width) })" || true
       - name: Build and test
         run: npm ci && npm run rebuild && npm test
