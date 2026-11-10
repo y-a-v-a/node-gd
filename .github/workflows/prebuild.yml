@@ -9,68 +9,68 @@ on:
     types: [published]
 
 jobs:
+  # Linux builds run in a container started with docker run instead of a job
+  # container, because JavaScript actions don't run in Alpine containers on
+  # arm64 runners (actions/runner#801).
   prebuild-linux:
-    runs-on: ubuntu-latest
-    container: node:${{ matrix.node-version }}-bookworm
+    name: prebuild-linux (${{ matrix.target.libc }}, ${{ matrix.target.arch }}, ${{ matrix.node-version }})
+    runs-on: ${{ matrix.target.runner }}
 
     strategy:
+      fail-fast: false
       matrix:
         node-version: [22, 24]
-        architecture: [x64]
+        target:
+          - { libc: glibc, arch: x64, runner: ubuntu-latest, image: bookworm }
+          - { libc: glibc, arch: arm64, runner: ubuntu-26.04-arm, image: bookworm }
+          - { libc: musl, arch: x64, runner: ubuntu-latest, image: alpine }
+          - { libc: musl, arch: arm64, runner: ubuntu-26.04-arm, image: alpine }
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install system dependencies (Debian)
+      - name: Build, test and generate prebuilds
         run: |
-          apt-get update
-          apt-get install -y build-essential pkg-config libgd-dev
-          # Install optional dependencies for full feature set
-          apt-get install -y libheif-dev libavif-dev libtiff-dev libwebp-dev \
-            libfontconfig1-dev libfreetype6-dev libpng-dev libjpeg-dev \
-            libaom-dev libdav1d-dev
-
-      - name: Cache npm dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-${{ matrix.node-version }}-
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build and test
-        run: |
-          npm run rebuild
-          npm test
-
-      - name: Generate prebuilds
-        run: |
-          npx prebuildify --napi --strip
+          docker run --rm -v "$PWD:/work" -w /work \
+            node:${{ matrix.node-version }}-${{ matrix.target.image }} \
+            sh .github/scripts/build-linux.sh
 
       - name: Upload prebuilds
         uses: actions/upload-artifact@v4
         with:
-          name: prebuilds-debian-${{ matrix.node-version }}-${{ matrix.architecture }}
+          name: prebuilds-linux-${{ matrix.target.libc }}-${{ matrix.target.arch }}-${{ matrix.node-version }}
           path: prebuilds/
           retention-days: 30
+          if-no-files-found: error
 
-      - name: Verify prebuild works
-        env:
-          PREBUILDS_ONLY: 1
+  test-package:
+    name: test-package (${{ matrix.target.libc }}, ${{ matrix.target.arch }})
+    needs: prebuild-linux
+    runs-on: ${{ matrix.target.runner }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - { libc: glibc, arch: x64, runner: ubuntu-latest, image: 'node:24-bookworm-slim' }
+          - { libc: glibc, arch: arm64, runner: ubuntu-26.04-arm, image: 'node:24-bookworm-slim' }
+          - { libc: musl, arch: x64, runner: ubuntu-latest, image: 'node:24-alpine' }
+          - { libc: musl, arch: arm64, runner: ubuntu-26.04-arm, image: 'node:24-alpine' }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Linux prebuilds
+        uses: actions/download-artifact@v4
+        with:
+          path: prebuilds
+          pattern: prebuilds-linux-*
+          merge-multiple: true
+
+      - name: Install the package and load the prebuild
         run: |
-          # Test that the prebuild can be loaded
-          node -e "
-            import('./index.js').then(({ default: gd }) => {
-              console.log('Version:', gd.getGDVersion());
-              console.log('Prebuild loaded successfully');
-            }).catch((error) => {
-              console.error(error);
-              process.exit(1);
-            });
-          "
+          docker run --rm -v "$PWD:/work" -w /work ${{ matrix.target.image }} \
+            sh .github/scripts/test-package.sh
 
   prebuild-macos:
     strategy:
@@ -143,21 +143,11 @@ jobs:
       - name: Verify prebuild works
         env:
           PREBUILDS_ONLY: 1
-        run: |
-          # Test that the prebuild can be loaded
-          node -e "
-            import('./index.js').then(({ default: gd }) => {
-              console.log('Version:', gd.getGDVersion());
-              console.log('Prebuild loaded successfully');
-            }).catch((error) => {
-              console.error(error);
-              process.exit(1);
-            });
-          "
+        run: node .github/scripts/verify-prebuild.mjs .
 
   # Job to collect all prebuilds and prepare for release
   collect-prebuilds:
-    needs: [prebuild-linux, prebuild-macos]
+    needs: [prebuild-linux, test-package, prebuild-macos]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
     permissions:
@@ -201,12 +191,14 @@ jobs:
         run: |
           mkdir -p prebuilds
           # Keep the <platform>-<arch> directories node-gyp-build looks for,
-          # every prebuild file is named node-gd.node
+          # Linux prebuild files carry the libc in their name
           cp -R all-prebuilds/. prebuilds/
           find prebuilds -type f
-          for platform in linux-x64 darwin-x64 darwin-arm64; do
-            if [ ! -f "prebuilds/$platform/node-gd.node" ]; then
-              echo "Missing prebuild for $platform"
+          for file in linux-x64/node-gd.glibc.node linux-x64/node-gd.musl.node \
+            linux-arm64/node-gd.glibc.node linux-arm64/node-gd.musl.node \
+            darwin-x64/node-gd.node darwin-arm64/node-gd.node; do
+            if [ ! -f "prebuilds/$file" ]; then
+              echo "Missing prebuild $file"
               exit 1
             fi
           done

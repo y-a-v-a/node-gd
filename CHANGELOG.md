@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# Unreleased
+
+### Added
+- Prebuilt binaries for Linux arm64, and for Linux x64 and arm64 with musl (Alpine). The musl binaries are built on Alpine 3.24 and need its `libgd` package.
+
+### Changed
+- Linux prebuilt binaries are named after their C library, `node-gd.glibc.node` and `node-gd.musl.node`, so `node-gyp-build` loads the right one.
+- The release workflow installs the npm package on Debian and Alpine, x64 and arm64, with only the libgd runtime library and no build tools, and only publishes when that works.
+
 # 4.0.1 - 2026-11-09 (current)
 
 ### Fixed
