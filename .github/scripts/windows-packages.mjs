@@ -29,7 +29,7 @@ root.optionalDependencies = {};
 for (const { name, arch } of targets) {
   const source = path.join(prebuildsDir, name, 'node-gd.node');
   const packageDir = path.join(outDir, name);
-  const packageName = `@node-gd/${name}`;
+  const packageName = `@y-a-v-a/node-gd-${name}`;
   fs.mkdirSync(packageDir, { recursive: true });
   fs.copyFileSync(source, path.join(packageDir, 'node-gd.node'));
   fs.copyFileSync(path.join(rootDir, 'LICENSE'), path.join(packageDir, 'LICENSE'));

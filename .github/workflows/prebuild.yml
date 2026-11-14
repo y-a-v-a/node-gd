@@ -232,9 +232,9 @@ jobs:
           npm init -y | Out-Null
           npm install (Get-Item "$env:RUNNER_TEMP\node-gd-[0-9]*.tgz").FullName
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          Get-ChildItem -Name node_modules\@node-gd
+          Get-ChildItem -Name node_modules\@y-a-v-a
           $other = if ('${{ matrix.target.arch }}' -eq 'x64') { 'arm64' } else { 'x64' }
-          if (Test-Path "node_modules\@node-gd\win32-$other") { Write-Error "@node-gd/win32-$other is installed on ${{ matrix.target.arch }}"; exit 1 }
+          if (Test-Path "node_modules\@y-a-v-a\node-gd-win32-$other") { Write-Error "@y-a-v-a/node-gd-win32-$other is installed on ${{ matrix.target.arch }}"; exit 1 }
           if (Test-Path "node_modules\node-gd\prebuilds\win32-${{ matrix.target.arch }}") { Write-Error "The node-gd package contains a Windows prebuild"; exit 1 }
           node "$env:GITHUB_WORKSPACE\.github\scripts\verify-prebuild.mjs" "$app\node_modules\node-gd"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

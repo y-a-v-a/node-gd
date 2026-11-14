@@ -43,7 +43,7 @@ Short, consolidated instructions for working on this repo.
 - Linux prebuilds are built for glibc (Debian bookworm) and musl (Alpine) on x64 and arm64 by `.github/scripts/build-linux.sh`, in containers started with `docker run`. JavaScript actions don't run in Alpine containers on arm64 runners, so don't move these builds to a job `container:`.
 - Windows prebuilds are built by `prebuild-windows`. `.github/actions/libgd-windows` builds libgd with vcpkg (pinned to a release tag) as static libraries and caches the vcpkg binaries, keyed on a hash of the action file. `util-win.mjs` reads `gdlib.pc` and the `.pc` files it requires, and gives `binding.gyp` the include directory, the libraries and the feature flags. The libraries are linked into `node-gd.node`, so the Windows prebuild needs no DLLs.
 - Linux prebuild files are tagged with their libc (`node-gd.glibc.node`, `node-gd.musl.node`), macOS and Windows files are `node-gd.node`.
-- The Windows binaries (11 to 16 MB) are not in the node-gd package. `collect-prebuilds` moves them into the platform packages `@node-gd/win32-x64` and `@node-gd/win32-arm64` with `.github/scripts/windows-packages.mjs`, publishes those first, and publishes node-gd with them as `optionalDependencies` of the same version. The repo `package.json` doesn't list them, so `npm ci` works before they are published. `lib/bindings.js` loads the platform package on Windows when `node-gyp-build` finds no binary.
+- The Windows binaries (11 to 16 MB) are not in the node-gd package. `collect-prebuilds` moves them into the platform packages `@y-a-v-a/node-gd-win32-x64` and `@y-a-v-a/node-gd-win32-arm64` with `.github/scripts/windows-packages.mjs`, publishes those first, and publishes node-gd with them as `optionalDependencies` of the same version. The repo `package.json` doesn't list them, so `npm ci` works before they are published. `lib/bindings.js` loads the platform package on Windows when `node-gyp-build` finds no binary.
 - `test-package-windows` creates the platform packages as local tarballs and installs the packed package with them on a Windows runner without vcpkg. It checks that only the platform package for the runner is installed and that node-gd loads its binary.
 - The install script runs `lib/install-check.js`, which loads the addon the same way node-gd does, and builds from source with `node-gyp rebuild` when that fails or `npm_config_build_from_source` is `true`.
 - The `test-package` job installs the packed package on systems with only the libgd runtime library (`.github/scripts/test-package.sh`). `.github/scripts/verify-prebuild.mjs` checks that the prebuild, not `build/Release`, is loaded and works.
@@ -57,7 +57,7 @@ Short, consolidated instructions for working on this repo.
 - Verify `prebuilds/` exists in the npm tarball (`npm pack` + `tar -tf`).
 - Publishing to npm uses trusted publishing (OIDC) from the `collect-prebuilds` job in `prebuild.yml`. There is no npm token.
 - The release tag must be `v` plus the `package.json` version, for example `v4.0.0`.
-- The trusted publisher on npmjs.com is configured for `y-a-v-a/node-gd` and the workflow file `prebuild.yml`, for `node-gd`, `@node-gd/win32-x64` and `@node-gd/win32-arm64`. Renaming the file breaks publishing.
+- The trusted publisher on npmjs.com is configured for `y-a-v-a/node-gd` and the workflow file `prebuild.yml`, for `node-gd`, `@y-a-v-a/node-gd-win32-x64` and `@y-a-v-a/node-gd-win32-arm64`. Renaming the file breaks publishing.
 
 ## Development notes
 - **Image types**:

@@ -6,7 +6,7 @@ const packageDir = path.resolve(process.argv[2] ?? '.');
 const libc = process.argv[3];
 
 const require = createRequire(path.join(packageDir, 'package.json'));
-const platformPackage = `@node-gd/${process.platform}-${process.arch}/package.json`;
+const platformPackage = `@y-a-v-a/node-gd-${process.platform}-${process.arch}/package.json`;
 let expectedDir = path.join(packageDir, 'prebuilds');
 try {
   expectedDir = path.dirname(require.resolve(platformPackage));
