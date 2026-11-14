@@ -47,3 +47,29 @@ jobs:
           done
       - name: Build and test
         run: npm ci && npm run rebuild && npm test -- --grep "HEIF format tests|save it as heif|open a heif file|images TIFF|Handling TIFF files" --invert
+
+  # Windows has no system libgd, so libgd and its libraries are built with vcpkg
+  # as static libraries and linked into node-gd.node (issues #56 and #86).
+  windows:
+    runs-on: ${{ matrix.runner }}
+    name: Windows ${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { arch: x64, runner: windows-latest }
+          - { arch: arm64, runner: windows-11-arm }
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          architecture: ${{ matrix.arch }}
+      - uses: ./.github/actions/libgd-windows
+        with:
+          arch: ${{ matrix.arch }}
+      - name: Build and test
+        run: npm ci && npm run rebuild && npm test
+      - name: Encode and decode AVIF
+        run: node .github/scripts/avif-roundtrip.mjs .

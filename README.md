@@ -14,11 +14,12 @@ For most users, installation is now much simpler thanks to prebuilt binaries:
 $ npm install node-gd
 ```
 
-The npm package includes precompiled binaries for macOS x64 and arm64, and for Linux x64 and arm64 with glibc (Debian, Ubuntu and most other distributions) or musl (Alpine). No build tools are needed on these platforms. The binaries do use the libgd shared library of your system, so install libgd first:
+The npm package includes precompiled binaries for macOS x64 and arm64, for Linux x64 and arm64 with glibc (Debian, Ubuntu and most other distributions) or musl (Alpine), and for Windows x64 and arm64. No build tools are needed on these platforms. The macOS and Linux binaries use the libgd shared library of your system, so install libgd first:
 
 - macOS: `brew install gd`. The binaries look for libgd in Homebrew's default location, `/opt/homebrew` on Apple Silicon and `/usr/local` on Intel.
 - Debian/Ubuntu: `sudo apt-get install libgd3`. The glibc binaries are built on Debian 12 (bookworm). On Ubuntu 24.04, reading HEIF files crashes Node.js once the HEVC plugins of libheif (`libheif-plugin-libde265`, `libheif-plugin-x265`) are installed. This is a bug in libgd 2.3.3 ([libgd/libgd#788](https://github.com/libgd/libgd/issues/788)) that node-gd can't work around. Without those plugins, reading and writing HEIF fails with an error. Ubuntu 24.04 also can't read TIFF files: libgd 2.3.3 tells libtiff 4.5.1 the file is empty, and libtiff rejects it. Reading fails with an error. This is fixed in libgd, but not in a released version yet.
 - Alpine: `apk add libgd`. The musl binaries are built on Alpine 3.24. Alpine's libgd doesn't support HEIF, so `gd.GD_HEIF` is not set there.
+- Windows: nothing to install. The Windows binaries contain libgd 2.3.3 and its image libraries, built with [vcpkg](https://vcpkg.io). They are in the separate packages `@y-a-v-a/node-gd-win32-x64` and `@y-a-v-a/node-gd-win32-arm64`, which node-gd lists as optional dependencies. Your package manager installs the one for your system, so don't install with `--omit=optional` or `--no-optional`. It supports PNG, JPEG, GIF, BMP, WBMP, TIFF, WebP and AVIF, and text with FreeType. It is built with Fontconfig, but finding fonts by name with Fontconfig (`use_fontconfig` in `stringFTEx()`) is not tested on Windows. It doesn't support HEIF or XPM, so `gd.GD_HEIF` and `gd.GD_XPM` are not set.
 
 ### Manual Installation
 
@@ -50,6 +51,18 @@ $ sudo yum install gd-devel
 $ npm install node-gd
 ```
 
+#### On Windows
+
+Install the Visual Studio C++ build tools (node-gyp lists them in [its Windows instructions](https://github.com/nodejs/node-gyp#on-windows)) and [vcpkg](https://learn.microsoft.com/vcpkg/get_started/get-started). Build libgd as a static library with vcpkg and set `VCPKG_ROOT` to the vcpkg directory:
+
+```powershell
+> vcpkg install "libgd[core,png,jpeg,tiff,webp,freetype,fontconfig,avif-aom]:x64-windows-static"
+> $env:VCPKG_ROOT = "C:\path\to\vcpkg"
+> npm install node-gd
+```
+
+On arm64, use the triplet `arm64-windows-static`. The build looks for libgd in `%VCPKG_ROOT%\installed\<arch>-windows-static`. To use another directory, set `GDLIB_PREFIX` to a directory with `include\gd.h` and `lib\pkgconfig\gdlib.pc`. Only the static triplets work, because node-gd links libgd and its libraries into `node-gd.node`.
+
 #### On Mac OS/X
 
 Using Homebrew
@@ -71,7 +84,7 @@ $ npm install node-gd
 - **✅ macOS** - x64 and arm64 (Apple Silicon) - prebuilt binaries available
 - **✅ Linux** - x64 and arm64, glibc and musl (Alpine) - prebuilt binaries available
 - **✅ FreeBSD** - manual build only
-- **❌ Windows** - Not supported
+- **✅ Windows** - x64 and arm64 - prebuilt binaries available
 
 ### Build from Source
 

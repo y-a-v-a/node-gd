@@ -5,7 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# 5.0.0 - 2026-11-10 (current)
+# Unreleased
+
+### Added
+- Windows support (issues #56 and #86). Prebuilt binaries for Windows x64 and arm64 contain libgd 2.3.3 and its image libraries, so nothing else needs to be installed. They are published as the packages `@y-a-v-a/node-gd-win32-x64` and `@y-a-v-a/node-gd-win32-arm64`, which node-gd lists as optional dependencies, so only Windows installs download them. It supports PNG, JPEG, GIF, BMP, WBMP, TIFF, WebP, AVIF and FreeType, but not HEIF or XPM. Building from source on Windows uses libgd from vcpkg, see the README.
+
+### Changed
+- The install script loads the addon with `lib/install-check.js` instead of `node-gyp-build`, so it also finds the Windows platform packages. It still builds from source when no binary loads or `npm_config_build_from_source` is `true`.
+
+### Fixed
+- The `stringFTEx()` font path tests comparing with a path that only matched on macOS and Linux.
+
+# 5.0.0 - 2026-11-10
 
 ### Breaking
 - Promises returned by node-gd are rejected with an `Error` instead of a string (issue #50). The message is the string that was used before, so use `error.message`. This applies to opening and reading files (`gd.openPng()`, `gd.createFromPng()`, `gd.openFile()` and the other formats), saving files (`gd.Image#png()`, `gd.Image#file()` and the other formats) and `gd.GifAnim#end()`.

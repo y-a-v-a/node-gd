@@ -141,10 +141,7 @@ describe('Creating images containing text', function () {
       extras
     );
 
-    assert.equal(
-      extras.fontpath,
-      process.cwd() + '/test/fixtures/FreeSans.ttf'
-    );
+    assert.equal(extras.fontpath, fontFile);
     assert.equal(
       extras.xshow,
       '72 53 21 21 53 25 72 53 33 21 -424 68 53 49 25 72 53 20 33 53 25 54 53 33 53'
@@ -275,10 +272,7 @@ describe('Creating images containing text', function () {
       extras
     );
 
-    assert.equal(
-      extras.fontpath,
-      process.cwd() + '/test/fixtures/FreeSans.ttf'
-    );
+    assert.equal(extras.fontpath, fontFile);
 
     await image.savePng(t, 0);
     image.destroy();

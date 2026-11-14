@@ -6,19 +6,24 @@ const packageDir = path.resolve(process.argv[2] ?? '.');
 const libc = process.argv[3];
 
 const require = createRequire(path.join(packageDir, 'package.json'));
-const binary = require('node-gyp-build').resolve(packageDir);
-console.log('Binary:', path.relative(packageDir, binary));
+const platformPackage = `@y-a-v-a/node-gd-${process.platform}-${process.arch}/package.json`;
+let expectedDir = path.join(packageDir, 'prebuilds');
+try {
+  expectedDir = path.dirname(require.resolve(platformPackage));
+} catch {}
 
-if (!binary.startsWith(path.join(packageDir, 'prebuilds') + path.sep)) {
-  console.error('The loaded binary is not a prebuilt binary');
+const { default: gd } = await import(pathToFileURL(path.join(packageDir, 'index.js')).href);
+
+const binaries = Object.keys(require.cache).filter((file) => file.endsWith('.node'));
+console.log('Binary:', binaries.join(', '));
+if (binaries.length !== 1 || !binaries[0].startsWith(expectedDir + path.sep)) {
+  console.error(`The loaded binary is not the prebuilt binary in ${expectedDir}`);
   process.exit(1);
 }
-if (libc && !binary.endsWith(`.${libc}.node`)) {
+if (libc && !binaries[0].endsWith(`.${libc}.node`)) {
   console.error(`The loaded binary is not the ${libc} build`);
   process.exit(1);
 }
-
-const { default: gd } = await import(pathToFileURL(path.join(packageDir, 'index.js')).href);
 console.log('libgd:', gd.getGDVersion());
 console.log(
   'Features:',

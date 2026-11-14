@@ -1,0 +1,46 @@
+name: libgd for Windows
+description: Build libgd and its libraries as static libraries with vcpkg and set VCPKG_ROOT for the node-gd build
+inputs:
+  arch:
+    description: Target architecture, x64 or arm64
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Set up vcpkg
+      shell: pwsh
+      env:
+        VCPKG_VERSION: '2026.10.16'
+      run: |
+        $root = "$env:RUNNER_TEMP\vcpkg"
+        git clone --quiet --depth 1 --branch $env:VCPKG_VERSION https://github.com/microsoft/vcpkg.git $root
+        & "$root\bootstrap-vcpkg.bat" -disableMetrics
+        New-Item -ItemType Directory -Force "$env:RUNNER_TEMP\vcpkg-cache" | Out-Null
+        "VCPKG_ROOT=$root" >> $env:GITHUB_ENV
+        "VCPKG_BINARY_SOURCES=clear;files,$env:RUNNER_TEMP\vcpkg-cache,readwrite" >> $env:GITHUB_ENV
+    - name: Restore vcpkg binary cache
+      id: restore
+      uses: actions/cache/restore@v4
+      with:
+        path: ${{ runner.temp }}\vcpkg-cache
+        key: vcpkg-${{ inputs.arch }}-windows-static-${{ hashFiles('.github/actions/libgd-windows/action.yml') }}
+    - name: Build libgd with vcpkg
+      shell: pwsh
+      run: |
+        & "$env:VCPKG_ROOT\vcpkg.exe" install "libgd[core,png,jpeg,tiff,webp,freetype,fontconfig,avif-aom]:${{ inputs.arch }}-windows-static" --clean-after-build
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    - name: Save vcpkg binary cache
+      if: steps.restore.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ runner.temp }}\vcpkg-cache
+        key: ${{ steps.restore.outputs.cache-primary-key }}
+    - name: Show detected libgd features
+      shell: pwsh
+      run: |
+        Get-Content "$env:VCPKG_ROOT\installed\${{ inputs.arch }}-windows-static\lib\pkgconfig\gdlib.pc"
+        Get-ChildItem "$env:VCPKG_ROOT\installed\${{ inputs.arch }}-windows-static\lib\*.lib" | ForEach-Object Name
+        node util-win.mjs ${{ inputs.arch }} libraries
+        foreach ($feature in 'heif','avif','tiff','webp','jpeg','png16','freetype','fontconfig','xpm') {
+          "${feature}: $(node util-win.mjs ${{ inputs.arch }} feature $feature)"
+        }

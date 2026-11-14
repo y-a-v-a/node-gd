@@ -145,9 +145,105 @@ jobs:
           PREBUILDS_ONLY: 1
         run: node .github/scripts/verify-prebuild.mjs .
 
+  # Windows has no system libgd, so the Windows prebuilds link libgd and its
+  # libraries statically from vcpkg and need nothing else at runtime.
+  prebuild-windows:
+    name: prebuild-windows (${{ matrix.target.arch }}, ${{ matrix.node-version }})
+    runs-on: ${{ matrix.target.runner }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22, 24]
+        target:
+          - { arch: x64, runner: windows-latest }
+          - { arch: arm64, runner: windows-11-arm }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          architecture: ${{ matrix.target.arch }}
+
+      - uses: ./.github/actions/libgd-windows
+        with:
+          arch: ${{ matrix.target.arch }}
+
+      - name: Build and test
+        run: npm ci && npm run rebuild && npm test
+
+      - name: Generate prebuilds
+        run: npx prebuildify --napi
+
+      - name: Upload prebuilds
+        uses: actions/upload-artifact@v4
+        with:
+          name: prebuilds-windows-${{ matrix.target.arch }}-${{ matrix.node-version }}
+          path: prebuilds/
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Verify prebuild works
+        env:
+          PREBUILDS_ONLY: 1
+        run: node .github/scripts/verify-prebuild.mjs .
+
+  test-package-windows:
+    name: test-package-windows (${{ matrix.target.arch }})
+    needs: prebuild-windows
+    runs-on: ${{ matrix.target.runner }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - { arch: x64, runner: windows-latest }
+          - { arch: arm64, runner: windows-11-arm }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          architecture: ${{ matrix.target.arch }}
+
+      - name: Download Windows prebuilds
+        uses: actions/download-artifact@v4
+        with:
+          path: prebuilds
+          pattern: prebuilds-windows-*
+          merge-multiple: true
+
+      - name: Install the package and load the prebuild from its platform package
+        shell: pwsh
+        run: |
+          Get-ChildItem -Recurse -File prebuilds | ForEach-Object FullName
+          node .github/scripts/windows-packages.mjs prebuilds "$env:RUNNER_TEMP\platform-packages" tarball
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm pack --pack-destination $env:RUNNER_TEMP
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $app = New-Item -ItemType Directory "$env:RUNNER_TEMP\app"
+          Set-Location $app
+          npm init -y | Out-Null
+          npm install (Get-Item "$env:RUNNER_TEMP\node-gd-[0-9]*.tgz").FullName
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Get-ChildItem -Name node_modules\@y-a-v-a
+          $other = if ('${{ matrix.target.arch }}' -eq 'x64') { 'arm64' } else { 'x64' }
+          if (Test-Path "node_modules\@y-a-v-a\node-gd-win32-$other") { Write-Error "@y-a-v-a/node-gd-win32-$other is installed on ${{ matrix.target.arch }}"; exit 1 }
+          if (Test-Path "node_modules\node-gd\prebuilds\win32-${{ matrix.target.arch }}") { Write-Error "The node-gd package contains a Windows prebuild"; exit 1 }
+          node "$env:GITHUB_WORKSPACE\.github\scripts\verify-prebuild.mjs" "$app\node_modules\node-gd"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node "$env:GITHUB_WORKSPACE\.github\scripts\avif-roundtrip.mjs" "$app\node_modules\node-gd"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
   # Job to collect all prebuilds and prepare for release
   collect-prebuilds:
-    needs: [prebuild-linux, test-package, prebuild-macos]
+    needs: [prebuild-linux, test-package, prebuild-macos, prebuild-windows, test-package-windows]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
     permissions:
@@ -196,7 +292,8 @@ jobs:
           find prebuilds -type f
           for file in linux-x64/node-gd.glibc.node linux-x64/node-gd.musl.node \
             linux-arm64/node-gd.glibc.node linux-arm64/node-gd.musl.node \
-            darwin-x64/node-gd.node darwin-arm64/node-gd.node; do
+            darwin-x64/node-gd.node darwin-arm64/node-gd.node \
+            win32-x64/node-gd.node win32-arm64/node-gd.node; do
             if [ ! -f "prebuilds/$file" ]; then
               echo "Missing prebuild $file"
               exit 1
@@ -214,5 +311,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish to npm (includes prebuilds/)
+      # The Windows binaries are too large to include in node-gd for everyone, so
+      # they are published as platform packages and added to node-gd as optional
+      # dependencies. They must be on npm before node-gd.
+      - name: Create Windows platform packages
+        run: node .github/scripts/windows-packages.mjs prebuilds platform-packages
+
+      - name: Publish Windows platform packages to npm
+        run: |
+          for dir in platform-packages/*/; do
+            spec=$(node -p "const p = require('./$dir/package.json'); p.name + '@' + p.version")
+            if npm view "$spec" version >/dev/null 2>&1; then
+              echo "$spec is already published"
+            else
+              npm publish --access public "./$dir"
+            fi
+          done
+
+      - name: Publish to npm (includes the macOS and Linux prebuilds)
         run: npm publish --access public
