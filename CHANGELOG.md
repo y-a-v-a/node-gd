@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# Unreleased
+# 5.1.0 - 2026-11-14 (current)
 
 ### Added
 - Windows support (issues #56 and #86). Prebuilt binaries for Windows x64 and arm64 contain libgd 2.3.3 and its image libraries, so nothing else needs to be installed. They are published as the packages `@y-a-v-a/node-gd-win32-x64` and `@y-a-v-a/node-gd-win32-arm64`, which node-gd lists as optional dependencies, so only Windows installs download them. It supports PNG, JPEG, GIF, BMP, WBMP, TIFF, WebP, AVIF and FreeType, but not HEIF or XPM. Building from source on Windows uses libgd from vcpkg, see the README.
