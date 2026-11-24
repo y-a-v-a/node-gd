@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { assert } from 'chai';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 import dirname from './dirname.mjs';
 
@@ -20,7 +21,7 @@ function runScenario(source) {
       env: {
         ...process.env,
         UV_THREADPOOL_SIZE: '1',
-        NODE_GD_ROOT: root,
+        NODE_GD_URL: pathToFileURL(path.join(root, 'index.js')).href,
         NODE_GD_TARGET: target,
       },
       encoding: 'utf8',
@@ -32,7 +33,7 @@ function runScenario(source) {
 describe('async image lifetime', function () {
   it('save worker racing destroy() does not crash the process', function () {
     const result = runScenario(`
-      const { default: gd } = await import(process.env.NODE_GD_ROOT + '/index.js');
+      const { default: gd } = await import(process.env.NODE_GD_URL);
       const im = await gd.createTrueColor(64, 64);
       const p = im.png(process.env.NODE_GD_TARGET + '/race-1.png');
       im.destroy();
@@ -43,7 +44,7 @@ describe('async image lifetime', function () {
 
   it('multiple pending workers racing destroy() do not crash', function () {
     const result = runScenario(`
-      const { default: gd } = await import(process.env.NODE_GD_ROOT + '/index.js');
+      const { default: gd } = await import(process.env.NODE_GD_URL);
       const im = await gd.createTrueColor(128, 128);
       const t = process.env.NODE_GD_TARGET;
       const p1 = im.png(t + '/race-2a.png');
@@ -57,7 +58,7 @@ describe('async image lifetime', function () {
 
   it('destroy() blocks new operations while workers are pending', function () {
     const result = runScenario(`
-      const { default: gd } = await import(process.env.NODE_GD_ROOT + '/index.js');
+      const { default: gd } = await import(process.env.NODE_GD_URL);
       const im = await gd.createTrueColor(64, 64);
       const p = im.png(process.env.NODE_GD_TARGET + '/race-3.png');
       im.destroy();
@@ -76,7 +77,7 @@ describe('async image lifetime', function () {
 
   it('pending writes still complete after destroy()', function () {
     const result = runScenario(`
-      const { default: gd } = await import(process.env.NODE_GD_ROOT + '/index.js');
+      const { default: gd } = await import(process.env.NODE_GD_URL);
       import { statSync } from 'node:fs';
       const file = process.env.NODE_GD_TARGET + '/race-4.png';
       const im = await gd.createTrueColor(64, 64);
