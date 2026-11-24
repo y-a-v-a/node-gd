@@ -450,22 +450,35 @@ private:
 class FileWorker : public AsyncWorker
 {
 public:
-  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  static Value DoWork(const CallbackInfo &info, Gd::Image *owner)
   {
     REQ_STR_ARG(0, path, "Argument should be a path to the image file to load.");
 
     FileWorker *worker = new FileWorker(info.Env(), "FileWorkerResource");
 
     worker->path = path;
-    worker->_gdImage = &gdImage;
+    worker->BindImage(info, owner);
     worker->Queue();
     return worker->_deferred.Promise();
   }
 
 protected:
+  /**
+   * Keeps the owning Image alive on the JS heap and registers this worker
+   * so the image's gdImagePtr is only released after Execute() completed.
+   * Called on the main thread while Queue() has not started yet.
+   */
+  void BindImage(const CallbackInfo &info, Gd::Image *owner)
+  {
+    _owner = owner;
+    _ownerRef = Napi::Persistent(info.This().As<Napi::Object>());
+    _gdImage = owner->getGdImagePtr();
+    owner->WorkerStarted();
+  }
+
   void Execute() override
   {
-    _success = gdImageFile(*_gdImage, path.c_str());
+    _success = gdImageFile(_gdImage, path.c_str());
 
     if (!_success)
     {
@@ -477,20 +490,32 @@ protected:
   {
     // resolve Promise with boolean
     _deferred.Resolve(Napi::Boolean::New(Env(), _success));
+    Done();
   }
 
   virtual void OnError(const Napi::Error &e) override
   {
     _deferred.Reject(e.Value());
+    Done();
   }
 
 private:
+  void Done()
+  {
+    _ownerRef.Reset();
+    _owner->WorkerDone();
+  }
+
   FileWorker(napi_env env, const char *resource_name)
       : AsyncWorker(env, resource_name), _deferred(Promise::Deferred::New(env))
   {
   }
 
-  gdImagePtr *_gdImage;
+  gdImagePtr _gdImage;
+
+  Gd::Image *_owner;
+
+  Napi::ObjectReference _ownerRef;
 
   Promise::Deferred _deferred;
 
@@ -623,17 +648,42 @@ public:
   }
 
 protected:
+  /**
+   * Keeps the owning Image alive on the JS heap and registers this worker
+   * so the image's gdImagePtr is only released after Execute() completed.
+   * Called on the main thread while Queue() has not started yet.
+   */
+  void BindImage(const CallbackInfo &info, Gd::Image *owner)
+  {
+    _owner = owner;
+    _ownerRef = Napi::Persistent(info.This().As<Napi::Object>());
+    _gdImage = owner->getGdImagePtr();
+    owner->WorkerStarted();
+  }
+
   virtual void OnOK() override
   {
     _deferred.Resolve(Napi::Boolean::New(Env(), true));
+    Done();
   }
 
   virtual void OnError(const Napi::Error &e) override
   {
     _deferred.Reject(e.Value());
+    Done();
   }
 
-  gdImagePtr *_gdImage;
+  void Done()
+  {
+    _ownerRef.Reset();
+    _owner->WorkerDone();
+  }
+
+  gdImagePtr _gdImage;
+
+  Gd::Image *_owner;
+
+  Napi::ObjectReference _ownerRef;
 
   int quality;
 
@@ -649,7 +699,7 @@ protected:
 class SaveJpegWorker : public SaveWorker
 {
 public:
-  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  static Value DoWork(const CallbackInfo &info, Gd::Image *owner)
   {
     REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the JPEG.");
     OPT_INT_ARG(1, quality, -1);
@@ -659,7 +709,7 @@ public:
 
     worker->path = path;
     worker->quality = quality;
-    worker->_gdImage = &gdImage;
+    worker->BindImage(info, owner);
     worker->Queue();
     return worker->_deferred.Promise();
   }
@@ -672,7 +722,7 @@ protected:
     {
       return SetError("Cannot save JPEG file");
     }
-    gdImageJpeg(*_gdImage, out, quality);
+    gdImageJpeg(_gdImage, out, quality);
     fclose(out);
   }
 
@@ -686,7 +736,7 @@ private:
 class SaveGifWorker : public SaveWorker
 {
 public:
-  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  static Value DoWork(const CallbackInfo &info, Gd::Image *owner)
   {
     REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the Gif.");
 
@@ -694,7 +744,7 @@ public:
                                               "SaveGifWorkerResource");
 
     worker->path = path;
-    worker->_gdImage = &gdImage;
+    worker->BindImage(info, owner);
     worker->Queue();
     return worker->_deferred.Promise();
   }
@@ -707,7 +757,7 @@ protected:
     {
       return SetError("Cannot save GIF file");
     }
-    gdImageGif(*_gdImage, out);
+    gdImageGif(_gdImage, out);
     fclose(out);
   }
 
@@ -721,7 +771,7 @@ private:
 class SavePngWorker : public SaveWorker
 {
 public:
-  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  static Value DoWork(const CallbackInfo &info, Gd::Image *owner)
   {
     REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the PNG.");
     OPT_INT_ARG(1, level, -1);
@@ -731,7 +781,7 @@ public:
 
     worker->path = path;
     worker->level = level;
-    worker->_gdImage = &gdImage;
+    worker->BindImage(info, owner);
     worker->Queue();
     return worker->_deferred.Promise();
   }
@@ -744,7 +794,7 @@ protected:
     {
       return SetError("Cannot save PNG file");
     }
-    gdImagePngEx(*_gdImage, out, level);
+    gdImagePngEx(_gdImage, out, level);
     fclose(out);
   }
 
@@ -758,7 +808,7 @@ private:
 class SaveWBMPWorker : public SaveWorker
 {
 public:
-  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  static Value DoWork(const CallbackInfo &info, Gd::Image *owner)
   {
     REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the WBMP.");
     REQ_INT_ARG(1, foreground, "The index of the foreground color should be supplied.");
@@ -768,7 +818,7 @@ public:
 
     worker->path = path;
     worker->foreground = foreground;
-    worker->_gdImage = &gdImage;
+    worker->BindImage(info, owner);
     worker->Queue();
     return worker->_deferred.Promise();
   }
@@ -781,7 +831,7 @@ protected:
     {
       return SetError("Cannot save WBMP file");
     }
-    gdImageWBMP(*_gdImage, foreground, out);
+    gdImageWBMP(_gdImage, foreground, out);
     fclose(out);
   }
 
@@ -795,7 +845,7 @@ private:
 class SaveWebpWorker : public SaveWorker
 {
 public:
-  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  static Value DoWork(const CallbackInfo &info, Gd::Image *owner)
   {
     REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the Webp.");
     OPT_INT_ARG(1, level, -1);
@@ -805,7 +855,7 @@ public:
 
     worker->path = path;
     worker->level = level;
-    worker->_gdImage = &gdImage;
+    worker->BindImage(info, owner);
     worker->Queue();
     return worker->_deferred.Promise();
   }
@@ -818,7 +868,7 @@ protected:
     {
       return SetError("Cannot save WEBP file");
     }
-    gdImageWebpEx(*_gdImage, out, level);
+    gdImageWebpEx(_gdImage, out, level);
     fclose(out);
   }
 
@@ -832,7 +882,7 @@ private:
 class SaveBmpWorker : public SaveWorker
 {
 public:
-  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  static Value DoWork(const CallbackInfo &info, Gd::Image *owner)
   {
     REQ_ARGS(2, "destination file path and compression flag.");
     REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the BMP.");
@@ -843,7 +893,7 @@ public:
 
     worker->path = path;
     worker->compression = compression;
-    worker->_gdImage = &gdImage;
+    worker->BindImage(info, owner);
     worker->Queue();
     return worker->_deferred.Promise();
   }
@@ -856,7 +906,7 @@ protected:
     {
       return SetError("Cannot save BMP file");
     }
-    gdImageBmp(*_gdImage, out, compression);
+    gdImageBmp(_gdImage, out, compression);
     fclose(out);
   }
 
@@ -872,7 +922,7 @@ private:
 class SaveTiffWorker : public SaveWorker
 {
 public:
-  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  static Value DoWork(const CallbackInfo &info, Gd::Image *owner)
   {
     REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the TIFF.");
 
@@ -880,7 +930,7 @@ public:
                                                 "SaveTiffWorkerResource");
 
     worker->path = path;
-    worker->_gdImage = &gdImage;
+    worker->BindImage(info, owner);
     worker->Queue();
     return worker->_deferred.Promise();
   }
@@ -893,7 +943,7 @@ protected:
     {
       return SetError("Cannot save TIFF file");
     }
-    gdImageTiff(*_gdImage, out);
+    gdImageTiff(_gdImage, out);
     fclose(out);
   }
 
@@ -908,7 +958,7 @@ private:
 class SaveHeifWorker : public SaveWorker
 {
 public:
-  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  static Value DoWork(const CallbackInfo &info, Gd::Image *owner)
   {
     REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the HEIF.");
     OPT_INT_ARG(1, quality, -1);
@@ -919,7 +969,7 @@ public:
                                                 "SaveHeifWorkerResource");
 
     worker->path = path;
-    worker->_gdImage = &gdImage;
+    worker->BindImage(info, owner);
     worker->quality = quality;
     if (codec_param == 1)
     {
@@ -946,7 +996,7 @@ protected:
     {
       return SetError("Cannot save HEIF file");
     }
-    gdImageHeifEx(*_gdImage, out, quality, codec, chroma.c_str());
+    gdImageHeifEx(_gdImage, out, quality, codec, chroma.c_str());
     fclose(out);
   }
 
@@ -966,7 +1016,7 @@ private:
 class SaveAvifWorker : public SaveWorker
 {
 public:
-  static Value DoWork(const CallbackInfo &info, gdImagePtr &gdImage)
+  static Value DoWork(const CallbackInfo &info, Gd::Image *owner)
   {
     REQ_STR_ARG(0, path, "Argument should be a path and filename to the destination to save the AVIF.");
     OPT_INT_ARG(1, quality, -1);
@@ -976,7 +1026,7 @@ public:
                                                 "SaveAvifWorkerResource");
 
     worker->path = path;
-    worker->_gdImage = &gdImage;
+    worker->BindImage(info, owner);
     worker->quality = quality;
     worker->speed = speed;
     worker->Queue();
@@ -993,14 +1043,14 @@ protected:
     }
     
     // Check if image is valid
-    if (*_gdImage == nullptr)
+    if (_gdImage == nullptr)
     {
       fclose(out);
       return SetError("Invalid image for AVIF conversion");
     }
     
     // Try to save AVIF - this can fail if codec is not available
-    gdImageAvifEx(*_gdImage, out, quality, speed);
+    gdImageAvifEx(_gdImage, out, quality, speed);
     fclose(out);
   }
 

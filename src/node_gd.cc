@@ -492,16 +492,43 @@ Gd::Image::~Image()
 
 void Gd::Image::DestroyImages()
 {
+  // When async workers still hold this image's gdImagePtr, the images are
+  // moved to _deferredFree instead of being released here; the last pending
+  // worker releases them in WorkerDone() on the main thread.
   for (gdImagePtr *image : {&this->_image, &this->_brush, &this->_tile})
   {
     if (*image != nullptr)
     {
-      gdImageDestroy(*image);
+      if (this->_pendingWorkers > 0)
+      {
+        this->_deferredFree.push_back(*image);
+      }
+      else
+      {
+        gdImageDestroy(*image);
+      }
       *image = nullptr;
     }
   }
 
   this->_isDestroyed = true;
+}
+
+void Gd::Image::FreeDeferredImages()
+{
+  for (gdImagePtr image : this->_deferredFree)
+  {
+    gdImageDestroy(image);
+  }
+  this->_deferredFree.clear();
+}
+
+void Gd::Image::WorkerDone()
+{
+  if (--this->_pendingWorkers == 0)
+  {
+    this->FreeDeferredImages();
+  }
 }
 
 gdImagePtr Gd::Image::ImageArg(const Napi::CallbackInfo &info, size_t index)
@@ -546,7 +573,7 @@ Napi::Value Gd::Image::Jpeg(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  return SaveJpegWorker::DoWork(info, this->_image);
+  return SaveJpegWorker::DoWork(info, this);
 }
 
 Napi::Value Gd::Image::JpegPtr(const Napi::CallbackInfo &info)
@@ -564,7 +591,7 @@ Napi::Value Gd::Image::Gif(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  return SaveGifWorker::DoWork(info, this->_image);
+  return SaveGifWorker::DoWork(info, this);
 }
 
 Napi::Value Gd::Image::GifPtr(const Napi::CallbackInfo &info)
@@ -581,7 +608,7 @@ Napi::Value Gd::Image::Png(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  return SavePngWorker::DoWork(info, this->_image);
+  return SavePngWorker::DoWork(info, this);
 }
 
 Napi::Value Gd::Image::PngPtr(const Napi::CallbackInfo &info)
@@ -600,7 +627,7 @@ Napi::Value Gd::Image::WBMP(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  return SaveWBMPWorker::DoWork(info, this->_image);
+  return SaveWBMPWorker::DoWork(info, this);
 }
 
 Napi::Value Gd::Image::WBMPPtr(const Napi::CallbackInfo &info)
@@ -620,7 +647,7 @@ Napi::Value Gd::Image::Webp(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  return SaveWebpWorker::DoWork(info, this->_image);
+  return SaveWebpWorker::DoWork(info, this);
 }
 
 Napi::Value Gd::Image::WebpPtr(const Napi::CallbackInfo &info)
@@ -640,7 +667,7 @@ Napi::Value Gd::Image::Bmp(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  return SaveBmpWorker::DoWork(info, this->_image);
+  return SaveBmpWorker::DoWork(info, this);
 }
 
 Napi::Value Gd::Image::BmpPtr(const Napi::CallbackInfo &info)
@@ -660,7 +687,7 @@ Napi::Value Gd::Image::Tiff(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  return SaveTiffWorker::DoWork(info, this->_image);
+  return SaveTiffWorker::DoWork(info, this);
 }
 
 Napi::Value Gd::Image::TiffPtr(const Napi::CallbackInfo &info)
@@ -679,7 +706,7 @@ Napi::Value Gd::Image::Heif(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  return SaveHeifWorker::DoWork(info, this->_image);
+  return SaveHeifWorker::DoWork(info, this);
 }
 
 Napi::Value Gd::Image::HeifPtr(const Napi::CallbackInfo &info)
@@ -729,7 +756,7 @@ Napi::Value Gd::Image::HeifPtr(const Napi::CallbackInfo &info)
 Napi::Value Gd::Image::Avif(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
-  return SaveAvifWorker::DoWork(info, this->_image);
+  return SaveAvifWorker::DoWork(info, this);
 }
 
 Napi::Value Gd::Image::AvifPtr(const Napi::CallbackInfo &info)
@@ -749,7 +776,7 @@ Napi::Value Gd::Image::File(const Napi::CallbackInfo &info)
 {
   CHECK_IMAGE_EXISTS;
 
-  return FileWorker::DoWork(info, this->_image);
+  return FileWorker::DoWork(info, this);
 }
 
 /**
