@@ -2316,6 +2316,8 @@ img2.destroy();
 
 The functions `gd.Image#savePng`, `gd.Image#saveJpeg`, `gd.Image#saveGif`, etc. are convenience functions which will be processed asynchronously when a callback is supplied. All of the following have a counterpart like `gd.Image#png` and `gd.Image#pngPtr` which write to disk synchronously or store the image data in a memory pointer respectively. `gd.Image#jpeg` will return the instance of `gd.Image`, `gd.Image#jpgPtr` will return the newly created image data.
 
+The methods that write a file, like `gd.Image#png`, `gd.Image#jpeg` and `gd.Image#file`, save a copy of the image as it is when the method is called. You can draw on the image or destroy it before the returned Promise settles. Those changes are not in the saved file. Until the Promise settles, the copy uses as much memory as the image.
+
 ```javascript
 const gd = require('node-gd');
 gd.openPng('/path/to/input.png', async function (err, img) {

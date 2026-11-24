@@ -20,11 +20,12 @@
 
 #include <napi.h>
 #include <gd.h>
-#include <vector>
 
 #define SUPPORTS_GD_2_3_3 (GD_MINOR_VERSION == 3 && GD_RELEASE_VERSION >= 3)
 
 #define SUPPORTS_GD_2_3_0 (SUPPORTS_GD_2_3_3 || GD_MINOR_VERSION == 3 && GD_RELEASE_VERSION >= 0)
+
+gdImagePtr CopyForSaving(gdImagePtr src);
 
 #define HAS_LIBHEIF (HAVE_LIBHEIF && SUPPORTS_GD_2_3_3)
 #define HAS_LIBAVIF (HAVE_LIBAVIF && SUPPORTS_GD_2_3_3)
@@ -261,16 +262,6 @@ public:
      */
     static gdImagePtr ImageArg(const Napi::CallbackInfo &info, size_t index);
 
-    /**
-     * Async workers (SaveXWorker, FileWorker) register themselves here so
-     * destroy() only marks the Image as destroyed instead of freeing the
-     * underlying gdImagePtr while a worker still uses it. Called on the
-     * main thread only.
-     */
-    void WorkerStarted() { _pendingWorkers++; }
-
-    void WorkerDone();
-
   private:
     gdImagePtr _image{nullptr};
 
@@ -282,16 +273,7 @@ public:
 
     bool _isDestroyed{true};
 
-    // number of async workers currently holding this image's gdImagePtr
-    int _pendingWorkers{0};
-
-    // images owned by this instance whose release is deferred until all
-    // pending workers completed; freed by the last worker on the main thread
-    std::vector<gdImagePtr> _deferredFree;
-
     void DestroyImages();
-
-    void FreeDeferredImages();
 
     operator gdImagePtr() const { return _image; }
 
